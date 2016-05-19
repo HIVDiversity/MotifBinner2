@@ -42,7 +42,7 @@ applyOperation <- function(operation, all_results, config)
 
 processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL, 
                            output_dir = NULL, prefix_for_names = NULL,
-                           operation_list = c('loadData', 'basicQualityPlots'),
+                           operation_list = c('loadData'),
                            intermediate_reports = TRUE, verbosity = 0)
 {
 ## Process arguments
@@ -55,8 +55,8 @@ processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL,
   all_results <- list()
   class(all_results) <- 'all_results'
 
-  config <- list(fwd_reads = fwd_reads,
-                 rev_reads = rev_reads,
+  config <- list(fwd_reads_file = fwd_reads_file,
+                 rev_reads_file = rev_reads_file,
                  output_dir = output_dir,
                  prefix_for_names = prefix_for_names,
                  intermediate_reports = intermediate_reports,

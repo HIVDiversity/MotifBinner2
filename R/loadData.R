@@ -10,7 +10,7 @@ loadData <- function(all_results, config)
   }
   if (!is.null(config$rev_reads_file))
   {
-    rev_reads <- readFastq(confiq$rev_reads_file)
+    rev_reads <- readFastq(config$rev_reads_file)
   }
   result <- list(fwd_reads = fwd_reads,
                  rev_reads = rev_reads)
