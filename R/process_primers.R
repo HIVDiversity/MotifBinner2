@@ -23,9 +23,31 @@ applyOperation <- function(operation, all_results, config)
   return(all_results)
 }
 
-processPrimers <- function(fwd_reads, rev_reads, output_dir, intermediate_reports = TRUE, verbosity = 0)
+#' Processes a dataset with Primer IDs
+#'
+#' Applies a series of operations to the input dataset that generates consensus
+#' sequences from raw (or preprocessed) datasets containing Primer IDs.
+#'
+#' @param fwd_reads The name of the fastq file with the forward reads.
+#' @param rev_reads The name of the fastq file with the reverse reads.
+#' @param output_dir The directory in which the output must be produced.
+#' @param operation_list The list of operations to apply to the input data.
+#' @param intermediate_reports Should intermediate reports be produced after
+#' each operations? (Useful for debugging)
+#' @param verbosity The output level. 0 = no output. 1 = info about which
+#' operation is currently running. 2 = info about progress of current
+#' operation. 3 = super verbose debugging output.
+#' @export
+
+processPrimers <- function(fwd_reads = NULL, rev_reads = NULL, output_dir = NULL, 
+                           operation_list = c('loadData', 'basicQualityPlots'),
+                           intermediate_reports = TRUE, verbosity = 0)
 {
 ## Process arguments
+  if (is.null(fwd_reads) & is.null(rev_reads))
+  {
+    stop('At least one of fwd_reads or rev_reads must be non-null')
+  }
 
 ## Setup data structures
   all_results <- list()
