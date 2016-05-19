@@ -31,6 +31,7 @@ applyOperation <- function(operation, all_results, config)
 #' @param fwd_reads_file The name of the fastq file with the forward reads.
 #' @param rev_reads_file The name of the fastq file with the reverse reads.
 #' @param output_dir The directory in which the output must be produced.
+#' @param prefix_for_names The basename to use for naming output.
 #' @param operation_list The list of operations to apply to the input data.
 #' @param intermediate_reports Should intermediate reports be produced after
 #' each operations? (Useful for debugging)
@@ -40,7 +41,7 @@ applyOperation <- function(operation, all_results, config)
 #' @export
 
 processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL, 
-                           output_dir = NULL, 
+                           output_dir = NULL, prefix_for_names = NULL,
                            operation_list = c('loadData', 'basicQualityPlots'),
                            intermediate_reports = TRUE, verbosity = 0)
 {
@@ -57,6 +58,7 @@ processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL,
   config <- list(fwd_reads = fwd_reads,
                  rev_reads = rev_reads,
                  output_dir = output_dir,
+                 prefix_for_names = prefix_for_names,
                  intermediate_reports = intermediate_reports,
                  verbosity = verbosity)
 

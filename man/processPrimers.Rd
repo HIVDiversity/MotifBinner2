@@ -5,7 +5,8 @@
 \title{Processes a dataset with Primer IDs}
 \usage{
 processPrimers(fwd_reads_file = NULL, rev_reads_file = NULL,
-  output_dir = NULL, operation_list = c("loadData", "basicQualityPlots"),
+  output_dir = NULL, prefix_for_names = NULL,
+  operation_list = c("loadData", "basicQualityPlots"),
   intermediate_reports = TRUE, verbosity = 0)
 }
 \arguments{
@@ -14,6 +15,8 @@ processPrimers(fwd_reads_file = NULL, rev_reads_file = NULL,
 \item{rev_reads_file}{The name of the fastq file with the reverse reads.}
 
 \item{output_dir}{The directory in which the output must be produced.}
+
+\item{prefix_for_names}{The basename to use for naming output.}
 
 \item{operation_list}{The list of operations to apply to the input data.}
 
