@@ -1,3 +1,13 @@
+#' Applies a single operation
+#'
+#' @param operation The name of the operation to apply. A function by this name
+#' with the arguments all_results and config must exists. Additionally, the
+#' functions saveToDisk, genReport, genSummary and print must be specialized
+#' for objects of the class matching the name of the operation.
+#' @param all_results A list of all results given the class 'all_results'.
+#' @param config A list of configuration options
+#' @export
+
 applyOperation <- function(operation, all_results, config)
 {
   operation_function <- get(operation)
