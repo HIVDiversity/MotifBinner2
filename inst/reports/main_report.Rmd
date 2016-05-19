@@ -1,0 +1,18 @@
+# Data Processing Report
+
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+library(MotifBinner2)
+```
+
+Hello Main
+
+```{r}
+1+1
+```
+
+```{r loadData, child='loadData.Rmd'}
+```
+
+Bye Main

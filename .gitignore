@@ -1,2 +1,5 @@
 *.swp
 *.swo
+inst/reports/*.md
+*.pdf
+*.html
