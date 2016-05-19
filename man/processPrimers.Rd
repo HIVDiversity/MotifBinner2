@@ -4,14 +4,14 @@
 \alias{processPrimers}
 \title{Processes a dataset with Primer IDs}
 \usage{
-processPrimers(fwd_reads = NULL, rev_reads = NULL, output_dir = NULL,
-  operation_list = c("loadData", "basicQualityPlots"),
+processPrimers(fwd_reads_file = NULL, rev_reads_file = NULL,
+  output_dir = NULL, operation_list = c("loadData", "basicQualityPlots"),
   intermediate_reports = TRUE, verbosity = 0)
 }
 \arguments{
-\item{fwd_reads}{The name of the fastq file with the forward reads.}
+\item{fwd_reads_file}{The name of the fastq file with the forward reads.}
 
-\item{rev_reads}{The name of the fastq file with the reverse reads.}
+\item{rev_reads_file}{The name of the fastq file with the reverse reads.}
 
 \item{output_dir}{The directory in which the output must be produced.}
 
