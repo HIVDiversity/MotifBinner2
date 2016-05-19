@@ -18,6 +18,11 @@ loadData <- function(all_results, config)
   return(result)
 }
 
+saveToDisk.loadData <- function(result, config)
+{
+  return(NULL)
+}
+
 
 #  result <- operation_function(all_results, config)
 #  result <- saveToDisk(result, config)
