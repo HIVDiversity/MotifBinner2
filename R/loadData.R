@@ -24,6 +24,11 @@ saveToDisk.loadData <- function(result, config)
   return(NULL)
 }
 
+genSummary.loadData <- function(result, config)
+{
+  return(NULL) 
+}
+
 
 #  result <- operation_function(all_results, config)
 #  result <- saveToDisk(result, config)
