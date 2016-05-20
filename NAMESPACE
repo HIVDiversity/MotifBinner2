@@ -3,6 +3,7 @@
 export(applyOperation)
 export(genReport)
 export(genSummary)
+export(genSummary_internal)
 export(loadData)
 export(processPrimers)
 export(saveToDisk)
