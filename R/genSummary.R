@@ -47,14 +47,14 @@ genSummary_internal_one <- function(seq_dat)
     prop_AT <- round(sum(conMat[c('A','T'),])/tot_lets,5)
 
     data.frame(seqs = length(seq_dat),
-               q25_length = quantile(read_widths, 0.25, names=FALSE),
-               mean_length = mean(read_widths, na.rm=TRUE),
-               q75_length = quantile(read_widths, 0.75, names=FALSE),
-               q25_qual = quantile(per_read_quality, 0.25, names = FALSE),
-               mean_qual = mean(per_read_quality, na.rm=T),
-               q75_qual = quantile(per_read_quality, 0.75, names = FALSE),
-               prop_gaps = prop_gaps,
-               prop_non_ACGT = prop_non_ACGT,
-               prop_AT = prop_AT)
+               q25_length = round(quantile(read_widths, 0.25, names=FALSE),2),
+               mean_length = round(mean(read_widths, na.rm=TRUE),2),
+               q75_length = round(quantile(read_widths, 0.75, names=FALSE),2),
+               q25_qual = round(quantile(per_read_quality, 0.25, names = FALSE),2),
+               mean_qual = round(mean(per_read_quality, na.rm=T),2),
+               q75_qual = round(quantile(per_read_quality, 0.75, names = FALSE),2),
+               prop_gaps = round(prop_gaps,4),
+               prop_non_ACGT = round(prop_non_ACGT,4),
+               prop_AT = round(prop_AT,4))
   }
 }
