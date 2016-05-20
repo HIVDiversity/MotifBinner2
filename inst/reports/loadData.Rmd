@@ -16,11 +16,11 @@ if (class(result) != 'loadData')
 }
 ```
 
-`r length(result)` files were sucussfully loaded.
+`r length(result$final)` files were sucussfully loaded.
 
 The number of reads per file:
 ```{r}
-tmp <- lapply(result, length)
+tmp <- lapply(result$final, length)
 kable(data.frame('data set' = names(tmp),
                  'n reads' = as.numeric(tmp),
                  check.names=F,

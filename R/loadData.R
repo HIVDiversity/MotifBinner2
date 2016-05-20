@@ -12,8 +12,9 @@ loadData <- function(all_results, config)
   {
     rev_reads <- readFastq(config$rev_reads_file)
   }
-  result <- list(fwd_reads = fwd_reads,
-                 rev_reads = rev_reads)
+  final <- list(fwd_reads = fwd_reads,
+                rev_reads = rev_reads)
+  result <- list(final = final)
   class(result) <- 'loadData'
   return(result)
 }
