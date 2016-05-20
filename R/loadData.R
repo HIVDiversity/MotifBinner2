@@ -5,7 +5,7 @@
 loadData <- function(all_results, config)
 {
   opdir <- file.path(config$output_dir, config$prefix_for_names,
-                      paste('n', sprintf("%03d", result$step_num), 'loadData', sep = ''))
+                      paste('n', sprintf("%03d", length(all_results)+1), 'loadData', sep = ''))
   dir.create(opdir, showWarnings = FALSE, recursive = TRUE)
   if (!is.null(config$fwd_reads_file))
   {
@@ -18,7 +18,7 @@ loadData <- function(all_results, config)
   final <- list(fwd_reads = fwd_reads,
                 rev_reads = rev_reads)
   result <- list(final = final,
-                 step_num = length(all_results),
+                 step_num = length(all_results)+1,
                  opdir = opdir)
   class(result) <- 'loadData'
   return(result)
@@ -26,7 +26,7 @@ loadData <- function(all_results, config)
 
 saveToDisk.loadData <- function(result, config)
 {
-  return(NULL)
+  return(result)
 }
 
 genSummary.loadData <- function(result, config)
