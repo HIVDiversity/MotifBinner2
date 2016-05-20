@@ -22,3 +22,24 @@ basicQC <- function(all_results, config)
   return(result)
 }
 
+saveToDisk.basicQC <- function(result, config)
+{
+  return(result)
+}
+
+genSummary.basicQC <- function(result, config)
+{
+  summary_tab <- rbind(
+    genSummary_internal(operation = 'basicQC',
+                        parameters = 'fwd_reads',
+                        kept_seq_dat = result$final$fwd_reads,
+                        trimmed_seq_dat = DNAStringSet(NULL)),
+    genSummary_internal(operation = 'basicQC',
+                        parameters = 'rev_reads',
+                        kept_seq_dat = result$final$rev_reads,
+                        trimmed_seq_dat = DNAStringSet(NULL)))
+  result$summary <- summary_tab
+  write.csv(summary_tab, file.path(result$opdir, 'basicQC_summary.csv'), row.names=FALSE)
+  return(result)
+}
+
