@@ -1,5 +1,6 @@
 dummy_test_debug <- function()
 {
+  getwd()
   library(devtools)
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
   load_all()

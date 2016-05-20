@@ -1,10 +1,28 @@
 ## loadData
 
-Hello loadData
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
 
-```{r}
-5+5
-print(names(result))
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[['loadData']]
+}
+if (class(result) != 'loadData')
+{
+  result <- all_results[['loadData']]
+}
 ```
 
-Bye loadData
+`r length(result)` files were sucussfully loaded.
+
+The number of reads per file:
+```{r}
+tmp <- lapply(result, length)
+kable(data.frame('data set' = names(tmp),
+                 'n reads' = as.numeric(tmp),
+                 check.names=F,
+                 row.names=NULL))
+```
