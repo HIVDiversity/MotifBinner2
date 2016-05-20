@@ -27,6 +27,9 @@ dummy_test_debug <- function()
   all_results[['loadData']] <- result
 
   result <- basicQC(all_results, config)
+  result <- saveToDisk(result, config)
+  result <- genSummary(result, config)
+  result <- genReport(result, config)
 }
 
 

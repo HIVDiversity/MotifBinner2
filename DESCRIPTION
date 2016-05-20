@@ -6,6 +6,7 @@ Author: Phillip Labuschagne <philliplab@gmail.com>
 Maintainer: Phillip Labuschagne <philliplab@gmail.com>
 Depends:
     ShortRead,
+    plyr,
     doMC,
     ggplot2,
     knitr,

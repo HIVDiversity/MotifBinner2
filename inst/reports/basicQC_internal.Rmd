@@ -1,0 +1,49 @@
+### QC report for `r data_set_name`
+
+Test note
+
+```{r}
+seq_dat <- result$final[[data_set_name]]
+
+read_widths <- width(seq_dat)
+seq_qual <- seq_dat@quality
+per_read_quality <- letterFrequency(seq_qual@quality , names(encoding(seq_qual)))
+per_read_quality <- (per_read_quality %*% matrix(encoding(seq_qual), ncol=1))[,1]
+per_read_quality <- per_read_quality / read_widths
+seq_names <- as.character(seq_dat@id)
+seq_names <- gsub(' ', ':', seq_names)
+seq_names <- strsplit(seq_names, ':')
+xpos <- as.numeric(sapply(seq_names, `[`, 6))
+ypos <- as.numeric(sapply(seq_names, `[`, 7))
+pos_and_qual <- 
+  data.frame(x = xpos,
+             y = ypos,
+             xcat = round(xpos/max(xpos), 2),
+             ycat = round(ypos/max(ypos), 2),
+             per_read_quality = per_read_quality)
+zone_qual <-
+ddply(pos_and_qual,
+      .(xcat, ycat),
+      summarize,
+      zone_quality = mean(per_read_quality, na.rm=T),
+      n_seq = sum(!is.na(per_read_quality)))
+
+hist(read_widths)
+```
+```{r}
+hist(per_read_quality)
+```
+```{r}
+print(
+ggplot(zone_qual,
+       aes(x=xcat, y=ycat, fill=n_seq)) + 
+       geom_tile()
+       )
+```
+```{r}
+print(
+ggplot(zone_qual,
+       aes(x=xcat, y=ycat, fill=zone_quality)) + 
+       geom_tile()
+       )
+```

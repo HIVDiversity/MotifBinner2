@@ -1,6 +1,36 @@
-# basicQC
+## basicQC
 
 Adapted from FastQC: 
 Andrews S. (2010). FastQC: a quality control tool for high throughput sequence data. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc
 
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
 
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[['basicQC']]
+}
+if (class(result) != 'basicQC')
+{
+  result <- all_results[['basicQC']]
+}
+```
+
+The following datasets must be Quality Checked:
+`r names(result$final)`
+
+```{r, include=FALSE}
+out <- NULL
+
+for (data_set_name in names(result$final))
+{
+  out <- c(out, knit_child('basicQC_internal.Rmd'))
+}
+```
+
+```{r, results='asis'}
+cat(paste(out, collapse = '\n'))
+```
