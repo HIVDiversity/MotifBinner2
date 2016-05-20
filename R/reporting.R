@@ -22,10 +22,7 @@ genReport <- function(result, config)
   if (class(result) == 'all_results'){
     setwd(file.path(config$output_dir))
   } else {
-    repdir <- file.path(config$output_dir, config$prefix_for_names,
-                    paste('n', sprintf("%03d", result$step_num), class(result), sep = ''))
-    print(repdir)
-    setwd(repdir)
+    setwd(result$opdir)
   }
   knit(report_file_name, new_report_name_md)
 
