@@ -22,4 +22,5 @@ dummy_test_debug <- function()
   result <- loadData(all_results, config)
   result <- genSummary(result, config)
   result <- genReport(result, config)
+  result <- print(result, config)
 }

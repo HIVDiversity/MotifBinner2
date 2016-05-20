@@ -45,6 +45,13 @@ genSummary.loadData <- function(result, config)
   return(result)
 }
 
+print.loadData <- function(result, config)
+{
+  cat('\nloadData\n')
+  print(result$summary)
+  return(result)
+}
+
 
 #  result <- operation_function(all_results, config)
 #  result <- saveToDisk(result, config)
