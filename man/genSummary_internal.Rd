@@ -4,7 +4,7 @@
 \alias{genSummary_internal}
 \title{Computes the summary tables of an operation}
 \usage{
-genSummary_internal(operation, parameters, good_seq_dat, bad_seq_dat)
+genSummary_internal(operation, parameters, kept_seq_dat, trimmed_seq_dat)
 }
 \description{
 Computes the summary tables of an operation

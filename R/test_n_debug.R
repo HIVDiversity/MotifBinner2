@@ -20,5 +20,6 @@ dummy_test_debug <- function()
                            report_type = c('html', 'pdf'))
 
   result <- loadData(all_results, config)
+  result <- genSummary(result, config)
   result <- genReport(result, config)
 }

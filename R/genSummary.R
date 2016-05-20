@@ -10,12 +10,15 @@ genSummary <- function(result, config)
 #' Computes the summary tables of an operation
 #' @export
 
-genSummary_internal <- function(operation, parameters, good_seq_dat, bad_seq_dat)
+genSummary_internal <- function(operation, parameters, kept_seq_dat, trimmed_seq_dat)
 {
+  kept_tab <- genSummary_internal_one(kept_seq_dat)
+  names(kept_tab) <- paste(names(kept_tab), 'kept', sep = '_')
+  trimmed_tab <- genSummary_internal_one(trimmed_seq_dat)
+  names(trimmed_tab) <- paste(names(trimmed_tab), 'trimmed', sep = '_')
   cbind(data.frame(operation = operation,
                    parameters = parameters),
-        genSummary_internal_one(good_seq_dat),
-        genSummary_internal_one(bad_seq_dat))
+        kept_tab, trimmed_tab)
 }
 
 genSummary_internal_one <- function(seq_dat)

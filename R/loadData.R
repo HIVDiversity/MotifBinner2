@@ -34,12 +34,12 @@ genSummary.loadData <- function(result, config)
   summary_tab <- rbind(
     genSummary_internal(operation = 'loadData',
                         parameters = 'fwd_reads',
-                        good_seq_dat = result$final$fwd_reads,
-                        bad_seq_dat = DNAStringSet(NULL)),
+                        kept_seq_dat = result$final$fwd_reads,
+                        trimmed_seq_dat = DNAStringSet(NULL)),
     genSummary_internal(operation = 'loadData',
                         parameters = 'rev_reads',
-                        good_seq_dat = result$final$rev_reads,
-                        bad_seq_dat = DNAStringSet(NULL)))
+                        kept_seq_dat = result$final$rev_reads,
+                        trimmed_seq_dat = DNAStringSet(NULL)))
   result$summary <- summary_tab
   write.csv(summary_tab, file.path(result$opdir, 'loadData_summary.csv'), row.names=FALSE)
   return(result)

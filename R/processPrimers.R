@@ -15,8 +15,8 @@ applyOperation <- function(operation, all_results, config)
 
   result <- operation_function(all_results, config)
   result <- saveToDisk(result, config)
-  result <- genReport(result, config)
   result <- genSummary(result, config)
+  result <- genReport(result, config)
   result <- print(result, config)
   all_results[[operation]] <- result
   
@@ -78,8 +78,8 @@ processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL,
 
 ## Finalize
   all_results <- saveToDisk(all_results, config)
-  all_results <- genReport(all_results, config)
   all_results <- genSummary(all_results, config)
+  all_results <- genReport(all_results, config)
   all_results <- print(all_results, config)
 
   return(all_results)
