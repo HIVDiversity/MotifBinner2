@@ -4,6 +4,7 @@ Hello loadData
 
 ```{r}
 5+5
+print(names(result))
 ```
 
 Bye loadData

@@ -1,6 +1,7 @@
 dummy_test_debug <- function()
 {
   library(devtools)
+  setwd('~/projects/MotifBinner2/code/MotifBinner2')
   load_all()
 
   all_results <- list()
@@ -14,4 +15,5 @@ dummy_test_debug <- function()
                  verbosity = 3)
 
   result <- loadData(all_results, config)
+  result <- genReport(result, config)
 }

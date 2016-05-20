@@ -19,15 +19,15 @@ genReport <- function(result, config)
   }
 
   cwd <- getwd()                                                                                    
-  setwd(output)                                                                                     
-  knit(knitr_file_location, new_report_name_md)                                                     
+  setwd(config$output_dir)                                                                                     
+  knit(report_file_name, new_report_name_md)                                                     
 
   if ('html' %in% config$report_type){
-    render(report_file_name, output_format = 'html_document',
+    render(new_report_name_md, output_format = 'html_document',
            output_file = new_report_name_html, clean=FALSE)
   }
   if ('pdf' %in% config$report_type){
-    render(report_file_name, output_format = 'pdf_document',
+    render(new_report_name_md, output_format = 'pdf_document',
            output_file = new_report_name_pdf, clean=FALSE)
   }
   setwd(cwd)
