@@ -66,6 +66,10 @@ processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL,
                  verbosity = verbosity,
                  report_type = report_type)
 
+## Prepare output directory
+  dir.create(file.path(config$output_dir, config$prefix_for_names), 
+             showWarnings = FALSE, recursive = TRUE)
+
 ## Perform operations
   for (operation in operation_list)
   {

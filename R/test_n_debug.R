@@ -7,6 +7,9 @@ dummy_test_debug <- function()
 
   all_results <- list()
   class(all_results) <- 'all_results'
+  
+  dir.create(file.path(config$output_dir, config$prefix_for_names), 
+             showWarnings = FALSE, recursive = TRUE)
 
   config <- list(fwd_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
                  rev_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
