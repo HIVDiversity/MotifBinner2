@@ -38,12 +38,15 @@ applyOperation <- function(operation, all_results, config)
 #' @param verbosity The output level. 0 = no output. 1 = info about which
 #' operation is currently running. 2 = info about progress of current
 #' operation. 3 = super verbose debugging output.
+#' @param report_type vector of types of reports to procude. Valid options:
+#' 'html', 'pdf'.
 #' @export
 
 processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL, 
                            output_dir = NULL, prefix_for_names = NULL,
                            operation_list = c('loadData'),
-                           intermediate_reports = TRUE, verbosity = 0)
+                           intermediate_reports = TRUE, verbosity = 0,
+                           report_type = c('html', 'pdf'))
 {
 ## Process arguments
   if (is.null(fwd_reads_file) & is.null(rev_reads_file))
@@ -60,7 +63,8 @@ processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL,
                  output_dir = output_dir,
                  prefix_for_names = prefix_for_names,
                  intermediate_reports = intermediate_reports,
-                 verbosity = verbosity)
+                 verbosity = verbosity,
+                 report_type = report_type)
 
 ## Perform operations
   for (operation in operation_list)

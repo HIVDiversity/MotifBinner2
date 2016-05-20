@@ -13,7 +13,8 @@ dummy_test_debug <- function()
                  output_dir = "/fridge/data/MotifBinner2_test",
                  prefix_for_names = "CAP256_3100_030wpi_v1v2",
                  intermediate_reports = TRUE,
-                 verbosity = 3)
+                 verbosity = 3,
+                           report_type = c('html', 'pdf'))
 
   result <- loadData(all_results, config)
   result <- genReport(result, config)

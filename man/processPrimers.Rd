@@ -7,7 +7,7 @@
 processPrimers(fwd_reads_file = NULL, rev_reads_file = NULL,
   output_dir = NULL, prefix_for_names = NULL,
   operation_list = c("loadData"), intermediate_reports = TRUE,
-  verbosity = 0)
+  verbosity = 0, report_type = c("html", "pdf"))
 }
 \arguments{
 \item{fwd_reads_file}{The name of the fastq file with the forward reads.}
@@ -26,6 +26,9 @@ each operations? (Useful for debugging)}
 \item{verbosity}{The output level. 0 = no output. 1 = info about which
 operation is currently running. 2 = info about progress of current
 operation. 3 = super verbose debugging output.}
+
+\item{report_type}{vector of types of reports to procude. Valid options:
+'html', 'pdf'.}
 }
 \description{
 Applies a series of operations to the input dataset that generates consensus
