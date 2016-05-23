@@ -4,9 +4,15 @@
 
 genReport <- function(result, config)
 {
-  new_report_name_md <- paste(config$prefix_for_names, 'bin_report.md', sep = '_')
-  new_report_name_html <- paste(config$prefix_for_names, 'bin_report.html', sep = '_')
-  new_report_name_pdf <- paste(config$prefix_for_names, 'bin_report.pdf', sep = '_')
+  report_class_name <- class(result)
+  if (report_class_name == 'allResults')
+  { 
+    report_class_name <- NULL
+  }
+  
+  new_report_name_md   <- paste(config$prefix_for_names, report_class_name, 'bin_report.md', sep = '_')
+  new_report_name_html <- paste(config$prefix_for_names, report_class_name, 'bin_report.html', sep = '_')
+  new_report_name_pdf  <- paste(config$prefix_for_names, report_class_name, 'bin_report.pdf', sep = '_')
 
   report_file_name <- file.path(find.package('MotifBinner2'),
                                 'reports',
@@ -38,3 +44,66 @@ genReport <- function(result, config)
   return(result)
 }
 
+genReport_internal_allResults <- function(result, config)
+{
+  new_report_name_md   <- paste(config$prefix_for_names, 'bin_report.md', sep = '_')
+  new_report_name_html <- paste(config$prefix_for_names, 'bin_report.html', sep = '_')
+  new_report_name_pdf  <- paste(config$prefix_for_names, 'bin_report.pdf', sep = '_')
+
+  report_file_name <- file.path(find.package('MotifBinner2'),
+                                'reports',
+                                paste(class(result), '.Rmd', sep = ''))
+  if (!file.exists(report_file_name))
+  {
+    report_file_name <- file.path(find.package('MotifBinner2'),
+                                  'inst', 'reports',
+                                  paste(class(result), '.Rmd', sep = ''))
+  }
+
+  setwd(file.path(config$output_dir))
+  knit(report_file_name, new_report_name_md)
+
+  if ('html' %in% config$report_type){
+    render(new_report_name_md, output_format = 'html_document',
+           output_file = new_report_name_html, clean=FALSE)
+  }
+  if ('pdf' %in% config$report_type){
+    render(new_report_name_md, output_format = 'pdf_document',
+           output_file = new_report_name_pdf, clean=FALSE)
+  }
+  setwd(cwd)
+  return(result)
+}
+
+                                 
+genReport_internal_generic <- function(result, config)
+{
+  new_report_name_md   <- paste(config$prefix_for_names, class(result), 'bin_report.md', sep = '_')
+  new_report_name_html <- paste(config$prefix_for_names, class(result), 'bin_report.html', sep = '_')
+  new_report_name_pdf  <- paste(config$prefix_for_names, class(result), 'bin_report.pdf', sep = '_')
+
+  report_file_name <- file.path(find.package('MotifBinner2'),
+                                'reports',
+                                paste(class(result), '.Rmd', sep = ''))
+  if (!file.exists(report_file_name))
+  {
+    report_file_name <- file.path(find.package('MotifBinner2'),
+                                  'inst', 'reports',
+                                  paste(class(result), '.Rmd', sep = ''))
+  }
+
+  cwd <- getwd()
+  setwd(result$op_dir)
+  knit(report_file_name, new_report_name_md)
+
+  if ('html' %in% config$report_type){
+    render(new_report_name_md, output_format = 'html_document',
+           output_file = new_report_name_html, clean=FALSE)
+  }
+  if ('pdf' %in% config$report_type){
+    render(new_report_name_md, output_format = 'pdf_document',
+           output_file = new_report_name_pdf, clean=FALSE)
+  }
+  setwd(cwd)
+  return(result)
+}
