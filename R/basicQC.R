@@ -11,7 +11,7 @@
 basicQC <- function(all_results, config)
 {
   opdir <- file.path(config$output_dir, config$prefix_for_names,
-                      paste('n', sprintf("%03d", length(all_results)+1), 'basicQC', sep = ''))
+                      paste('n', sprintf("%03d", length(all_results)+1), '_basicQC', sep = ''))
   dir.create(opdir, showWarnings = FALSE, recursive = TRUE)
   
   result <- list(final = all_results[[length(all_results)]]$final,

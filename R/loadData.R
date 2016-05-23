@@ -5,7 +5,7 @@
 loadData <- function(all_results, config)
 {
   opdir <- file.path(config$output_dir, config$prefix_for_names,
-                      paste('n', sprintf("%03d", length(all_results)+1), 'loadData', sep = ''))
+                      paste('n', sprintf("%03d", length(all_results)+1), '_loadData', sep = ''))
   dir.create(opdir, showWarnings = FALSE, recursive = TRUE)
   if (!is.null(config$fwd_reads_file))
   {
