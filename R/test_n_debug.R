@@ -33,7 +33,11 @@ dummy_test_debug <- function()
   result <- print(result, config)
   all_results[[basename(result$op_dir)]] <- result
 
-  all_results <- allResults(all_results, config)
+  setwd('~/projects/MotifBinner2/code/MotifBinner2')
+  load_all()
+
+  result <- allResults(all_results, config)
+  result <- saveToDisk(result, config)
 }
 
 

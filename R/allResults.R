@@ -8,3 +8,8 @@ allResults <- function(all_results, config)
   return(all_results)
 }
 
+saveToDisk.allResults <- function(result, config)
+{
+  return(result)
+}
+
