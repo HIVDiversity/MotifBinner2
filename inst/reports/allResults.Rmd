@@ -3,28 +3,6 @@
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
-library(MotifBinner2)
-```
-
-Hello Main
-
-```{r}
-1+1
-```
-
-```{r loadData, child='loadData.Rmd'}
-```
-
-Bye Main
-
-
-
-
-
-
-```{r include=FALSE}
-opts_chunk$set(echo=FALSE)
-opts_chunk$set(warning=FALSE)
 
 library(MotifBinner2)
 
@@ -41,9 +19,9 @@ out <- NULL
 
 for (operation in operations)
 {
-  print('boo')
-  print(operation)
-#  out <- c(out, knit_child('basicQC_internal.Rmd'))
+  result <- all_results[[operation]]
+  report_name <- paste(class(result), '.Rmd', sep = '')
+  out <- c(out, knit_child(report_name))
 }
 ```
 

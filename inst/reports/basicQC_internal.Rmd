@@ -1,6 +1,7 @@
 ### QC report for `r data_set_name`
 
-Test note
+A series of plots showing the sequence quality and data. More to be written
+here soon.
 
 ```{r}
 seq_dat <- result$final[[data_set_name]]
