@@ -30,6 +30,8 @@ dummy_test_debug <- function()
   result <- saveToDisk(result, config)
   result <- genSummary(result, config)
   result <- genReport(result, config)
+  result <- print(result, config)
+  all_results[['basicQC']] <- result
 }
 
 
