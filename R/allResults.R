@@ -27,3 +27,10 @@ genSummary.allResults <- function(result, config)
   return(result)
 }
 
+print.allResults <- function(result, config)
+{
+  cat('\nallResults\n')
+  print(result$summary)
+  return(result)
+}
+

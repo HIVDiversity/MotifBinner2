@@ -39,6 +39,7 @@ dummy_test_debug <- function()
   result <- allResults(all_results, config)
   result <- saveToDisk(result, config)
   result <- genSummary(result, config)
+  result <- print(result, config)
 }
 
 
