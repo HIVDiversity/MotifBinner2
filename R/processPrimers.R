@@ -56,7 +56,7 @@ processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL,
 
 ## Setup data structures
   all_results <- list()
-  class(all_results) <- 'all_results'
+  class(all_results) <- 'allResults'
 
   config <- list(fwd_reads_file = fwd_reads_file,
                  rev_reads_file = rev_reads_file,

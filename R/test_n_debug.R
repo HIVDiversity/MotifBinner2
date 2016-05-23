@@ -6,7 +6,7 @@ dummy_test_debug <- function()
   load_all()
 
   all_results <- list()
-  class(all_results) <- 'all_results'
+  class(all_results) <- 'allResults'
   
   config <- list(fwd_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
                  rev_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
@@ -32,6 +32,8 @@ dummy_test_debug <- function()
   result <- genReport(result, config)
   result <- print(result, config)
   all_results[[basename(result$op_dir)]] <- result
+
+  all_results <- allResults(all_results, config)
 }
 
 
