@@ -45,6 +45,43 @@ genSummary.basicQC <- function(result, config)
 
 computeMetrics.basicQC <- function(result, config)
 {
+  result$metrics <- list()
+  for (data_set_name in names(result$final)){
+    seq_dat <- result$final[[data_set_name]]
+    
+    fastq_name_headers <- c("instrument", "run_num", "flowcell", "lane", "tile",
+                            "xpos", "ypos", "read", "is_filtered", "control_num",
+                            "index_seq")
+    fastq_numeric <- c("run_num", "lane", "tile", "xpos", "ypos", "read",
+                       "control_num", "index_seq")
+    
+    per_read_quality <- letterFrequency(seq_dat@quality@quality, 
+                                        names(encoding(seq_dat@quality)))
+    per_read_quality <- (per_read_quality %*% matrix(encoding(seq_dat@quality), ncol=1))[,1]
+    
+    seq_df <- data.frame(seq_name = as.character(seq_dat@id),
+                         read_widths = width(seq_dat),
+                         qual = per_read_quality / width(seq_dat),              
+                         stringsAsFactors = F)
+    rm(per_read_quality)
+    
+    seq_df <- seq_df %>%
+      mutate(seq_name = gsub(' ', ':', seq_name)) %>%
+      separate(seq_name, fastq_name_headers, ":") %>%
+      mutate_each_(funs(as.numeric), fastq_numeric) %>%
+      mutate(xcat = round(xpos/max(xpos), 2)) %>%
+      mutate(ycat = round(ypos/max(ypos), 2))
+    
+    zone_qual <- seq_df %>%
+      group_by(xcat, ycat) %>%
+      summarize(zone_quality = mean(qual, na.rm=T),
+                n_seq = sum(!is.na(qual)))
+
+    result$metrics[[data_set_name]] <- list(
+      seq_df = seq_df,
+      zone_qual = zone_qual
+    )
+  }
   return(result)
 }
 
