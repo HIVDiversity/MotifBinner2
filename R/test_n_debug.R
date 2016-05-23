@@ -3,7 +3,7 @@ dummy_test_debug <- function()
   getwd()
   library(devtools)
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
-  load_all()
+  load_all(quiet=TRUE)
 
   all_results <- list()
   class(all_results) <- 'allResults'
@@ -36,7 +36,7 @@ dummy_test_debug <- function()
   all_results[[basename(result$op_dir)]] <- result
 
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
-  load_all()
+  load_all(quiet=TRUE)
 
   result <- allResults(all_results, config)
   result <- saveToDisk(result, config)

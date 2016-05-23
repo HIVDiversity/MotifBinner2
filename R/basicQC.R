@@ -87,8 +87,11 @@ computeMetrics.basicQC <- function(result, config)
 
 print.basicQC <- function(result, config)
 {
-  cat('\nbasicQC\n')
-  print(result$summary)
+  cat('\n------------------')
+  cat('\nOperation: basicQC')
+  cat('\n------------------')
+  cat('\nLoaded Sequences:\n')
+  print(result$summary[,c('parameters', 'seqs_kept')])
   return(result)
 }
 
