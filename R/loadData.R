@@ -52,11 +52,11 @@ computeMetrics.loadData <- function(result, config)
 
 print.loadData <- function(result, config)
 {
-  cat('\nloadData\n\n')
-  cat('\nKept Sequences:\n\n')
+  cat('\n-------------------')
+  cat('\nOperation: loadData')
+  cat('\n-------------------')
+  cat('\nLoaded Sequences:\n')
   print(result$summary[,c('parameters', 'seqs_kept', 'mean_length_kept', 'mean_qual_kept')])
-  cat('\n\nTrimmed Sequences:\n\n')
-  print(result$summary[,c('parameters', 'seqs_trimmed', 'mean_length_trimmed', 'mean_qual_trimmed')])
   return(result)
 }
 
