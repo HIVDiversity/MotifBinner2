@@ -18,7 +18,7 @@ applyOperation <- function(operation, all_results, config)
   result <- genSummary(result, config)
   result <- genReport(result, config)
   result <- print(result, config)
-  all_results[[operation]] <- result
+  all_results[[basename(result$op_dir)]] <- result
   
   return(all_results)
 }

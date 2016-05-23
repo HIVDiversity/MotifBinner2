@@ -10,13 +10,13 @@
 
 basicQC <- function(all_results, config)
 {
-  opdir <- file.path(config$output_dir, config$prefix_for_names,
+  op_dir <- file.path(config$output_dir, config$prefix_for_names,
                       paste('n', sprintf("%03d", length(all_results)+1), '_basicQC', sep = ''))
-  dir.create(opdir, showWarnings = FALSE, recursive = TRUE)
+  dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   
   result <- list(final = all_results[[length(all_results)]]$final,
                  step_num = length(all_results)+1,
-                 opdir = opdir)
+                 op_dir = op_dir)
   
   class(result) <- 'basicQC'
   return(result)
@@ -39,7 +39,7 @@ genSummary.basicQC <- function(result, config)
                         kept_seq_dat = result$final$rev_reads,
                         trimmed_seq_dat = DNAStringSet(NULL)))
   result$summary <- summary_tab
-  write.csv(summary_tab, file.path(result$opdir, 'basicQC_summary.csv'), row.names=FALSE)
+  write.csv(summary_tab, file.path(result$op_dir, 'basicQC_summary.csv'), row.names=FALSE)
   return(result)
 }
 

@@ -24,14 +24,14 @@ dummy_test_debug <- function()
   result <- genSummary(result, config)
   result <- genReport(result, config)
   result <- print(result, config)
-  all_results[['loadData']] <- result
+  all_results[[basename(result$op_dir)]] <- result
 
   result <- basicQC(all_results, config)
   result <- saveToDisk(result, config)
   result <- genSummary(result, config)
   result <- genReport(result, config)
   result <- print(result, config)
-  all_results[['basicQC']] <- result
+  all_results[[basename(result$op_dir)]] <- result
 }
 
 

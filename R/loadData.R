@@ -4,9 +4,9 @@
 
 loadData <- function(all_results, config)
 {
-  opdir <- file.path(config$output_dir, config$prefix_for_names,
+  op_dir <- file.path(config$output_dir, config$prefix_for_names,
                       paste('n', sprintf("%03d", length(all_results)+1), '_loadData', sep = ''))
-  dir.create(opdir, showWarnings = FALSE, recursive = TRUE)
+  dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   if (!is.null(config$fwd_reads_file))
   {
     fwd_reads <- readFastq(config$fwd_reads_file)
@@ -19,7 +19,7 @@ loadData <- function(all_results, config)
                 rev_reads = rev_reads)
   result <- list(final = final,
                  step_num = length(all_results)+1,
-                 opdir = opdir)
+                 op_dir = op_dir)
   class(result) <- 'loadData'
   return(result)
 }
@@ -41,7 +41,7 @@ genSummary.loadData <- function(result, config)
                         kept_seq_dat = result$final$rev_reads,
                         trimmed_seq_dat = DNAStringSet(NULL)))
   result$summary <- summary_tab
-  write.csv(summary_tab, file.path(result$opdir, 'loadData_summary.csv'), row.names=FALSE)
+  write.csv(summary_tab, file.path(result$op_dir, 'loadData_summary.csv'), row.names=FALSE)
   return(result)
 }
 
