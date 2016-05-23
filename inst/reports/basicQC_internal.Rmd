@@ -5,34 +5,39 @@ here soon.
 
 ```{r}
 seq_dat <- result$final[[data_set_name]]
+fastq_name_headers <- c("instrument", "run_num", "flowcell", "lane", "tile",
+                        "xpos", "ypos", "read", "is_filtered", "control_num",
+                        "index_seq")
+fastq_numeric <- c("run_num", "lane", "tile", "xpos", "ypos", "read",
+                   "control_num", "index_seq")
 
-read_widths <- width(seq_dat)
-seq_qual <- seq_dat@quality
-per_read_quality <- letterFrequency(seq_qual@quality , names(encoding(seq_qual)))
-per_read_quality <- (per_read_quality %*% matrix(encoding(seq_qual), ncol=1))[,1]
-per_read_quality <- per_read_quality / read_widths
-seq_names <- as.character(seq_dat@id)
-seq_names <- gsub(' ', ':', seq_names)
-seq_names <- strsplit(seq_names, ':')
-xpos <- as.numeric(sapply(seq_names, `[`, 6))
-ypos <- as.numeric(sapply(seq_names, `[`, 7))
-pos_and_qual <- 
-  data.frame(x = xpos,
-             y = ypos,
-             xcat = round(xpos/max(xpos), 2),
-             ycat = round(ypos/max(ypos), 2),
-             per_read_quality = per_read_quality)
-zone_qual <-
-ddply(pos_and_qual,
-      .(xcat, ycat),
-      summarize,
-      zone_quality = mean(per_read_quality, na.rm=T),
-      n_seq = sum(!is.na(per_read_quality)))
+per_read_quality <- letterFrequency(seq_dat@quality@quality, 
+                                    names(encoding(seq_dat@quality)))
+per_read_quality <- (per_read_quality %*% matrix(encoding(seq_dat@quality), ncol=1))[,1]
 
-hist(read_widths)
+seq_df <- data.frame(seq_name = as.character(seq_dat@id),
+                     read_widths = width(seq_dat),
+                     qual = per_read_quality / width(seq_dat),              
+                     stringsAsFactors = F)
+rm(per_read_quality)
+
+seq_df <- seq_df %>%
+  mutate(seq_name = gsub(' ', ':', seq_name)) %>%
+  separate(seq_name, fastq_name_headers, ":") %>%
+  mutate_each_(funs(as.numeric), fastq_numeric) %>%
+  mutate(xcat = round(xpos/max(xpos), 2)) %>%
+  mutate(ycat = round(ypos/max(ypos), 2))
+
+zone_qual <- seq_df %>%
+  group_by(xcat, ycat) %>%
+  summarize(zone_quality = mean(qual, na.rm=T),
+            n_seq = sum(!is.na(qual)))
 ```
 ```{r}
-hist(per_read_quality)
+hist(seq_df$read_widths)
+```
+```{r}
+hist(seq_df$qual)
 ```
 ```{r}
 print(
