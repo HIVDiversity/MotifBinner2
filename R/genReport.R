@@ -32,15 +32,15 @@ genReport_internal_allResults <- function(result, config)
 
   cwd <- getwd()
   setwd(file.path(config$output_dir, config$prefix_for_names))
-  knit(report_file_name, new_report_name_md)
+  knit(report_file_name, new_report_name_md, quiet = TRUE)
 
   if ('html' %in% config$report_type){
     render(new_report_name_md, output_format = 'html_document',
-           output_file = new_report_name_html, clean=FALSE)
+           output_file = new_report_name_html, clean=TRUE, quiet=TRUE)
   }
   if ('pdf' %in% config$report_type){
     render(new_report_name_md, output_format = 'pdf_document',
-           output_file = new_report_name_pdf, clean=FALSE)
+           output_file = new_report_name_pdf, clean=TRUE, quiet=TRUE)
   }
   setwd(cwd)
   return(result)
@@ -65,15 +65,15 @@ genReport_internal_generic <- function(result, config)
 
   cwd <- getwd()
   setwd(result$op_dir)
-  knit(report_file_name, new_report_name_md)
+  knit(report_file_name, new_report_name_md, quiet = TRUE)
 
   if ('html' %in% config$report_type){
     render(new_report_name_md, output_format = 'html_document',
-           output_file = new_report_name_html, clean=FALSE)
+           output_file = new_report_name_html, clean=TRUE, quiet=TRUE)
   }
   if ('pdf' %in% config$report_type){
     render(new_report_name_md, output_format = 'pdf_document',
-           output_file = new_report_name_pdf, clean=FALSE)
+           output_file = new_report_name_pdf, clean=TRUE, quiet=TRUE)
   }
   setwd(cwd)
   return(result)
