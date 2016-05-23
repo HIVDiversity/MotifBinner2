@@ -16,6 +16,7 @@ applyOperation <- function(operation, all_results, config)
   result <- operation_function(all_results, config)
   result <- saveToDisk(result, config)
   result <- genSummary(result, config)
+  result <- computeMetrics(result, config)
   result <- genReport(result, config)
   result <- print(result, config)
   all_results[[basename(result$op_dir)]] <- result

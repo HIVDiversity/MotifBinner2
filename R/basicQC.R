@@ -43,6 +43,11 @@ genSummary.basicQC <- function(result, config)
   return(result)
 }
 
+computeMetrics.basicQC <- function(result, config)
+{
+  return(result)
+}
+
 print.basicQC <- function(result, config)
 {
   cat('\nbasicQC\n')

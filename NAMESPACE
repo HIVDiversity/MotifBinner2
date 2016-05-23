@@ -3,6 +3,7 @@
 export(allResults)
 export(applyOperation)
 export(basicQC)
+export(computeMetrics)
 export(genReport)
 export(genSummary)
 export(genSummary_internal)

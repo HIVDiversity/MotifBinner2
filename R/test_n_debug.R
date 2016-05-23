@@ -22,6 +22,7 @@ dummy_test_debug <- function()
   result <- loadData(all_results, config)
   result <- saveToDisk(result, config)
   result <- genSummary(result, config)
+  result <- computeMetrics(result, config)
   result <- genReport(result, config)
   result <- print(result, config)
   all_results[[basename(result$op_dir)]] <- result
@@ -29,6 +30,7 @@ dummy_test_debug <- function()
   result <- basicQC(all_results, config)
   result <- saveToDisk(result, config)
   result <- genSummary(result, config)
+  result <- computeMetrics(result, config)
   result <- genReport(result, config)
   result <- print(result, config)
   all_results[[basename(result$op_dir)]] <- result
@@ -39,20 +41,8 @@ dummy_test_debug <- function()
   result <- allResults(all_results, config)
   result <- saveToDisk(result, config)
   result <- genSummary(result, config)
+  result <- computeMetrics(result, config)
   result <- genReport(result, config)
   result <- print(result, config)
 }
 
-
-
-#  operation_function <- get(operation)
-#  config$operation_number <- length(all_results)
-#
-#  result <- operation_function(all_results, config)
-#  result <- saveToDisk(result, config)
-#  result <- genSummary(result, config)
-#  result <- genReport(result, config)
-#  result <- print(result, config)
-#  all_results[[operation]] <- result
-#  
-#  return(all_results)

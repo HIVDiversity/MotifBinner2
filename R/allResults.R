@@ -27,6 +27,11 @@ genSummary.allResults <- function(result, config)
   return(result)
 }
 
+computeMetrics.allResults <- function(result, config)
+{
+  return(result)
+}
+
 print.allResults <- function(result, config)
 {
   cat('\nallResults\n')

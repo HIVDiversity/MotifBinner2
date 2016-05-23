@@ -12,7 +12,8 @@ Depends:
     knitr,
     optparse,
     rmarkdown,
-    foreach
+    foreach,
+    tidyr
 Imports:
     BiocGenerics,
     Biostrings

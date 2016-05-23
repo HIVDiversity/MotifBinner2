@@ -45,6 +45,11 @@ genSummary.loadData <- function(result, config)
   return(result)
 }
 
+computeMetrics.loadData <- function(result, config)
+{
+  return(result)
+}
+
 print.loadData <- function(result, config)
 {
   cat('\nloadData\n')
