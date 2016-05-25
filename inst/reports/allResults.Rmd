@@ -30,3 +30,7 @@ for (operation in operations)
 ```{r, results='asis'}
 cat(paste(out, collapse = '\n'))
 ```
+
+```{r, results='asis'}
+timingTable(all_results)
+```

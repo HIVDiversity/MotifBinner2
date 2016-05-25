@@ -16,7 +16,7 @@ applyOperation <- function(operation, all_results, config)
   config$operation_number <- length(all_results)
 
   result <- operation_function(all_results, config)
-  timing$main_operation <- proc.time() - ptm
+  timing$main <- proc.time() - ptm
   ptm <- proc.time()
 
   result <- saveToDisk(result, config)
