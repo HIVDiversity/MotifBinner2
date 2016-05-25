@@ -13,7 +13,8 @@ Depends:
     optparse,
     rmarkdown,
     foreach,
-    tidyr
+    tidyr,
+    gridExtra
 Imports:
     BiocGenerics,
     Biostrings
