@@ -16,7 +16,7 @@ if (class(result) != 'loadData')
 }
 ```
 
-`r length(result$final)` files were sucussfully loaded.
+`r length(result$final)` files were sucessfully loaded.
 
 The number of reads per file:
 ```{r}
