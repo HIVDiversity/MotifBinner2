@@ -8,9 +8,11 @@ seq_df <- result$metrics[[data_set_name]]$seq_df
 zone_qual <- result$metrics[[data_set_name]]$zone_qual
 fig.cap1 <- "Histograms of read lengths and average qualities"
 fig.cap2 <- "Read length and quality by position on slide"
+fig.cap3 <- "Average sequence quality by tile and cycle"
+fig.cap4 <- "Distribution of sequence qualities by cycle"
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=7, fig.cap=fig.cap1}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
 options(scipen=99)
 read_width_breaks <- c(-Inf,(0:22)*15, Inf)
 qual_breaks <- (0:21)*2
@@ -27,7 +29,7 @@ ggplot(seq_df, aes(x=qual)) +
 grid.arrange(p1, p2, ncol=2)
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=7, fig.cap=fig.cap2}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2}
 p3 <-
 ggplot(zone_qual,
        aes(x=xcat, y=ycat, fill=n_seq)) + 
@@ -43,4 +45,39 @@ ggplot(zone_qual,
        xlab(NULL) + ylab(NULL) +
        labs(list(fill = 'Average Quality Score'))
 grid.arrange(p3, p4, ncol=2)
+```
+
+```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap3}
+seq_dat <- result$final[[data_set_name]]
+qual_mat <- as(FastqQuality(quality(quality(seq_dat))), 'matrix')
+
+pos_qual <- melt(qual_mat)
+rm(qual_mat)
+names(pos_qual) <- c('read_num', 'cycle', 'qual')
+
+tile_qual <- pos_qual %>%
+  inner_join(seq_df %>% select(read_num, tile), by = 'read_num') %>%
+  mutate(tile_indx = dense_rank(tile)) %>%
+  select(tile_indx, cycle, qual) %>%
+  group_by(tile_indx, cycle) %>%
+  summarize(avg_qual = mean(qual, na.rm = T))
+
+print(
+  ggplot(data.frame(tile_qual), aes(cycle, tile_indx)) +
+  geom_tile(aes(fill=avg_qual))
+)
+rm(tile_qual)
+```
+
+```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap4}
+pos_qual <- pos_qual %>%
+  mutate(cycle_cat = trunc((cycle+1)/2)*2) %>%
+  select(cycle_cat, qual) %>%
+  group_by(cycle_cat, qual) %>%
+  summarize(count = n())
+
+print(
+  ggplot(na.omit(pos_qual), aes(x = cycle_cat, fill = as.factor(qual))) +
+    geom_bar(aes(y=count), width=2, stat = 'identity') 
+)
 ```

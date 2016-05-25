@@ -43,6 +43,8 @@ genSummary.basicQC <- function(result, config)
   return(result)
 }
 
+
+
 computeMetrics.basicQC <- function(result, config)
 {
   result$metrics <- list()
@@ -54,12 +56,13 @@ computeMetrics.basicQC <- function(result, config)
                             "index_seq")
     fastq_numeric <- c("run_num", "lane", "tile", "xpos", "ypos", "read",
                        "control_num", "index_seq")
+
+    qual_mat <- as(FastqQuality(quality(quality(seq_dat))), 'matrix')
+    per_read_quality <- apply(qual_mat, 1, mean, na.rm=T)
+    rm(qual_mat)
     
-    per_read_quality <- letterFrequency(seq_dat@quality@quality, 
-                                        names(encoding(seq_dat@quality)))
-    per_read_quality <- (per_read_quality %*% matrix(encoding(seq_dat@quality), ncol=1))[,1]
-    
-    seq_df <- data.frame(seq_name = as.character(seq_dat@id),
+    seq_df <- data.frame(read_num = 1:length(seq_dat),
+                         seq_name = as.character(seq_dat@id),
                          read_widths = width(seq_dat),
                          qual = per_read_quality / width(seq_dat),              
                          stringsAsFactors = F)

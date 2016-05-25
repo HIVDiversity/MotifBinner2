@@ -14,7 +14,8 @@ Depends:
     rmarkdown,
     foreach,
     tidyr,
-    gridExtra
+    gridExtra,
+    reshape2
 Imports:
     BiocGenerics,
     Biostrings
