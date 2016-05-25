@@ -10,15 +10,34 @@
 
 applyOperation <- function(operation, all_results, config)
 {
+  ptm <- proc.time()
+  timing <- list()
   operation_function <- get(operation)
   config$operation_number <- length(all_results)
 
   result <- operation_function(all_results, config)
+  timing$main_operation <- proc.time() - ptm
+  ptm <- proc.time()
+
   result <- saveToDisk(result, config)
+  timing$saveToDisk <- proc.time() - ptm
+  ptm <- proc.time()
+
   result <- genSummary(result, config)
+  timing$genSummary <- proc.time() - ptm
+  ptm <- proc.time()
+
   result <- computeMetrics(result, config)
+  timing$computeMetrics <- proc.time() - ptm
+  ptm <- proc.time()
+
   result <- genReport(result, config)
+  timing$genReport <- proc.time() - ptm
+  ptm <- proc.time()
+
   result <- print(result, config)
+  timing$print <- proc.time() - ptm
+
   all_results[[basename(result$op_dir)]] <- result
   
   return(all_results)
