@@ -29,6 +29,7 @@ applyOperation <- function(operation, all_results, config)
 
   result <- computeMetrics(result, config)
   timing$computeMetrics <- proc.time() - ptm
+  result$timing <- timing
   ptm <- proc.time()
 
   result <- genReport(result, config)
@@ -37,6 +38,7 @@ applyOperation <- function(operation, all_results, config)
 
   result <- print(result, config)
   timing$print <- proc.time() - ptm
+  result$timing <- timing
 
   all_results[[basename(result$op_dir)]] <- result
   

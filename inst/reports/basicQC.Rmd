@@ -34,3 +34,17 @@ for (data_set_name in names(result$final))
 ```{r, results='asis'}
 cat(paste(out, collapse = '\n'))
 ```
+
+```{r, results='asis'}
+y <- result$timing
+sliceTime <- function(x){
+  z <- summary(x)['user']
+  names(z) <- NULL
+  z
+}
+
+cat(paste('\nTiming for the steps in ', class(result), '\n', sep = ''))
+kable(data.frame(step = names(sapply(y, sliceTime)),
+           time = sapply(y, sliceTime),
+           row.names = NULL))
+```

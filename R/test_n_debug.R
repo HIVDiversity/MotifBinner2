@@ -5,17 +5,20 @@ dummy_test_debug <- function()
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
   load_all(quiet=TRUE)
 
-  all_results <- list()
-  class(all_results) <- 'allResults'
-  
   config <- list(fwd_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
                  rev_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
                  output_dir = "/fridge/data/MotifBinner2_test",
                  prefix_for_names = "CAP256_3100_030wpi_v1v2",
+                 operation_list = c('loadData', 'basicQC'),
                  intermediate_reports = TRUE,
                  verbosity = 3,
                            report_type = c('html', 'pdf'))
 
+  x <- do.call(processPrimers, config)
+
+  all_results <- list()
+  class(all_results) <- 'allResults'
+  
   dir.create(file.path(config$output_dir, config$prefix_for_names), 
              showWarnings = FALSE, recursive = TRUE)
 
