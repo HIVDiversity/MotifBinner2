@@ -24,6 +24,7 @@ for (operation in operations)
   result <- all_results[[operation]]
   report_name <- paste(class(result), '.Rmd', sep = '')
   out <- c(out, knit_child(report_name))
+  out <- c(out, '\n\n---\n\n')
 }
 ```
 
