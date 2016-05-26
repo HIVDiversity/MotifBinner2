@@ -14,7 +14,7 @@ genReport <- function(result, config)
   return(result)
 }
 
-genReport_internal_allResults <- function(result, config)
+genReport_internal_allResults <- function(all_results, config)
 {
   new_report_name_md   <- paste(config$prefix_for_names, 'bin_report.md', sep = '_')
   new_report_name_html <- paste(config$prefix_for_names, 'bin_report.html', sep = '_')
@@ -22,12 +22,12 @@ genReport_internal_allResults <- function(result, config)
 
   report_file_name <- file.path(find.package('MotifBinner2'),
                                 'reports',
-                                paste(class(result), '.Rmd', sep = ''))
+                                paste(class(all_results), '.Rmd', sep = ''))
   if (!file.exists(report_file_name))
   {
     report_file_name <- file.path(find.package('MotifBinner2'),
                                   'inst', 'reports',
-                                  paste(class(result), '.Rmd', sep = ''))
+                                  paste(class(all_results), '.Rmd', sep = ''))
   }
 
   cwd <- getwd()
@@ -45,7 +45,7 @@ genReport_internal_allResults <- function(result, config)
 #           output_file = new_report_name_pdf, clean=TRUE, quiet=TRUE)
   }
   setwd(cwd)
-  return(result)
+  return(all_results)
 }
 
                                  

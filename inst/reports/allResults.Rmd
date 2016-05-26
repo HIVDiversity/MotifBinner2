@@ -6,9 +6,8 @@ opts_chunk$set(warning=FALSE)
 
 library(MotifBinner2)
 
-stopifnot(exists('result'))
-stopifnot(class(result) == 'allResults')
-all_results <- result
+stopifnot(exists('all_results'))
+stopifnot(class(all_results) == 'allResults')
 operations <- names(all_results)
 operations <- operations[grep('^n[0-9]{3}_', operations)]
 ```

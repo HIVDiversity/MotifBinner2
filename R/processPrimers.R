@@ -95,6 +95,7 @@ processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL,
 ## Perform operations
   for (operation in operation_list)
   {
+    print(operation)
     all_results <- applyOperation(operation, all_results, config)
   }
 
