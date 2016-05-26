@@ -6,6 +6,7 @@ Andrews S. (2010). FastQC: a quality control tool for high throughput sequence d
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
 
 library(MotifBinner2)
 

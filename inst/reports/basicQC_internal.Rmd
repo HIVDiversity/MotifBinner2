@@ -62,6 +62,12 @@ tile_qual <- pos_qual %>%
   group_by(tile_indx, cycle) %>%
   summarize(avg_qual = mean(qual, na.rm = T))
 
+pos_qual <- pos_qual %>%
+  mutate(cycle_cat = trunc((cycle+1)/2)*2) %>%
+  select(cycle_cat, qual) %>%
+  group_by(cycle_cat, qual) %>%
+  summarize(count = n())
+
 print(
   ggplot(data.frame(tile_qual), aes(cycle, tile_indx)) +
   geom_tile(aes(fill=avg_qual))
@@ -70,12 +76,6 @@ rm(tile_qual)
 ```
 
 ```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap4}
-pos_qual <- pos_qual %>%
-  mutate(cycle_cat = trunc((cycle+1)/2)*2) %>%
-  select(cycle_cat, qual) %>%
-  group_by(cycle_cat, qual) %>%
-  summarize(count = n())
-
 print(
   ggplot(na.omit(pos_qual), aes(x = cycle_cat, fill = as.factor(qual))) +
     geom_bar(aes(y=count), width=2, stat = 'identity') 
