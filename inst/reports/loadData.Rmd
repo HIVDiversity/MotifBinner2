@@ -29,5 +29,7 @@ kable(data.frame('data set' = names(tmp),
 ```
 
 ```{r, results='asis'}
+kable_summary(result$summary)
+
 timingTable(result)
 ```

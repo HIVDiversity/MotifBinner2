@@ -58,3 +58,23 @@ genSummary_internal_one <- function(seq_dat)
                prop_AT = round(prop_AT,4))
   }
 }
+
+#' formats a summary table for markdown
+#' @param summary_tab A data.frame as produced by genSummary
+
+kable_summary <- function(summary_tab)
+{
+  summary_tab$seqs_in <- summary_tab$seqs_kept + summary_tab$seqs_trimmed
+  cat('\n\nThe number of sequences kept and discarded:\n\n')
+  print(
+  kable(summary_tab[,c('parameters', 'seqs_in', 'seqs_kept', 'seqs_trimmed')])
+  )
+  cat('\n\nStatistics of the kept sequences\n\n')
+  kept_tab <- summary_tab[,grep('_kept', names(summary_tab))]
+  names(kept_tab) <- gsub('_kept', '', names(kept_tab))
+  print(kable(kept_tab))
+  cat('\n\nStatistics of the trimmed sequences\n\n')
+  trimmed_tab <- summary_tab[,grep('_trimmed', names(summary_tab))]
+  names(trimmed_tab) <- gsub('_trimmed', '', names(trimmed_tab))
+  print(kable(trimmed_tab))
+}

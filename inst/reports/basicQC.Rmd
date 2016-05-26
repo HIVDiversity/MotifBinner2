@@ -37,5 +37,8 @@ cat(paste(out, collapse = '\n'))
 ```
 
 ```{r, results='asis'}
+kable_summary(result$summary)
+
 timingTable(result)
 ```
+
