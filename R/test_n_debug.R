@@ -10,8 +10,9 @@ dummy_test_debug <- function()
                  rev_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R2.fastq",
                  output_dir = "/fridge/data/MotifBinner2_test",
                  prefix_for_names = "CAP256_3100_030wpi_v1v2_20k",
-                 operation_list = c('loadData', 'basicQC', 'ambigSeqs'),
+                 operation_list = c('loadData', 'basicQC', 'ambigSeqs', 'primerDimer'),
                  ambigSeqs = list(max_ambig = 5),
+                 primerDimer = list(primer_dimer_len = 80),
                  intermediate_reports = TRUE,
                  verbosity = 3,
                  report_type = c('html'))
@@ -27,6 +28,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation('loadData', all_results, config)
   all_results <- applyOperation('basicQC', all_results, config)
   all_results <- applyOperation('ambigSeqs', all_results, config)
+  all_results <- applyOperation('primerDimer', all_results, config)
 
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
   unlink('/fridge/data/MotifBinner2_test/CAP256_3100_030wpi_v1v2_20k/n003_ambigSeqs', recursive=T)
