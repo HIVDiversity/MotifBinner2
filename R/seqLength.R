@@ -2,10 +2,10 @@
 #' @inheritParams applyOperation
 #' @export
 
-primerDimer <- function(all_results, config)
+seqLength <- function(all_results, config)
 {
   op_dir <- file.path(config$output_dir, config$prefix_for_names,
-                      paste('n', sprintf("%03d", length(all_results)+1), '_primerDimer', sep = ''))
+                      paste('n', sprintf("%03d", length(all_results)+1), '_seqLength', sep = ''))
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
 
   kept <- list()
@@ -14,7 +14,8 @@ primerDimer <- function(all_results, config)
     seq_dat <- all_results[[length(all_results)]]$kept[[data_set_name]]
     if (length(seq_dat) > 0)
     {
-      kept_list <- width(seq_dat) > config$primerDimer$primer_dimer_len
+      kept_list <- width(seq_dat) > config$seqLength$short_seq_len &
+                   width(seq_dat) < config$seqLength$long_seq_len
       kept[[data_set_name]] <- seq_dat[kept_list]
       trimmed[[data_set_name]] <- seq_dat[!kept_list]
     }
@@ -24,11 +25,11 @@ primerDimer <- function(all_results, config)
                  trimmed = trimmed,
                  step_num = length(all_results)+1,
                  op_dir = op_dir)
-  class(result) <- 'primerDimer'
+  class(result) <- 'seqLength'
   return(result)
 }
 
-saveToDisk.primerDimer <- function(result, config)
+saveToDisk.seqLength <- function(result, config)
 {
   for (data_set_name in names(result$kept)){
     seq_dat <- result$kept[[data_set_name]]
@@ -49,31 +50,31 @@ saveToDisk.primerDimer <- function(result, config)
   return(result)
 }
 
-genSummary.primerDimer <- function(result, config)
+genSummary.seqLength <- function(result, config)
 {
   summary_tab <- rbind(
-    genSummary_internal(operation = 'primerDimer',
+    genSummary_internal(operation = 'seqLength',
                         parameters = 'fwd_reads',
                         kept_seq_dat = result$kept$fwd_reads,
                         trimmed_seq_dat = result$trimmed$fwd_reads),
-    genSummary_internal(operation = 'primerDimer',
+    genSummary_internal(operation = 'seqLength',
                         parameters = 'rev_reads',
                         kept_seq_dat = result$kept$rev_reads,
                         trimmed_seq_dat = result$trimmed$rev_reads))
   result$summary <- summary_tab
-  write.csv(summary_tab, file.path(result$op_dir, 'primerDimer_summary.csv'), row.names=FALSE)
+  write.csv(summary_tab, file.path(result$op_dir, 'seqLength_summary.csv'), row.names=FALSE)
   return(result)
 }
 
-computeMetrics.primerDimer <- function(result, config)
+computeMetrics.seqLength <- function(result, config)
 {
   return(result)
 }
 
-print.primerDimer <- function(result, config)
+print.seqLength <- function(result, config)
 {
   cat('\n-------------------')
-  cat('\nOperation: primerDimer')
+  cat('\nOperation: seqLength')
   cat('\n-------------------')
   cat('\nKept Sequences:\n')
   print(result$summary[,c('parameters', 'seqs_kept', 'mean_length_kept', 'mean_qual_kept')])

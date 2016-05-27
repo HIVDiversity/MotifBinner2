@@ -1,0 +1,30 @@
+## seqLength
+
+Removes sequences that are either too short or too long.
+
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('seqLength', names(all_results))[1]]]
+}
+if (class(result) != 'seqLength')
+{
+  result <- all_results[[grep('seqLength', names(all_results))[1]]]
+}
+```
+
+The following datasets must be scanned for short or long sequences:
+`r names(result$kept)`
+
+```{r, results='asis'}
+kable_summary(result$summary)
+
+timingTable(result)
+```
+
