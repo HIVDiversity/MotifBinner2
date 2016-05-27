@@ -24,7 +24,7 @@ ambigSeqs <- function(all_results, config)
 
 ambigSeqs_internal <- function(seq_dat, max_ambig)
 {
-  counts <- alphabetFrequency(seq_dat)
+  counts <- alphabetFrequency(seq_dat@sread)
   tmp <- data.frame(counts)
   names(tmp) <- paste('c',attr(counts, 'dimnames')[[2]],sep='')
   counts <- tmp
@@ -33,6 +33,14 @@ ambigSeqs_internal <- function(seq_dat, max_ambig)
   ambigCols <- !(gsub('^c','', names(counts)) %in% c('A','C','G','T','-'))
   counts$ambig <- apply(counts[,ambigCols], 1, sum)
   counts$perc_ambig <- counts$ambig/(apply(counts, 1, sum) - counts$ambig)
+  if (max_ambig < 1)
+  {
+    kept_list <- counts$perc_ambig <= max_ambig
+  } else {
+    kept_list <- counts$ambig <= max_ambig
+  }
+  return(list(kept = seq_dat[kept_list],
+              trimmed = seq_dat[!kept_list]))
 }
 
 saveToDisk.ambigSeqs <- function(result, config)
