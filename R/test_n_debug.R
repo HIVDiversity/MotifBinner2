@@ -13,9 +13,9 @@ dummy_test_debug <- function()
                  ambigSeqs = list(max_ambig = 5),
                  intermediate_reports = TRUE,
                  verbosity = 3,
-                 report_type = c('html', 'pdf'))
+                 report_type = c('html'))
 
-#  x <- do.call(processPrimers, config)
+  x <- do.call(processPrimers, config)
 
   all_results <- list()
   class(all_results) <- 'allResults'
@@ -25,8 +25,10 @@ dummy_test_debug <- function()
 
   all_results <- applyOperation('loadData', all_results, config)
   all_results <- applyOperation('basicQC', all_results, config)
+  all_results <- applyOperation('ambigSeqs', all_results, config)
 
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
+  unlink('/fridge/data/MotifBinner2_test/CAP256_3100_030wpi_v1v2_20k/n003_ambigSeqs', recursive=T)
   load_all(quiet=TRUE)
 
   ptm <- proc.time()

@@ -10,6 +10,7 @@ ambigSeqs <- function(all_results, config)
 
   kept <- list()
   trimmed <- list()
+  metrics <- list()
   for (data_set_name in names(all_results[[length(all_results)]]$kept)){
     seq_dat <- all_results[[length(all_results)]]$kept[[data_set_name]]
     if (length(seq_dat) > 0)
@@ -17,12 +18,14 @@ ambigSeqs <- function(all_results, config)
       tmp <- ambigSeqs_internal(seq_dat, config$ambigSeqs$max_ambig)
       kept[[data_set_name]] <- tmp$kept
       trimmed[[data_set_name]] <- tmp$trimmed
+      metrics[[data_set_name]] <- tmp$metrics
       rm(tmp)
     }
   }
 
   result <- list(kept = kept,
                  trimmed = trimmed,
+                 metrics = metrics,
                  step_num = length(all_results)+1,
                  op_dir = op_dir)
   class(result) <- 'ambigSeqs'
@@ -38,8 +41,10 @@ ambigSeqs_internal <- function(seq_dat, max_ambig)
   rm(tmp)
 
   ambigCols <- !(gsub('^c','', names(counts)) %in% c('A','C','G','T','-'))
+  counts$seq_len <- width(seq_dat@sread)
   counts$ambig <- apply(counts[,ambigCols], 1, sum)
-  counts$perc_ambig <- counts$ambig/(apply(counts, 1, sum) - counts$ambig)
+  counts$perc_ambig <- counts$ambig/counts$seq_len
+  counts <- counts[,c('seq_len', 'ambig', 'perc_ambig')]
   if (max_ambig < 1)
   {
     kept_list <- counts$perc_ambig <= max_ambig
@@ -47,7 +52,8 @@ ambigSeqs_internal <- function(seq_dat, max_ambig)
     kept_list <- counts$ambig <= max_ambig
   }
   return(list(kept = seq_dat[kept_list],
-              trimmed = seq_dat[(!kept_list)]))
+              trimmed = seq_dat[(!kept_list)],
+              metrics = list(ambig_counts = counts)))
 }
 
 saveToDisk.ambigSeqs <- function(result, config)
