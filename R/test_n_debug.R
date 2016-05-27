@@ -9,10 +9,11 @@ dummy_test_debug <- function()
                  rev_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R2.fastq",
                  output_dir = "/fridge/data/MotifBinner2_test",
                  prefix_for_names = "CAP256_3100_030wpi_v1v2_20k",
-                 operation_list = c('loadData', 'basicQC'),
+                 operation_list = c('loadData', 'basicQC', 'ambigSeqs'),
+                 ambigSeqs = list(max_ambig = 5),
                  intermediate_reports = TRUE,
                  verbosity = 3,
-                           report_type = c('html', 'pdf'))
+                 report_type = c('html', 'pdf'))
 
 #  x <- do.call(processPrimers, config)
 

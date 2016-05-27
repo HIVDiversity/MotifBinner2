@@ -8,14 +8,21 @@ ambigSeqs <- function(all_results, config)
                       paste('n', sprintf("%03d", length(all_results)+1), '_ambigSeqs', sep = ''))
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
 
+  kept <- list()
+  trimmed <- list()
   for (data_set_name in names(all_results[[length(all_results)]]$kept)){
-    print(data_set_name)
+    seq_dat <- all_results[[length(all_results)]]$kept[[data_set_name]]
+    if (length(seq_dat) > 0)
+    {
+      tmp <- ambigSeqs_internal(seq_dat, config$ambigSeqs$max_ambig)
+      kept[[data_set_name]] <- tmp$kept
+      trimmed[[data_set_name]] <- tmp$trimmed
+      rm(tmp)
+    }
   }
 
-  kept <- list(fwd_reads = 1,
-                rev_reads = 2)
-
   result <- list(kept = kept,
+                 trimmed = trimmed,
                  step_num = length(all_results)+1,
                  op_dir = op_dir)
   class(result) <- 'ambigSeqs'
@@ -40,7 +47,7 @@ ambigSeqs_internal <- function(seq_dat, max_ambig)
     kept_list <- counts$ambig <= max_ambig
   }
   return(list(kept = seq_dat[kept_list],
-              trimmed = seq_dat[!kept_list]))
+              trimmed = seq_dat[(!kept_list)]))
 }
 
 saveToDisk.ambigSeqs <- function(result, config)
@@ -54,11 +61,11 @@ genSummary.ambigSeqs <- function(result, config)
     genSummary_internal(operation = 'ambigSeqs',
                         parameters = 'fwd_reads',
                         kept_seq_dat = result$kept$fwd_reads,
-                        trimmed_seq_dat = DNAStringSet(NULL)),
+                        trimmed_seq_dat = result$trimmed$fwd_reads),
     genSummary_internal(operation = 'ambigSeqs',
                         parameters = 'rev_reads',
                         kept_seq_dat = result$kept$rev_reads,
-                        trimmed_seq_dat = DNAStringSet(NULL)))
+                        trimmed_seq_dat = result$trimmed$rev_reads))
   result$summary <- summary_tab
   write.csv(summary_tab, file.path(result$op_dir, 'ambigSeqs_summary.csv'), row.names=FALSE)
   return(result)
