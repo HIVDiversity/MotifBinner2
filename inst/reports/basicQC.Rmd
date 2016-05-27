@@ -21,12 +21,12 @@ if (class(result) != 'basicQC')
 ```
 
 The following datasets must be Quality Checked:
-`r names(result$final)`
+`r names(result$kept)`
 
 ```{r, include=FALSE}
 out <- NULL
 
-for (data_set_name in names(result$final))
+for (data_set_name in names(result$kept))
 {
   out <- c(out, knit_child('basicQC_internal.Rmd'))
 }

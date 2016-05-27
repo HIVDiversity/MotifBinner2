@@ -8,14 +8,14 @@ ambigSeqs <- function(all_results, config)
                       paste('n', sprintf("%03d", length(all_results)+1), '_ambigSeqs', sep = ''))
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
 
-  for (data_set_name in names(all_results[[length(all_results)]]$final)){
+  for (data_set_name in names(all_results[[length(all_results)]]$kept)){
     print(data_set_name)
   }
 
-  final <- list(fwd_reads = 1,
+  kept <- list(fwd_reads = 1,
                 rev_reads = 2)
 
-  result <- list(final = final,
+  result <- list(kept = kept,
                  step_num = length(all_results)+1,
                  op_dir = op_dir)
   class(result) <- 'ambigSeqs'
@@ -45,11 +45,11 @@ genSummary.ambigSeqs <- function(result, config)
   summary_tab <- rbind(
     genSummary_internal(operation = 'ambigSeqs',
                         parameters = 'fwd_reads',
-                        kept_seq_dat = result$final$fwd_reads,
+                        kept_seq_dat = result$kept$fwd_reads,
                         trimmed_seq_dat = DNAStringSet(NULL)),
     genSummary_internal(operation = 'ambigSeqs',
                         parameters = 'rev_reads',
-                        kept_seq_dat = result$final$rev_reads,
+                        kept_seq_dat = result$kept$rev_reads,
                         trimmed_seq_dat = DNAStringSet(NULL)))
   result$summary <- summary_tab
   write.csv(summary_tab, file.path(result$op_dir, 'ambigSeqs_summary.csv'), row.names=FALSE)

@@ -15,9 +15,9 @@ loadData <- function(all_results, config)
   {
     rev_reads <- readFastq(config$rev_reads_file)
   }
-  final <- list(fwd_reads = fwd_reads,
+  kept <- list(fwd_reads = fwd_reads,
                 rev_reads = rev_reads)
-  result <- list(final = final,
+  result <- list(kept = kept,
                  step_num = length(all_results)+1,
                  op_dir = op_dir)
   class(result) <- 'loadData'
@@ -34,11 +34,11 @@ genSummary.loadData <- function(result, config)
   summary_tab <- rbind(
     genSummary_internal(operation = 'loadData',
                         parameters = 'fwd_reads',
-                        kept_seq_dat = result$final$fwd_reads,
+                        kept_seq_dat = result$kept$fwd_reads,
                         trimmed_seq_dat = DNAStringSet(NULL)),
     genSummary_internal(operation = 'loadData',
                         parameters = 'rev_reads',
-                        kept_seq_dat = result$final$rev_reads,
+                        kept_seq_dat = result$kept$rev_reads,
                         trimmed_seq_dat = DNAStringSet(NULL)))
   result$summary <- summary_tab
   write.csv(summary_tab, file.path(result$op_dir, 'loadData_summary.csv'), row.names=FALSE)

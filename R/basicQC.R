@@ -14,7 +14,7 @@ basicQC <- function(all_results, config)
                       paste('n', sprintf("%03d", length(all_results)+1), '_basicQC', sep = ''))
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   
-  result <- list(final = all_results[[length(all_results)]]$final,
+  result <- list(kept = all_results[[length(all_results)]]$kept,
                  step_num = length(all_results)+1,
                  op_dir = op_dir)
   
@@ -32,11 +32,11 @@ genSummary.basicQC <- function(result, config)
   summary_tab <- rbind(
     genSummary_internal(operation = 'basicQC',
                         parameters = 'fwd_reads',
-                        kept_seq_dat = result$final$fwd_reads,
+                        kept_seq_dat = result$kept$fwd_reads,
                         trimmed_seq_dat = DNAStringSet(NULL)),
     genSummary_internal(operation = 'basicQC',
                         parameters = 'rev_reads',
-                        kept_seq_dat = result$final$rev_reads,
+                        kept_seq_dat = result$kept$rev_reads,
                         trimmed_seq_dat = DNAStringSet(NULL)))
   result$summary <- summary_tab
   write.csv(summary_tab, file.path(result$op_dir, 'basicQC_summary.csv'), row.names=FALSE)
@@ -48,8 +48,8 @@ genSummary.basicQC <- function(result, config)
 computeMetrics.basicQC <- function(result, config)
 {
   result$metrics <- list()
-  for (data_set_name in names(result$final)){
-    seq_dat <- result$final[[data_set_name]]
+  for (data_set_name in names(result$kept)){
+    seq_dat <- result$kept[[data_set_name]]
     
     fastq_name_headers <- c("instrument", "run_num", "flowcell", "lane", "tile",
                             "xpos", "ypos", "read", "is_filtered", "control_num",
@@ -58,7 +58,7 @@ computeMetrics.basicQC <- function(result, config)
                        "control_num", "index_seq")
 
     qual_mat <- as(FastqQuality(quality(quality(seq_dat))), 'matrix')
-    per_read_quality <- apply(qual_mat, 1, mean, na.rm=T)
+    per_read_quality <- apply(qual_mat, 1, sum, na.rm=T)
     pos_qual <- melt(qual_mat)
     names(pos_qual) <- c('read_num', 'cycle', 'qual')
     rm(qual_mat)
