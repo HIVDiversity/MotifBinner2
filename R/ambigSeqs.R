@@ -52,7 +52,23 @@ ambigSeqs_internal <- function(seq_dat, max_ambig)
 
 saveToDisk.ambigSeqs <- function(result, config)
 {
-  return(result)
+  for (data_set_name in names(result$kept)){
+    seq_dat <- result$kept[[data_set_name]]
+    if (length(seq_dat) > 0)
+    {
+      writeFastq(seq_dat, file.path(result$op_dir, 
+        paste(config$prefix_for_names, '_kept_', data_set_name, '.fastq', sep = '')), compress=F)
+    }
+  }
+  for (data_set_name in names(result$trimmed)){
+    seq_dat <- result$trimmed[[data_set_name]]
+    if (length(seq_dat) > 0)
+    {
+      writeFastq(seq_dat, file.path(result$op_dir, 
+        paste(config$prefix_for_names, '_trimmed_', data_set_name, '.fastq', sep = '')), compress=F)
+    }
+  }
+
 }
 
 genSummary.ambigSeqs <- function(result, config)

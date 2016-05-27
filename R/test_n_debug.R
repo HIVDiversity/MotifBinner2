@@ -26,6 +26,9 @@ dummy_test_debug <- function()
   all_results <- applyOperation('loadData', all_results, config)
   all_results <- applyOperation('basicQC', all_results, config)
 
+  setwd('~/projects/MotifBinner2/code/MotifBinner2')
+  load_all(quiet=TRUE)
+
   ptm <- proc.time()
   timing <- list()
   operation_function <- ambigSeqs
