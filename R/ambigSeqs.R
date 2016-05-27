@@ -68,7 +68,7 @@ saveToDisk.ambigSeqs <- function(result, config)
         paste(config$prefix_for_names, '_trimmed_', data_set_name, '.fastq', sep = '')), compress=F)
     }
   }
-
+  return(result)
 }
 
 genSummary.ambigSeqs <- function(result, config)
