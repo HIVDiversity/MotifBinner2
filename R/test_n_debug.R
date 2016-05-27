@@ -40,6 +40,7 @@ dummy_test_debug <- function()
 
   result <- saveToDisk(result, config)
   timing$saveToDisk <- proc.time() - ptm
+
   ptm <- proc.time()
 
   result <- genSummary(result, config)

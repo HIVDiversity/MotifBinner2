@@ -9,11 +9,11 @@ library(MotifBinner2)
 
 if (!exists('result'))
 {
-  result <- all_results[['loadData']]
+  result <- all_results[[grep('loadData', names(all_results))[1]]]
 }
 if (class(result) != 'loadData')
 {
-  result <- all_results[['loadData']]
+  result <- all_results[[grep('loadData', names(all_results))[1]]]
 }
 ```
 

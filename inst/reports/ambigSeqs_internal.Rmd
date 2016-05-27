@@ -1,0 +1,7 @@
+### ambigSeqs report for `r data_set_name`
+
+Hello
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
+```

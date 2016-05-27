@@ -12,11 +12,11 @@ library(MotifBinner2)
 
 if (!exists('result'))
 {
-  result <- all_results[['basicQC']]
+  result <- all_results[[grep('basicQC', names(all_results))[1]]]
 }
 if (class(result) != 'basicQC')
 {
-  result <- all_results[['basicQC']]
+  result <- all_results[[grep('basicQC', names(all_results))[1]]]
 }
 ```
 

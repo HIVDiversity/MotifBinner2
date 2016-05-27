@@ -1,0 +1,43 @@
+## ambigSeqs
+
+Removes sequences with more than a certain number (percentage) of ambiguous
+characters.
+
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('ambigSeqs', names(all_results))[1]]]
+}
+if (class(result) != 'ambigSeqs')
+{
+  result <- all_results[[grep('ambigSeqs', names(all_results))[1]]]
+}
+```
+
+The following datasets were checked for ambiguous bases:
+`r names(result$kept)`
+
+```{r, include=FALSE}
+out <- NULL
+
+for (data_set_name in names(result$kept))
+{
+  out <- c(out, knit_child('ambigSeqs_internal.Rmd'))
+}
+```
+
+```{r, results='asis'}
+cat(paste(out, collapse = '\n'))
+```
+
+```{r, results='asis'}
+kable_summary(result$summary)
+
+timingTable(result)
+```
