@@ -7,7 +7,7 @@
 processPrimers(fwd_reads_file = NULL, rev_reads_file = NULL,
   output_dir = NULL, prefix_for_names = NULL,
   operation_list = c("loadData"), intermediate_reports = TRUE,
-  verbosity = 0, report_type = c("html", "pdf"))
+  verbosity = 0, report_type = c("html", "pdf"), ...)
 }
 \arguments{
 \item{fwd_reads_file}{The name of the fastq file with the forward reads.}

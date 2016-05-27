@@ -68,7 +68,7 @@ processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL,
                            output_dir = NULL, prefix_for_names = NULL,
                            operation_list = c('loadData'),
                            intermediate_reports = TRUE, verbosity = 0,
-                           report_type = c('html', 'pdf'))
+                           report_type = c('html', 'pdf'), ...)
 {
 ## Process arguments
   if (is.null(fwd_reads_file) & is.null(rev_reads_file))
@@ -80,13 +80,14 @@ processPrimers <- function(fwd_reads_file = NULL, rev_reads_file = NULL,
   all_results <- list()
   class(all_results) <- 'allResults'
 
-  config <- list(fwd_reads_file = fwd_reads_file,
-                 rev_reads_file = rev_reads_file,
-                 output_dir = output_dir,
-                 prefix_for_names = prefix_for_names,
-                 intermediate_reports = intermediate_reports,
-                 verbosity = verbosity,
-                 report_type = report_type)
+  config <- c(list(fwd_reads_file = fwd_reads_file,
+                   rev_reads_file = rev_reads_file,
+                   output_dir = output_dir,
+                   prefix_for_names = prefix_for_names,
+                   intermediate_reports = intermediate_reports,
+                   verbosity = verbosity,
+                   report_type = report_type),
+              list(...))
 
 ## Prepare output directory
   dir.create(file.path(config$output_dir, config$prefix_for_names), 

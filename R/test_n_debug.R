@@ -1,5 +1,6 @@
 dummy_test_debug <- function()
 {
+  unlink('/fridge/data/MotifBinner2_test/CAP256_3100_030wpi_v1v2_20k', recursive=T)
   getwd()
   library(devtools)
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
