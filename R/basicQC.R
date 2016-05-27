@@ -59,6 +59,8 @@ computeMetrics.basicQC <- function(result, config)
 
     qual_mat <- as(FastqQuality(quality(quality(seq_dat))), 'matrix')
     per_read_quality <- apply(qual_mat, 1, mean, na.rm=T)
+    pos_qual <- melt(qual_mat)
+    names(pos_qual) <- c('read_num', 'cycle', 'qual')
     rm(qual_mat)
     
     seq_df <- data.frame(read_num = 1:length(seq_dat),
@@ -80,9 +82,24 @@ computeMetrics.basicQC <- function(result, config)
       summarize(zone_quality = mean(qual, na.rm=T),
                 n_seq = sum(!is.na(qual)))
 
+    tile_qual <- pos_qual %>%
+      inner_join(seq_df %>% select(read_num, tile), by = 'read_num') %>%
+      mutate(tile_indx = dense_rank(tile)) %>%
+      select(tile_indx, cycle, qual) %>%
+      group_by(tile_indx, cycle) %>%
+      summarize(avg_qual = mean(qual, na.rm = T))
+
+    pos_qual <- pos_qual %>%
+      mutate(cycle_cat = trunc((cycle+1)/2)*2) %>%
+      select(cycle_cat, qual) %>%
+      group_by(cycle_cat, qual) %>%
+      summarize(count = n())
+
     result$metrics[[data_set_name]] <- list(
       seq_df = seq_df,
-      zone_qual = zone_qual
+      zone_qual = zone_qual,
+      tile_qual = tile_qual,
+      pos_qual = pos_qual
     )
   }
   return(result)

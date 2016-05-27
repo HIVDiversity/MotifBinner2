@@ -14,7 +14,7 @@ dummy_test_debug <- function()
                  verbosity = 3,
                            report_type = c('html', 'pdf'))
 
-  x <- do.call(processPrimers, config)
+#  x <- do.call(processPrimers, config)
 
   all_results <- list()
   class(all_results) <- 'allResults'
@@ -22,31 +22,41 @@ dummy_test_debug <- function()
   dir.create(file.path(config$output_dir, config$prefix_for_names), 
              showWarnings = FALSE, recursive = TRUE)
 
-  result <- loadData(all_results, config)
+  all_results <- applyOperation('loadData', all_results, config)
+  all_results <- applyOperation('basicQC', all_results, config)
+
+  ptm <- proc.time()
+  timing <- list()
+  operation_function <- ambigSeqs
+  config$operation_number <- length(all_results)
+
+  result <- operation_function(all_results, config)
+  timing$main <- proc.time() - ptm
+  ptm <- proc.time()
+
   result <- saveToDisk(result, config)
+  timing$saveToDisk <- proc.time() - ptm
+  ptm <- proc.time()
+
   result <- genSummary(result, config)
+  timing$genSummary <- proc.time() - ptm
+  ptm <- proc.time()
+
   result <- computeMetrics(result, config)
+  timing$computeMetrics <- proc.time() - ptm
+  result$timing <- timing
+  ptm <- proc.time()
+
   result <- genReport(result, config)
+  timing$genReport <- proc.time() - ptm
+  ptm <- proc.time()
+
   result <- print(result, config)
+  timing$print <- proc.time() - ptm
+  result$timing <- timing
+
   all_results[[basename(result$op_dir)]] <- result
+  
+  return(all_results)
 
-  result <- basicQC(all_results, config)
-  result <- saveToDisk(result, config)
-  result <- genSummary(result, config)
-  result <- computeMetrics(result, config)
-  result <- genReport(result, config)
-  result <- print(result, config)
-  all_results[[basename(result$op_dir)]] <- result
-
-  setwd('~/projects/MotifBinner2/code/MotifBinner2')
-  load_all(quiet=TRUE)
-
-  result <- allResults(all_results, config)
-  result <- saveToDisk(result, config)
-  result <- genSummary(result, config)
-  result <- computeMetrics(result, config)
-  result <- genReport(result, config)
-  result <- print(result, config)
 }
-
-

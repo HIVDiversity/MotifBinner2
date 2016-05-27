@@ -74,8 +74,10 @@ genReport_internal_generic <- function(result, config)
            output_file = new_report_name_html, clean=TRUE, quiet=TRUE)
   }
   if ('pdf' %in% config$report_type){
-    render(new_report_name_md, output_format = 'pdf_document',
-           output_file = new_report_name_pdf, clean=TRUE, quiet=TRUE)
+    warning('pdf reports not implemented yet')
+    # pandoc md -> tex; manual hacking in .tex; pandoc tex -> pdf
+    #render(new_report_name_md, output_format = 'pdf_document',
+    #       output_file = new_report_name_pdf, clean=TRUE, quiet=TRUE)
   }
   setwd(cwd)
   return(result)
