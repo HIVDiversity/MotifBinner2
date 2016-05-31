@@ -11,11 +11,14 @@ using namespace Rcpp;
 
 void print_cpp(CharacterVector r_sread, CharacterVector r_id, CharacterVector r_qual)
 {
-  IupacString sq_sread;
-  CharString sq_id;
-  CharString sq_qual;
+  StringSet<IupacString> sq_sread;
+  StringSet<CharString> sq_id;
+  StringSet<CharString> sq_qual;
 
-//  sq_sread = r_sread;
+  sq_sread = Rcpp::as<std::vector<std::string> >(r_sread);
+  sq_id = Rcpp::as<std::vector<std::string> >(r_id);
+  sq_qual = Rcpp::as<std::vector<std::string> >(r_qual);
+
 //  sq_id = r_id;
 //  sq_qual = r_qual;
 
