@@ -1,7 +1,7 @@
 library(Rcpp)
 library(ShortRead)
 
-seq_dat <- readFastq('CAP256_3100_030wpi_v1v2_20k_R1.fastq')
+seq_dat <- readFastq('test_dat.fastq')
 
 sourceCpp('trimEnds.cpp')
 
