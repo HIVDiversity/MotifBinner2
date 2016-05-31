@@ -1,6 +1,8 @@
 library(Rcpp)
 library(ShortRead)
 
+Sys.setenv("PKG_CXXFLAGS"="-std=c++11")
+
 seq_dat <- readFastq('test_dat.fastq')
 
 sourceCpp('trimEnds.cpp')
