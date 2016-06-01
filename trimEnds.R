@@ -6,11 +6,13 @@ Sys.setenv("PKG_CXXFLAGS"="-std=c++11")
 seq_dat <- readFastq('test_dat.fastq')
 
 sourceCpp('trimEnds.cpp')
+prefix <- "TATGGGAYSAAAGYCTMAARCCATGTG"
+prefix <- "ATATATATATATATATATATATATATA"
 
 trimEnds_cpp(as.character(seq_dat@sread),
              as.character(seq_dat@id),
              as.character(seq_dat@quality@quality),
-             "ACGTACGT")
+             prefix)
 print(seq_dat)
 
 
