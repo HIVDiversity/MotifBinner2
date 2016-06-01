@@ -52,13 +52,19 @@ struct ScoringMatrixData_<int, Iupac, UserDefinedMatrix>
 }  // namespace seqan
 
 template <typename TString>
-std::string convert_to_string(TString x)
+std::string convert_to_string(TString x, char filler, int num_fill)
 {
   std::string y;
-  resize(y, length(x));
+  resize(y, length(x)+num_fill+1);
+  if (num_fill > 0){
+    for (int i = 0; i != num_fill; ++i)
+    {
+      y[i] = filler;
+    }
+  }
   for (int i = 0; i != length(x); ++i)
   {
-    y[i] = x[i];
+    y[i+num_fill] = x[i];
   }
   return y;
 }
@@ -129,9 +135,11 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
       }
     }
 
-    trim_haystack[i] = convert_to_string(infix(haystack[i], trim_spots[i], length(haystack[i])-1));
-    trim_qual[i] = convert_to_string(infix(qual[i], trim_spots[i], length(qual[i])-1));
-    trim_id[i] = convert_to_string(id[i]);
+    trim_haystack[i] = convert_to_string(infix(haystack[i], trim_spots[i], length(haystack[i])-1),
+        '-', std::max(0, last_gap_in_read[i]));
+    trim_qual[i] = convert_to_string(infix(qual[i], trim_spots[i], length(qual[i])-1),
+        '!', std::max(0, last_gap_in_read[i]));
+    trim_id[i] = convert_to_string(id[i], '-', 0);
 //    std::cout << "Sequence " << i << std::endl;
 //    std::cout << align;
 //    std::cout << "Score = " << scores[i] << ";  Trim Spot = " << trim_spots[i] << "; Last Read Gap = " << last_gap_in_read[i] << std::endl;
