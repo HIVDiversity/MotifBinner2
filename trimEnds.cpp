@@ -72,6 +72,11 @@ void findPrefixMatch(StringSet<IupacString> haystack,
   setDefaultScoreMatrix(scoringScheme, UserDefinedMatrix());
 
   int seq_len = 0;
+  int gap_search_range;
+  std::vector<int> scores(length(haystack));
+  std::vector<int> trim_spots(length(haystack));
+  std::vector<int> last_gap_in_read(length(haystack));
+
   Align<IupacString, ArrayGaps> align;
   resize(rows(align), 2);
   Row<Align<IupacString, ArrayGaps> >::Type & row0 = row(align, 0);
@@ -80,11 +85,36 @@ void findPrefixMatch(StringSet<IupacString> haystack,
   for (unsigned i = 0; i < length(haystack); ++i)
   {
     seq_len = length(haystack[i]);
-    assignSource(row(align, 0), infix(haystack[i], 0, std::min(50, seq_len)));
+    assignSource(row(align, 0), infix(haystack[i], 0, std::min(40, seq_len)));
     assignSource(row(align, 1), needle);
 
     int score = globalAlignment(align, scoringScheme, AlignConfig<true, false, false, true>(), LinearGaps());
-    std::cout << i << " = " << score << ";  " ;
+    scores[i] = score;
+
+    for (unsigned j = 0; j != length(row1); ++j)
+    {
+      if (row1[j] != '-')
+      {
+        trim_spots[i] = j;
+        break;
+      }
+    }
+
+    last_gap_in_read[i] = -1;
+    gap_search_range = std::min(length(needle)+trim_spots[i], length(row0));
+    for (unsigned j = trim_spots[i]; j <= gap_search_range; ++j)
+    {
+      if (row0[j] == '-')
+      {
+        last_gap_in_read[i] = j - trim_spots[i] + 1;
+      }
+    }
+
+    std::cout << "Sequence " << i << std::endl;
+    std::cout << align;
+    std::cout << "Score = " << scores[i] << ";  Trim Spot = " << trim_spots[i] << "; Last Read Gap = " << last_gap_in_read[i] << std::endl;
+    std::cout << " --------------------- " << std::endl;
+    std::cout << std::endl;
   }
   std::cout << std::endl;
   assignSource(row(align, 0), needle);
@@ -97,7 +127,7 @@ void findPrefixMatch(StringSet<IupacString> haystack,
 
 // [[Rcpp::export]]
 
-void trimEnds_cpp(CharacterVector r_sread, CharacterVector r_id, 
+Rcpp::List trimEnds_cpp(CharacterVector r_sread, CharacterVector r_id, 
     CharacterVector r_qual, CharacterVector r_prefix)
 {
   StringSet<IupacString> sq_sread;
@@ -116,10 +146,7 @@ void trimEnds_cpp(CharacterVector r_sread, CharacterVector r_id,
 
   findPrefixMatch(sq_sread, sq_id, sq_qual, sq_prefix[0]);
 
-
-//  sq_id = r_id;
-//  sq_qual = r_qual;
-
-  std::cout << "inside print_cpp" << std::endl;
+  int bla = 5;
+  return Rcpp::List::create(Rcpp::Named("seq_dat") = bla);
 }
 
