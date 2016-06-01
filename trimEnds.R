@@ -10,10 +10,15 @@ sourceCpp('trimEnds.cpp')
 prefix <- "TATGGGAYSAAAGYCTMAARCCATGTG"
 prefix <- "ATATATATATATATATATATATATATA"
 
+trimmed <- 
 trimEnds_cpp(as.character(seq_dat@sread),
              as.character(seq_dat@id),
              as.character(seq_dat@quality@quality),
              prefix)
+trimmed <- ShortReadQ(sread = DNAStringSet(trimmed$sread),
+                      quality = BStringSet(trimmed$qual),
+                      id = BStringSet(trimmed$id))
 print(seq_dat)
+print(trimmed@sread)
 
 

@@ -51,7 +51,19 @@ struct ScoringMatrixData_<int, Iupac, UserDefinedMatrix>
 };
 }  // namespace seqan
 
-void findPrefixMatch(StringSet<IupacString> haystack,
+template <typename TString>
+std::string convert_to_string(TString x)
+{
+  std::string y;
+  resize(y, length(x));
+  for (int i = 0; i != length(x); ++i)
+  {
+    y[i] = x[i];
+  }
+  return y;
+}
+
+Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
   StringSet<CharString> id, StringSet<CharString> qual,
   IupacString needle)
 {
@@ -59,6 +71,11 @@ void findPrefixMatch(StringSet<IupacString> haystack,
   typedef Score<TValue, ScoreMatrix<Iupac, Default> > TScoringScheme;
   int const gapOpenScore = -1;
   int const gapExtendScore = -1;
+  //StringSet<IupacString> trim_haystack(length(haystack));
+  //StringSet<CharString> trim_qual(length(qual));
+  std::vector<std::string> trim_haystack(length(haystack));
+  std::vector<std::string> trim_qual(length(qual));
+  std::vector<std::string> trim_id(length(id));
 
   TScoringScheme scoringScheme(gapExtendScore, gapOpenScore);
 
@@ -107,14 +124,19 @@ void findPrefixMatch(StringSet<IupacString> haystack,
       if (row0[j] == '-')
       {
         last_gap_in_read[i] = j - trim_spots[i] + 1;
+      } else {
+        break;
       }
     }
 
-    std::cout << "Sequence " << i << std::endl;
-    std::cout << align;
-    std::cout << "Score = " << scores[i] << ";  Trim Spot = " << trim_spots[i] << "; Last Read Gap = " << last_gap_in_read[i] << std::endl;
-    std::cout << " --------------------- " << std::endl;
-    std::cout << std::endl;
+    trim_haystack[i] = convert_to_string(infix(haystack[i], trim_spots[i], length(haystack[i])-1));
+    trim_qual[i] = convert_to_string(infix(qual[i], trim_spots[i], length(qual[i])-1));
+    trim_id[i] = convert_to_string(id[i]);
+//    std::cout << "Sequence " << i << std::endl;
+//    std::cout << align;
+//    std::cout << "Score = " << scores[i] << ";  Trim Spot = " << trim_spots[i] << "; Last Read Gap = " << last_gap_in_read[i] << std::endl;
+//    std::cout << " --------------------- " << std::endl;
+//    std::cout << std::endl;
   }
   std::cout << std::endl;
   assignSource(row(align, 0), needle);
@@ -123,6 +145,15 @@ void findPrefixMatch(StringSet<IupacString> haystack,
   int score = globalAlignment(align, Score<int, Simple>(0, -1, -1), AlignConfig<true, false, false, true>(), LinearGaps());
   std::cout << "best alignment: prefix to prefix" << std::endl;
   std::cout << score << std::endl;
+
+//  int bla = 5;
+//  return Rcpp::List::create(Rcpp::Named("sread") = bla);
+  return Rcpp::List::create(Rcpp::Named("sread") = trim_haystack,
+                            Rcpp::Named("id") = trim_id,
+                            Rcpp::Named("qual") = trim_qual,
+                            Rcpp::Named("score") = scores,
+                            Rcpp::Named("trim_spot") = trim_spots,
+                            Rcpp::Named("first_nongap") = last_gap_in_read);
 }
 
 // [[Rcpp::export]]
@@ -144,9 +175,9 @@ Rcpp::List trimEnds_cpp(CharacterVector r_sread, CharacterVector r_id,
   std::cout << "length of prefix " << length(sq_prefix) << std::endl;
   std::cout << "length of first element of prefix " << length(sq_prefix[0]) << std::endl;
 
-  findPrefixMatch(sq_sread, sq_id, sq_qual, sq_prefix[0]);
+  Rcpp::List trim_result;
+  trim_result = findPrefixMatch(sq_sread, sq_id, sq_qual, sq_prefix[0]);
 
-  int bla = 5;
-  return Rcpp::List::create(Rcpp::Named("seq_dat") = bla);
+  return trim_result;
 }
 
