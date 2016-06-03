@@ -4,6 +4,8 @@ Description: Process NGS Primer ID Datasets
 Version: 0.0.1
 Author: Phillip Labuschagne <philliplab@gmail.com>
 Maintainer: Phillip Labuschagne <philliplab@gmail.com>
+LinkingTo:
+    Rcpp
 Depends:
     ShortRead,
     dplyr,
@@ -18,7 +20,8 @@ Depends:
     reshape2
 Imports:
     BiocGenerics,
-    Biostrings
+    Biostrings,
+    Rcpp
 Suggests:
     testthat
 VignetteBuilder: knitr
