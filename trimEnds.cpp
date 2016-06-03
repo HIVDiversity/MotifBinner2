@@ -139,7 +139,7 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
         '-', std::max(0, last_gap_in_read[i]));
     trim_qual[i] = convert_to_string(infix(qual[i], trim_spots[i], length(qual[i])-1),
         '!', std::max(0, last_gap_in_read[i]));
-    trim_id[i] = convert_to_string(id[i], '-', 0);
+    trim_id[i] = toCString(id[i]);  //convert_to_string(id[i], '-', 0);
 //    std::cout << "Sequence " << i << std::endl;
 //    std::cout << align;
 //    std::cout << "Score = " << scores[i] << ";  Trim Spot = " << trim_spots[i] << "; Last Read Gap = " << last_gap_in_read[i] << std::endl;
