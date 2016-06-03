@@ -32,6 +32,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation('ambigSeqs', all_results, config)
   all_results <- applyOperation('primerDimer', all_results, config)
   all_results <- applyOperation('seqLength', all_results, config)
+  all_results <- applyOperation('trimEnds', all_results, config)
 
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
   unlink('/fridge/data/MotifBinner2_test/CAP256_3100_030wpi_v1v2_20k/n005_seqLength', recursive=T)
