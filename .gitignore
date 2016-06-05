@@ -4,3 +4,5 @@ inst/reports/*.md
 *.pdf
 *.html
 .Rproj.user
+*.so
+*.o

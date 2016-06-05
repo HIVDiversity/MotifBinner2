@@ -11,6 +11,8 @@ dummy_test_debug <- function()
                  rev_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R2.fastq",
                  output_dir = "/fridge/data/MotifBinner2_test",
                  prefix_for_names = "CAP256_3100_030wpi_v1v2_20k",
+                 fwd_primer = 'TATGGGAYSAAAGYCTMAARCCATGTG',
+                 rev_primer = 'CACACGCTCAGNNNNNNNNNATTCCATGTGTACATTGTACTGTRCTG',
                  operation_list = c('loadData', 'basicQC', 'ambigSeqs', 'primerDimer', 'seqLength'),
                  ambigSeqs = list(max_ambig = 5),
                  primerDimer = list(primer_dimer_len = 80),
@@ -23,6 +25,10 @@ dummy_test_debug <- function()
   x <- do.call(processPrimers, config)
   all_results <- x
   all_results$summary <- NULL
+  
+  operation_function <- trimAffixes
+  config$operation_number <- length(all_results)
+  result <- operation_function(all_results, config)
 
   all_results <- list()
   class(all_results) <- 'allResults'
@@ -43,7 +49,7 @@ dummy_test_debug <- function()
 
   ptm <- proc.time()
   timing <- list()
-  operation_function <- trimEnds
+  operation_function <- trimAffixes
   config$operation_number <- length(all_results)
 
   result <- operation_function(all_results, config)

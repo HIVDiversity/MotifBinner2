@@ -108,7 +108,7 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
   for (unsigned i = 0; i < length(haystack); ++i)
   {
     seq_len = length(haystack[i]);
-    assignSource(row(align, 0), infix(haystack[i], 0, std::min(40, seq_len)));
+    assignSource(row(align, 0), infix(haystack[i], 0, std::min(80, seq_len)));
     assignSource(row(align, 1), needle);
 
     int score = globalAlignment(align, scoringScheme, AlignConfig<true, false, false, true>(), LinearGaps());
@@ -147,6 +147,8 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
 //    std::cout << std::endl;
   }
   std::cout << std::endl;
+  std::cout << "number of alignments performed " << length(haystack) << std::endl;
+  std::cout << "number of alignments results obtained " << length(trim_haystack) << std::endl;
   assignSource(row(align, 0), needle);
   assignSource(row(align, 1), needle);
 
@@ -177,9 +179,9 @@ Rcpp::List trimEnds_cpp(CharacterVector r_sread, CharacterVector r_id,
   sq_qual = Rcpp::as<std::vector<std::string> >(r_qual);
   sq_prefix = Rcpp::as<std::vector<std::string> >(r_prefix);
 
-  //std::cout << "length of haystack " << length(sq_sread) << std::endl;
-  //std::cout << "length of prefix " << length(sq_prefix) << std::endl;
-  //std::cout << "length of first element of prefix " << length(sq_prefix[0]) << std::endl;
+  std::cout << "length of haystack " << length(sq_sread) << std::endl;
+  std::cout << "length of prefix " << length(sq_prefix) << std::endl;
+  std::cout << "length of first element of prefix " << length(sq_prefix[0]) << std::endl;
 
   Rcpp::List trim_result;
   trim_result = findPrefixMatch(sq_sread, sq_id, sq_qual, sq_prefix[0]);

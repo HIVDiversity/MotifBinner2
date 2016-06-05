@@ -2,10 +2,10 @@
 #' @inheritParams applyOperation
 #' @export
 
-trimEnds <- function(all_results, config)
+trimAffixes <- function(all_results, config)
 {
   op_dir <- file.path(config$output_dir, config$prefix_for_names,
-                      paste('n', sprintf("%03d", length(all_results)+1), '_trimEnds', sep = ''))
+                      paste('n', sprintf("%03d", length(all_results)+1), '_trimAffixes', sep = ''))
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
 
   kept <- list()
@@ -16,11 +16,11 @@ trimEnds <- function(all_results, config)
   rev_primer <- config$rev_primer
 
   fwd_seq <- all_results[[length(all_results)]]$kept[['fwd_reads']]
-  fwd_result <- trimEnds_internal(fwd_seq, fwd_primer)
+  fwd_result <- trimAffixes_internal(fwd_seq, fwd_primer)
 
-  rev_seq <- all_results[[length(all_results)]]$trimmed[['rev_reads']]
-  rev_result <- trimEnds_internal(reverse(rev_seq), reverse(rev_primer))
-  rev_result$seq_dat <- reverse(rev_result$seq_dat)
+  rev_seq <- all_results[[length(all_results)]]$kept[['rev_reads']]
+  rev_result <- trimAffixes_internal(rev_seq, rev_primer)
+#  rev_result$seq_dat <- reverse(rev_result$seq_dat)
 
   result <- list(fwd_result = fwd_result,
                  rev_result = rev_result)
@@ -29,11 +29,11 @@ trimEnds <- function(all_results, config)
 #                 metrics = metrics,
 #                 step_num = length(all_results)+1,
 #                 op_dir = op_dir)
-  class(result) <- 'trimEnds'
+  class(result) <- 'trimAffixes'
   return(result)
 }
 
-trimEnds_internal <- function(seq_dat, prefix, min_score = 0.7, front_gaps_allowed = 0)
+trimAffixes_internal <- function(seq_dat, prefix, min_score = 0.7, front_gaps_allowed = 0)
 {
   if (is.null(min_score)) {min_score <- -Inf}
   if (min_score < 1 & min_score > 0){min_score <- -nchar(prefix)*(1-min_score)}
@@ -61,7 +61,7 @@ trimEnds_internal <- function(seq_dat, prefix, min_score = 0.7, front_gaps_allow
 
 
 
-saveToDisk.trimEnds <- function(result, config)
+saveToDisk.trimAffixes <- function(result, config)
 {
   for (data_set_name in names(result$kept)){
     seq_dat <- result$kept[[data_set_name]]
@@ -82,37 +82,38 @@ saveToDisk.trimEnds <- function(result, config)
   return(result)
 }
 
-genSummary.trimEnds <- function(result, config)
+genSummary.trimAffixes <- function(result, config)
 {
   summary_tab <- rbind(
-    genSummary_internal(operation = 'trimEnds',
+    genSummary_internal(operation = 'trimAffixes',
                         parameters = 'fwd_reads',
                         kept_seq_dat = result$kept$fwd_reads,
                         trimmed_seq_dat = result$trimmed$fwd_reads),
-    genSummary_internal(operation = 'trimEnds',
+    genSummary_internal(operation = 'trimAffixes',
                         parameters = 'rev_reads',
                         kept_seq_dat = result$kept$rev_reads,
                         trimmed_seq_dat = result$trimmed$rev_reads))
   result$summary <- summary_tab
-  write.csv(summary_tab, file.path(result$op_dir, 'trimEnds_summary.csv'), row.names=FALSE)
+  write.csv(summary_tab, file.path(result$op_dir, 'trimAffixes_summary.csv'), row.names=FALSE)
   return(result)
 }
 
-computeMetrics.trimEnds <- function(result, config)
+computeMetrics.trimAffixes <- function(result, config)
 {
   return(result)
 }
 
-print.trimEnds <- function(result, config)
+print.trimAffixes <- function(result, config)
 {
   cat('\n-------------------')
-  cat('\nOperation: trimEnds')
+  cat('\nOperation: trimAffixes')
   cat('\n-------------------')
-  cat('\nKept Sequences:\n')
-  print(result$summary[,c('parameters', 'seqs_kept', 'mean_length_kept', 'mean_qual_kept')])
-  cat('\n-------------------')
-  cat('\nTrimmed Sequences:\n')
-  print(result$summary[,c('parameters', 'seqs_trimmed', 'mean_length_trimmed', 'mean_qual_trimmed')])
+  print(names(result))
+#  cat('\nKept Sequences:\n')
+#  print(result$summary[,c('parameters', 'seqs_kept', 'mean_length_kept', 'mean_qual_kept')])
+#  cat('\n-------------------')
+#  cat('\nTrimmed Sequences:\n')
+#  print(result$summary[,c('parameters', 'seqs_trimmed', 'mean_length_trimmed', 'mean_qual_trimmed')])
   return(result)
 }
 
@@ -131,9 +132,9 @@ print.trimEnds <- function(result, config)
 #seq_dat <- readFastq('test_dat.fastq')
 #seq_dat <- seq_dat[1:4]
 #
-#sourceCpp('trimEnds.cpp')
+#sourceCpp('trimAffixes.cpp')
 #prefix <- "TATGGGAYSAAAGYCTMAARCCATGTG"
 
-#trimmed <- trimEnds_internal(seq_dat, prefix)
+#trimmed <- trimAffixes_internal(seq_dat, prefix)
 
 
