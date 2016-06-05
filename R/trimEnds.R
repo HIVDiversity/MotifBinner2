@@ -18,53 +18,22 @@ trimEnds <- function(all_results, config)
   fwd_seq <- all_results[[length(all_results)]]$kept[['fwd_reads']]
   fwd_result <- trimEnds_internal(fwd_seq, fwd_primer)
 
+  rev_seq <- all_results[[length(all_results)]]$trimmed[['rev_reads']]
+  rev_result <- trimEnds_internal(reverse(rev_seq), reverse(rev_primer))
+  rev_result$seq_dat <- reverse(rev_result$seq_dat)
 
-  for (data_set_name in names(all_results[[length(all_results)]]$kept)){
-    seq_dat <- all_results[[length(all_results)]]$kept[[data_set_name]]
-    if (length(seq_dat) > 0)
-    {
-      tmp <- trimEnds_internal(seq_dat, config$trimEnds$max_ambig)
-      kept[[data_set_name]] <- tmp$kept
-      trimmed[[data_set_name]] <- tmp$trimmed
-      metrics[[data_set_name]] <- tmp$metrics
-      rm(tmp)
-    }
-  }
-
-  result <- list(kept = kept,
-                 trimmed = trimmed,
-                 metrics = metrics,
-                 step_num = length(all_results)+1,
-                 op_dir = op_dir)
+  result <- list(fwd_result = fwd_result,
+                 rev_result = rev_result)
+#  result <- list(kept = kept,
+#                 trimmed = trimmed,
+#                 metrics = metrics,
+#                 step_num = length(all_results)+1,
+#                 op_dir = op_dir)
   class(result) <- 'trimEnds'
   return(result)
 }
 
-trimEnds_internal <- function(seq_dat, max_ambig)
-{
-  counts <- alphabetFrequency(seq_dat@sread)
-  tmp <- data.frame(counts)
-  names(tmp) <- paste('c',attr(counts, 'dimnames')[[2]],sep='')
-  counts <- tmp
-  rm(tmp)
-
-  ambigCols <- !(gsub('^c','', names(counts)) %in% c('A','C','G','T','-'))
-  counts$seq_len <- width(seq_dat@sread)
-  counts$ambig <- apply(counts[,ambigCols], 1, sum)
-  counts$perc_ambig <- counts$ambig/counts$seq_len
-  counts <- counts[,c('seq_len', 'ambig', 'perc_ambig')]
-  if (max_ambig < 1)
-  {
-    kept_list <- counts$perc_ambig <= max_ambig
-  } else {
-    kept_list <- counts$ambig <= max_ambig
-  }
-  return(list(kept = seq_dat[kept_list],
-              trimmed = seq_dat[(!kept_list)],
-              metrics = list(ambig_counts = counts)))
-}
-
-trimEnds_internal2 <- function(seq_dat, prefix, min_score = 0.7, front_gaps_allowed = 0)
+trimEnds_internal <- function(seq_dat, prefix, min_score = 0.7, front_gaps_allowed = 0)
 {
   if (is.null(min_score)) {min_score <- -Inf}
   if (min_score < 1 & min_score > 0){min_score <- -nchar(prefix)*(1-min_score)}

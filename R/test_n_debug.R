@@ -4,6 +4,7 @@ dummy_test_debug <- function()
   getwd()
   library(devtools)
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
+  #Rcpp::compileAttributes()
   load_all(quiet=TRUE)
 
   config <- list(fwd_reads_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R1.fastq",
@@ -20,11 +21,13 @@ dummy_test_debug <- function()
                  report_type = c('html'))
 
   x <- do.call(processPrimers, config)
+  all_results <- x
+  all_results$summary <- NULL
 
   all_results <- list()
   class(all_results) <- 'allResults'
-  
-  dir.create(file.path(config$output_dir, config$prefix_for_names), 
+
+  dir.create(file.path(config$output_dir, config$prefix_for_names),
              showWarnings = FALSE, recursive = TRUE)
 
   all_results <- applyOperation('loadData', all_results, config)
@@ -40,7 +43,7 @@ dummy_test_debug <- function()
 
   ptm <- proc.time()
   timing <- list()
-  operation_function <- seqLength
+  operation_function <- trimEnds
   config$operation_number <- length(all_results)
 
   result <- operation_function(all_results, config)
@@ -70,7 +73,7 @@ dummy_test_debug <- function()
   result$timing <- timing
 
   all_results[[basename(result$op_dir)]] <- result
-  
+
   return(all_results)
 
 }
