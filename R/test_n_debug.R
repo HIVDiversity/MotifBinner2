@@ -30,6 +30,9 @@ dummy_test_debug <- function()
   config$operation_number <- length(all_results)
   result <- operation_function(all_results, config)
 
+  str(result$fwd_result$kept$trim_stats)
+  print(result$fwd_result$kept$seq_dat@sread)
+
   all_results <- list()
   class(all_results) <- 'allResults'
 

@@ -98,7 +98,7 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
   int gap_search_range;
   std::vector<int> scores(length(haystack));
   std::vector<int> trim_spots(length(haystack));
-  std::vector<int> last_gap_in_read(length(haystack));
+  std::vector<int> gaps_at_front_of_read(length(haystack));
 
   Align<IupacString, ArrayGaps> align;
   resize(rows(align), 2);
@@ -123,26 +123,26 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
       }
     }
 
-    last_gap_in_read[i] = -1;
+    gaps_at_front_of_read[i] = 0;
     gap_search_range = std::min(length(needle)+trim_spots[i], length(row0));
     for (unsigned j = trim_spots[i]; j <= gap_search_range; ++j)
     {
       if (row0[j] == '-')
       {
-        last_gap_in_read[i] = j - trim_spots[i] + 1;
+        gaps_at_front_of_read[i] = j - trim_spots[i] + 1;
       } else {
         break;
       }
     }
 
     trim_haystack[i] = convert_to_string(infix(haystack[i], trim_spots[i], length(haystack[i])-1),
-        '-', std::max(0, last_gap_in_read[i]));
+        '-', std::max(0, gaps_at_front_of_read[i]));
     trim_qual[i] = convert_to_string(infix(qual[i], trim_spots[i], length(qual[i])-1),
-        '!', std::max(0, last_gap_in_read[i]));
+        '!', std::max(0, gaps_at_front_of_read[i]));
     trim_id[i] = toCString(id[i]);  //convert_to_string(id[i], '-', 0);
 //    std::cout << "Sequence " << i << std::endl;
 //    std::cout << align;
-//    std::cout << "Score = " << scores[i] << ";  Trim Spot = " << trim_spots[i] << "; Last Read Gap = " << last_gap_in_read[i] << std::endl;
+//    std::cout << "Score = " << scores[i] << ";  Trim Spot = " << trim_spots[i] << "; Last Read Gap = " << gaps_at_front_of_read[i] << std::endl;
 //    std::cout << " --------------------- " << std::endl;
 //    std::cout << std::endl;
   }
@@ -161,7 +161,7 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
                             Rcpp::Named("qual") = trim_qual,
                             Rcpp::Named("score") = scores,
                             Rcpp::Named("trim_spot") = trim_spots,
-                            Rcpp::Named("first_nongap") = last_gap_in_read);
+                            Rcpp::Named("gaps_at_front_of_read") = gaps_at_front_of_read);
 }
 
 // [[Rcpp::export]]

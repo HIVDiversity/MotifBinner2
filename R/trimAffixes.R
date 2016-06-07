@@ -47,10 +47,10 @@ trimAffixes_internal <- function(seq_dat, prefix, min_score = 0.7, front_gaps_al
                                        id = BStringSet(trimmed$id)),
                   trim_stats = data.frame(score = trimmed$score,
                                           bases_trimmed = trimmed$trim_spot,
-                                          first_nongap = trimmed$first_nongap))
+                                          gaps_at_front_of_read = trimmed$gaps_at_front_of_read))
 
   kept_list <- trimmed$trim_stats$score > min_score &
-               trimmed$trim_stats$first_nongap <= front_gaps_allowed
+               trimmed$trim_stats$gaps_at_front_of_read <= front_gaps_allowed
   kept <- list(seq_dat = trimmed$seq_dat[kept_list],
                trim_stats = trimmed$trim_stats[kept_list,])
   trimmed <- list(seq_dat = trimmed$seq_dat[!kept_list],
