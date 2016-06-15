@@ -5,7 +5,8 @@
 loadData <- function(all_results, config)
 {
   op_number <- config$current_op_number
-  op_full_name <- paste(op_number, config$operation_list[[op_number]]$name, sep = '_')
+  op_args <- config$operation_list[[op_number]]
+  op_full_name <- paste(op_number, op_args$name, sep = '_')
 
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   input_file <- config$operation_list[[op_number]]$input_file
@@ -16,31 +17,19 @@ loadData <- function(all_results, config)
     stop(paste('input file does not exists: ', input_file, sep = ''))
   }
 
-#  dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
-#  if (!is.null(config$fwd_reads_file))
-#  {
-#    fwd_reads <- readFastq(config$fwd_reads_file)
-#  }
-#  if (!is.null(config$rev_reads_file))
-#  {
-#    rev_reads <- readFastq(config$rev_reads_file)
-#  }
-#  result <- list(
-#    fwd_reads = list(
-#      kept = list(
-#        seq_dat = fwd_reads
-#                  )
-#                     ),
-#    rev_reads = list(
-#      kept = list(
-#        seq_dat = rev_reads)
-#      ),
-#    step_num = length(all_results)+1,
-#    op_dir = op_dir,
-#    op_name = op_name
-#                 )
-#  class(result) <- 'loadData'
-#  return(result)
+  seq_dat <- readFastq(input_file)
+  per_read_metrics <- data.frame('read_exists' = rep(1, length(seq_dat)))
+  trim_steps <- list(step1 = list(name = 'read_exists',
+                                  threshold = 1,
+                                  breaks = c(0,1)))
+
+  result <- list(trim_steps = trim_steps,
+                 metrics = list(per_read_metrics = per_read_metrics))
+  class(result) <- 'loadData'
+  if (op_args$cache){
+    result$seq_dat <- seq_dat
+  }
+  return(result)
 }
 
 saveToDisk.loadData <- function(result, config)
