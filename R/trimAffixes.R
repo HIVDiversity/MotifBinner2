@@ -20,7 +20,6 @@ trimAffixes <- function(all_results, config)
 
   rev_seq <- all_results[[length(all_results)]]$kept[['rev_reads']]
   rev_result <- trimAffixes_internal(rev_seq, rev_primer)
-#  rev_result$seq_dat <- reverse(rev_result$seq_dat)
 
   result <- list(fwd_result = fwd_result,
                  rev_result = rev_result)
