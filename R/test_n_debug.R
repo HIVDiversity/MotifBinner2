@@ -8,10 +8,12 @@ dummy_test_debug <- function()
   load_all(quiet=TRUE)
 
   # arguments passed in:
-  operation_list = list('n001' = list(name = 'fwd_loadData',
-                                      op = 'loadData',
-                                      input_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R1.fastq",
-                                      cache_data = TRUE))
+  operation_list = list('n001' = 
+    list(name = 'fwd_loadData',
+      op = 'loadData',
+      input_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R1.fastq",
+      cache_data = TRUE)
+    )
   output_dir = "/fridge/data/MotifBinner2_test"
   base_for_names = "CAP256_3100_030wpi_v1v2_20k"
   intermediate_reports = TRUE
