@@ -2,18 +2,9 @@
 #' @inheritParams saveToDisk
 #' @export
 
-genSummary <- function(result, config)
+genSummary <- function(result, config, seq_dat)
 {
   op_args <- result$config$op_args
-
-  # load data
-  if (!op_args$cache)
-  {
-    stop('implement getKept now')
-  } else 
-  {
-    seq_dat <- result$seq_dat
-  }
 
   for (trim_step in result$trim_steps)
   {

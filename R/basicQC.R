@@ -10,15 +10,34 @@
 
 basicQC <- function(all_results, config)
 {
-  op_dir <- file.path(config$output_dir, config$prefix_for_names,
-                      paste('n', sprintf("%03d", length(all_results)+1), '_basicQC', sep = ''))
+  op_number <- config$current_op_number
+  op_args <- config$operation_list[[op_number]]
+  op_full_name <- paste(op_number, op_args$name, sep = '_')
+
+  op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
+
+  data_source_indx <- grep(op_args$data_source, names(all_results))
+  stopifnot(length(data_source_indx) == 1)
+  seq_dat <- all_results[[data_source_indx]]$seq_dat
   
-  result <- list(kept = all_results[[length(all_results)]]$kept,
-                 step_num = length(all_results)+1,
-                 op_dir = op_dir)
-  
+  per_read_metrics <- data.frame('read_exists' = rep(1, length(seq_dat)))
+  trim_steps <- list(step1 = list(name = 'read_exists',
+                                  threshold = 1,
+                                  breaks = c(1)))
+
+  result <- list(trim_steps = trim_steps,
+                 metrics = list(per_read_metrics = per_read_metrics))
   class(result) <- 'basicQC'
+  if (op_args$cache){
+    stop('Do not cache data in steps that do not alter the datasets')
+  } else {
+    result$tmp <- seq_dat
+  }
+  result$config <- list(op_number = op_number,
+                        op_args = op_args,
+                        op_full_name = op_full_name,
+                        op_dir = op_dir)
   return(result)
 }
 
@@ -27,21 +46,21 @@ saveToDisk.basicQC <- function(result, config)
   return(result)
 }
 
-genSummary.basicQC <- function(result, config)
-{
-  summary_tab <- rbind(
-    genSummary_internal(operation = 'basicQC',
-                        parameters = 'fwd_reads',
-                        kept_seq_dat = result$kept$fwd_reads,
-                        trimmed_seq_dat = DNAStringSet(NULL)),
-    genSummary_internal(operation = 'basicQC',
-                        parameters = 'rev_reads',
-                        kept_seq_dat = result$kept$rev_reads,
-                        trimmed_seq_dat = DNAStringSet(NULL)))
-  result$summary <- summary_tab
-  write.csv(summary_tab, file.path(result$op_dir, 'basicQC_summary.csv'), row.names=FALSE)
-  return(result)
-}
+#genSummary.basicQC <- function(result, config)
+#{
+#  summary_tab <- rbind(
+#    genSummary_internal(operation = 'basicQC',
+#                        parameters = 'fwd_reads',
+#                        kept_seq_dat = result$kept$fwd_reads,
+#                        trimmed_seq_dat = DNAStringSet(NULL)),
+#    genSummary_internal(operation = 'basicQC',
+#                        parameters = 'rev_reads',
+#                        kept_seq_dat = result$kept$rev_reads,
+#                        trimmed_seq_dat = DNAStringSet(NULL)))
+#  result$summary <- summary_tab
+#  write.csv(summary_tab, file.path(result$op_dir, 'basicQC_summary.csv'), row.names=FALSE)
+#  return(result)
+#}
 
 computeMetrics.basicQC <- function(result, config)
 {

@@ -8,11 +8,17 @@ dummy_test_debug <- function()
   load_all(quiet=TRUE)
 
   # arguments passed in:
-  operation_list = list('n001' = 
-    list(name = 'fwd_loadData',
-      op = 'loadData',
-      input_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R1.fastq",
-      cache_data = TRUE)
+  operation_list = list(
+    'n001' = 
+      list(name = 'fwd_loadData',
+        op = 'loadData',
+        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R1.fastq",
+        cache_data = TRUE),
+    'n002' =
+      list(name = 'fwd_basicQC',
+        op = 'basicQC',
+        data_source = "n001",
+        cache_data = FALSE)
     )
   output_dir = "/fridge/data/MotifBinner2_test"
   base_for_names = "CAP256_3100_030wpi_v1v2_20k"
@@ -34,14 +40,21 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n001'
+  op_number <- 'n002'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
+  if ('seq_dat' %in% names(result))
+  {
+    seq_dat <- result$seq_dat
+  } else {
+    seq_dat <- result$tmp
+    result$tmp <- NULL
+  }
   timing$main <- proc.time() - ptm
   
   ptm <- proc.time()
-  result <- genSummary(result, config)
+  result <- genSummary(result, config, seq_dat = seq_dat)
   timing$summary <- proc.time() - ptm
   
   ptm <- proc.time()

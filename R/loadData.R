@@ -10,7 +10,7 @@ loadData <- function(all_results, config)
 
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
-  input_file <- config$operation_list[[op_number]]$input_file
+  input_file <- config$operation_list[[op_number]]$data_source
   if (is.null(input_file)){
     stop('Input file must be specified')
   }
