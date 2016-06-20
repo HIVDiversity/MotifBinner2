@@ -19,10 +19,6 @@ applyOperation <- function(operation, all_results, config)
   timing$main <- proc.time() - ptm
   ptm <- proc.time()
 
-  result <- saveToDisk(result, config)
-  timing$saveToDisk <- proc.time() - ptm
-  ptm <- proc.time()
-
   result <- genSummary(result, config)
   timing$genSummary <- proc.time() - ptm
   ptm <- proc.time()
@@ -30,6 +26,10 @@ applyOperation <- function(operation, all_results, config)
   result <- computeMetrics(result, config)
   timing$computeMetrics <- proc.time() - ptm
   result$timing <- timing
+  ptm <- proc.time()
+
+  result <- saveToDisk(result, config)
+  timing$saveToDisk <- proc.time() - ptm
   ptm <- proc.time()
 
   result <- genReport(result, config)

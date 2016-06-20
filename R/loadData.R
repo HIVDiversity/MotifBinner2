@@ -9,6 +9,7 @@ loadData <- function(all_results, config)
   op_full_name <- paste(op_number, op_args$name, sep = '_')
 
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
+  dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   input_file <- config$operation_list[[op_number]]$input_file
   if (is.null(input_file)){
     stop('Input file must be specified')
@@ -29,6 +30,10 @@ loadData <- function(all_results, config)
   if (op_args$cache){
     result$seq_dat <- seq_dat
   }
+  result$config <- list(op_number = op_number,
+                        op_args = op_args,
+                        op_full_name = op_full_name,
+                        op_dir = op_dir)
   return(result)
 }
 
@@ -44,12 +49,15 @@ saveToDisk.loadData <- function(result, config)
 
 print.loadData <- function(result, config)
 {
-  cat('\n-------------------')
-  cat('\nOperation: loadData')
-  cat('\n-------------------')
-  cat('\nLoaded Sequences:\n')
-  print(result$summary[,c('parameters', 'seqs_kept', 'mean_length_kept', 'mean_qual_kept')])
-  return(result)
+  cat('\n-------------------\n')
+  cat(  'Operation: loadData\n')
+  cat(  '-------------------\n')
+#  cat('\nLoaded Sequences: Bases:\n')
+#  print(result$seq_dat@sread)
+#  cat('\nLoaded Sequences: Qualities:\n')
+#  print(result$seq_dat@quality@quality)
+#  cat('\nSummary:\n')
+  print(result$summary[,c('parameter', 'k_seqs', 'k_mean_length', 'k_mean_qual')])
 }
 
 

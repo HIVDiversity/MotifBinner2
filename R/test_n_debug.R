@@ -30,10 +30,28 @@ dummy_test_debug <- function()
   all_results <- list()
   class(all_results) <- 'allResults'
 
+  timing <- list()
+  ptm <- proc.time()
   op_number <- 'n001'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
+  timing$main <- proc.time() - ptm
+  
+  ptm <- proc.time()
+  result <- genSummary(result, config)
+  timing$summary <- proc.time() - ptm
+  
+  ptm <- proc.time()
+  result <- computeMetrics(result, config)
+  timing$metrics <- proc.time() - ptm
+  
+  ptm <- proc.time()
+  result$timing <- timing
+  result <- genReport(result, config)
+  timing$report <- proc.time() - ptm
+  
+  ptm <- proc.time()
 
   print('bye')
 

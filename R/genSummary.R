@@ -4,9 +4,7 @@
 
 genSummary <- function(result, config)
 {
-  op_number <- config$current_op_number
-  op_args <- config$operation_list[[op_number]]
-  op_full_name <- paste(op_number, op_args$name, sep = '_')
+  op_args <- result$config$op_args
 
   # load data
   if (!op_args$cache)
@@ -97,17 +95,17 @@ genSummary_one <- function(seq_dat, names_pref)
 
 kable_summary <- function(summary_tab)
 {
-  summary_tab$seqs_in <- summary_tab$seqs_kept + summary_tab$seqs_trimmed
+  summary_tab$seqs_in <- summary_tab$k_seqs + summary_tab$t_seqs
   cat('\n\nThe number of sequences kept and discarded:\n\n')
   print(
-  kable(summary_tab[,c('parameters', 'seqs_in', 'seqs_kept', 'seqs_trimmed')])
+  kable(summary_tab[,c('parameter', 'seqs_in', 'k_seqs', 't_seqs')])
   )
   cat('\n\nStatistics of the kept sequences\n\n')
-  kept_tab <- summary_tab[,grep('_kept', names(summary_tab))]
-  names(kept_tab) <- gsub('_kept', '', names(kept_tab))
+  kept_tab <- summary_tab[,grep('k_', names(summary_tab))]
+  names(kept_tab) <- gsub('k_', '', names(kept_tab))
   print(kable(kept_tab))
   cat('\n\nStatistics of the trimmed sequences\n\n')
-  trimmed_tab <- summary_tab[,grep('_trimmed', names(summary_tab))]
-  names(trimmed_tab) <- gsub('_trimmed', '', names(trimmed_tab))
+  trimmed_tab <- summary_tab[,grep('t_', names(summary_tab))]
+  names(trimmed_tab) <- gsub('t_', '', names(trimmed_tab))
   print(kable(trimmed_tab))
 }

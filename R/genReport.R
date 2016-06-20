@@ -16,9 +16,9 @@ genReport <- function(result, config)
 
 genReport_internal_allResults <- function(all_results, config)
 {
-  new_report_name_md   <- paste(config$prefix_for_names, 'bin_report.md', sep = '_')
-  new_report_name_html <- paste(config$prefix_for_names, 'bin_report.html', sep = '_')
-  new_report_name_pdf  <- paste(config$prefix_for_names, 'bin_report.pdf', sep = '_')
+  new_report_name_md   <- paste(config$base_for_names, 'bin_report.md', sep = '_')
+  new_report_name_html <- paste(config$base_for_names, 'bin_report.html', sep = '_')
+  new_report_name_pdf  <- paste(config$base_for_names, 'bin_report.pdf', sep = '_')
 
   report_file_name <- file.path(find.package('MotifBinner2'),
                                 'reports',
@@ -31,7 +31,7 @@ genReport_internal_allResults <- function(all_results, config)
   }
 
   cwd <- getwd()
-  setwd(file.path(config$output_dir, config$prefix_for_names))
+  setwd(file.path(config$output_dir, config$base_for_names))
   knit(report_file_name, new_report_name_md, quiet = TRUE)
 
   if ('html' %in% config$report_type){
@@ -48,12 +48,11 @@ genReport_internal_allResults <- function(all_results, config)
   return(all_results)
 }
 
-                                 
 genReport_internal_generic <- function(result, config)
 {
-  new_report_name_md   <- paste(config$prefix_for_names, class(result), 'bin_report.md', sep = '_')
-  new_report_name_html <- paste(config$prefix_for_names, class(result), 'bin_report.html', sep = '_')
-  new_report_name_pdf  <- paste(config$prefix_for_names, class(result), 'bin_report.pdf', sep = '_')
+  new_report_name_md   <- paste(config$base_for_names, class(result), 'bin_report.md', sep = '_')
+  new_report_name_html <- paste(config$base_for_names, class(result), 'bin_report.html', sep = '_')
+  new_report_name_pdf  <- paste(config$base_for_names, class(result), 'bin_report.pdf', sep = '_')
 
   report_file_name <- file.path(find.package('MotifBinner2'),
                                 'reports',
@@ -66,7 +65,7 @@ genReport_internal_generic <- function(result, config)
   }
 
   cwd <- getwd()
-  setwd(result$op_dir)
+  setwd(result$config$op_dir)
   knit(report_file_name, new_report_name_md, quiet = TRUE)
 
   if ('html' %in% config$report_type){

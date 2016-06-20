@@ -17,16 +17,7 @@ if (class(result) != 'loadData')
 }
 ```
 
-`r length(result$kept)` files were sucessfully loaded.
-
-The number of reads per file:
-```{r}
-tmp <- lapply(result$kept, length)
-kable(data.frame('data set' = names(tmp),
-                 'n reads' = as.numeric(tmp),
-                 check.names=F,
-                 row.names=NULL))
-```
+`r length(result$seq_dat)` reads were sucessfully loaded.
 
 ```{r, results='asis'}
 kable_summary(result$summary)
