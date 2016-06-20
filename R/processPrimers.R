@@ -1,21 +1,32 @@
 #' Applies a single operation
 #'
+#' @param all_results A list of all results given the class 'all_results'.
+#' @param config A list of configuration options
+#' @param op_number The operation number. If not specified it will be computed
+#' based on the length of all_results
 #' @param operation The name of the operation to apply. A function by this name
 #' with the arguments all_results and config must exists. Additionally, the
 #' functions saveToDisk, genReport, genSummary and print must be specialized
-#' for objects of the class matching the name of the operation.
-#' @param all_results A list of all results given the class 'all_results'.
-#' @param config A list of configuration options
+#' for objects of the class matching the name of the operation. If specified,
+#' it will be used as a check to ensure that the correct operation was
+#' retrieved from the operations_list in the config argument.
 #' @export
 
-applyOperation <- function(operation, all_results, config)
-{
+applyOperation <- function(all_results, config, op_number = NULL, operation = NULL) {
+  if (is.null(op_number)) {
+    op_number <- paste('n', sprintf("%03d", length(all_results)+1), sep = '')
+  }
+  if (!is.null(operation)) {
+    stopifnot(operation == config$operation_list[[op_number]]$op)
+  }
+  config$current_op_number <- op_number
+  print(op_number)
+  print(config$operation_list)
+  op <- get(config$operation_list[[op_number]]$op)
   ptm <- proc.time()
   timing <- list()
-  operation_function <- get(operation)
-  config$operation_number <- length(all_results)
 
-  result <- operation_function(all_results, config)
+  result <- op(all_results, config)
   timing$main <- proc.time() - ptm
   ptm <- proc.time()
 
@@ -40,7 +51,7 @@ applyOperation <- function(operation, all_results, config)
   timing$print <- proc.time() - ptm
   result$timing <- timing
 
-  all_results[[basename(result$op_dir)]] <- result
+  all_results[[result$config$op_full_name]] <- result
   
   return(all_results)
 }

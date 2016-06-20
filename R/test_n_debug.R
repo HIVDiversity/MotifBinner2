@@ -30,6 +30,8 @@ dummy_test_debug <- function()
   all_results <- list()
   class(all_results) <- 'allResults'
 
+  all_results <- applyOperation(all_results, config, operation = 'loadData')
+
   timing <- list()
   ptm <- proc.time()
   op_number <- 'n001'

@@ -58,6 +58,7 @@ print.loadData <- function(result, config)
 #  print(result$seq_dat@quality@quality)
 #  cat('\nSummary:\n')
   print(result$summary[,c('parameter', 'k_seqs', 'k_mean_length', 'k_mean_qual')])
+  invisible(result)
 }
 
 
