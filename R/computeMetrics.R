@@ -3,7 +3,7 @@
 #' @inheritParams applyOperation
 #' @export
 
-computeMetrics <- function(result, config)
+computeMetrics <- function(result, config, seq_dat)
 {
   UseMethod('computeMetrics')
 }

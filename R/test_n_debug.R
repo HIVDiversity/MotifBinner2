@@ -37,6 +37,7 @@ dummy_test_debug <- function()
   class(all_results) <- 'allResults'
 
   all_results <- applyOperation(all_results, config, operation = 'loadData')
+  all_results <- applyOperation(all_results, config, operation = 'basicQC')
 
   timing <- list()
   ptm <- proc.time()
@@ -58,7 +59,7 @@ dummy_test_debug <- function()
   timing$summary <- proc.time() - ptm
   
   ptm <- proc.time()
-  result <- computeMetrics(result, config)
+  result <- computeMetrics(result, config, seq_dat = seq_dat)
   timing$metrics <- proc.time() - ptm
   
   ptm <- proc.time()

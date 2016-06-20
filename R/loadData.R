@@ -37,7 +37,7 @@ loadData <- function(all_results, config)
   return(result)
 }
 
-computeMetrics.loadData <- function(result, config)
+computeMetrics.loadData <- function(result, config, seq_dat)
 {
   return(result)
 }

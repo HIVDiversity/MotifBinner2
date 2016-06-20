@@ -20,20 +20,69 @@ if (class(result) != 'basicQC')
 }
 ```
 
-The following datasets must be Quality Checked:
-`r names(result$kept)`
+```{r}
+seq_df <- result$metrics$seq_df
+zone_qual <- result$metrics$zone_qual
+tile_qual <- result$metrics$tile_qual
+pos_qual <- result$metrics$pos_qual
 
-```{r, include=FALSE}
-out <- NULL
-
-for (data_set_name in names(result$kept))
-{
-  out <- c(out, knit_child('basicQC_internal.Rmd'))
-}
+fig.cap1 <- "Histograms of read lengths and average qualities"
+fig.cap2 <- "Read length and quality by position on slide"
+fig.cap3 <- "Average sequence quality by tile and cycle"
+fig.cap4 <- "Distribution of sequence qualities by cycle"
 ```
 
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
+options(scipen=99)
+read_width_breaks <- c(-Inf,(0:22)*15, Inf)
+qual_breaks <- (0:21)*2
+p1 <- 
+ggplot(seq_df, aes(x=read_widths)) + 
+  geom_histogram(breaks=read_width_breaks) +
+  xlab('Read Length') +
+  ylab('Number of Reads')
+p2 <- 
+ggplot(seq_df, aes(x=qual)) + 
+  geom_histogram(breaks=qual_breaks) +
+  xlab('Quality Score') +
+  ylab('Number of Reads')
+grid.arrange(p1, p2, ncol=2)
+```
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2}
+p3 <-
+ggplot(zone_qual,
+       aes(x=xcat, y=ycat, fill=n_seq)) + 
+       geom_tile() + 
+       theme(legend.position = 'bottom') +
+       xlab(NULL) + ylab(NULL) +
+       labs(list(fill = 'Number of Sequences'))
+p4 <-
+ggplot(zone_qual,
+       aes(x=xcat, y=ycat, fill=zone_quality)) + 
+       geom_tile() + 
+       theme(legend.position = 'bottom') +
+       xlab(NULL) + ylab(NULL) +
+       labs(list(fill = 'Average Quality Score'))
+grid.arrange(p3, p4, ncol=2)
+```
+
+```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap3}
+
+print(
+  ggplot(data.frame(tile_qual), aes(cycle, tile_indx)) +
+  geom_tile(aes(fill=avg_qual))
+)
+```
+
+```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap4}
+print(
+  ggplot(na.omit(pos_qual), aes(x = cycle_cat, fill = as.factor(qual))) +
+    geom_bar(aes(y=count), width=2, stat = 'identity') 
+)
+```
 ```{r, results='asis'}
-cat(paste(out, collapse = '\n'))
+cat('\n\n---\n\n')
 ```
 
 ```{r, results='asis'}
@@ -41,4 +90,3 @@ kable_summary(result$summary)
 
 timingTable(result)
 ```
-

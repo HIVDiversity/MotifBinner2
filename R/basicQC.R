@@ -62,63 +62,59 @@ saveToDisk.basicQC <- function(result, config)
 #  return(result)
 #}
 
-computeMetrics.basicQC <- function(result, config)
+computeMetrics.basicQC <- function(result, config, seq_dat)
 {
-  result$metrics <- list()
-  for (data_set_name in names(result$kept)){
-    seq_dat <- result$kept[[data_set_name]]
-    
-    fastq_name_headers <- c("instrument", "run_num", "flowcell", "lane", "tile",
-                            "xpos", "ypos", "read", "is_filtered", "control_num",
-                            "index_seq")
-    fastq_numeric <- c("run_num", "lane", "tile", "xpos", "ypos", "read",
-                       "control_num", "index_seq")
+  fastq_name_headers <- c("instrument", "run_num", "flowcell", "lane", "tile",
+                          "xpos", "ypos", "read", "is_filtered", "control_num",
+                          "index_seq")
+  fastq_numeric <- c("run_num", "lane", "tile", "xpos", "ypos", "read",
+                     "control_num", "index_seq")
 
-    qual_mat <- as(FastqQuality(quality(quality(seq_dat))), 'matrix')
-    per_read_quality <- apply(qual_mat, 1, sum, na.rm=T)
-    pos_qual <- melt(qual_mat)
-    names(pos_qual) <- c('read_num', 'cycle', 'qual')
-    rm(qual_mat)
-    
-    seq_df <- data.frame(read_num = 1:length(seq_dat),
-                         seq_name = as.character(seq_dat@id),
-                         read_widths = width(seq_dat),
-                         qual = per_read_quality / width(seq_dat),              
-                         stringsAsFactors = F)
-    rm(per_read_quality)
-    
-    seq_df <- seq_df %>%
-      mutate(seq_name = gsub(' ', ':', seq_name)) %>%
-      separate(seq_name, fastq_name_headers, ":") %>%
-      mutate_each_(funs(as.numeric), fastq_numeric) %>%
-      mutate(xcat = round(xpos/max(xpos), 2)) %>%
-      mutate(ycat = round(ypos/max(ypos), 2))
-    
-    zone_qual <- seq_df %>%
-      group_by(xcat, ycat) %>%
-      summarize(zone_quality = mean(qual, na.rm=T),
-                n_seq = sum(!is.na(qual)))
+  qual_mat <- as(FastqQuality(quality(quality(seq_dat))), 'matrix')
+  per_read_quality <- apply(qual_mat, 1, sum, na.rm=T)
+  pos_qual <- melt(qual_mat)
+  names(pos_qual) <- c('read_num', 'cycle', 'qual')
+  rm(qual_mat)
+  
+  seq_df <- data.frame(read_num = 1:length(seq_dat),
+                       seq_name = as.character(seq_dat@id),
+                       read_widths = width(seq_dat),
+                       qual = per_read_quality / width(seq_dat),              
+                       stringsAsFactors = F)
+  rm(per_read_quality)
+  
+  seq_df <- seq_df %>%
+    mutate(seq_name = gsub(' ', ':', seq_name)) %>%
+    separate(seq_name, fastq_name_headers, ":") %>%
+    mutate_each_(funs(as.numeric), fastq_numeric) %>%
+    mutate(xcat = round(xpos/max(xpos), 2)) %>%
+    mutate(ycat = round(ypos/max(ypos), 2))
+  
+  zone_qual <- seq_df %>%
+    group_by(xcat, ycat) %>%
+    summarize(zone_quality = mean(qual, na.rm=T),
+              n_seq = sum(!is.na(qual)))
 
-    tile_qual <- pos_qual %>%
-      inner_join(seq_df %>% select(read_num, tile), by = 'read_num') %>%
-      mutate(tile_indx = dense_rank(tile)) %>%
-      select(tile_indx, cycle, qual) %>%
-      group_by(tile_indx, cycle) %>%
-      summarize(avg_qual = mean(qual, na.rm = T))
+  tile_qual <- pos_qual %>%
+    inner_join(seq_df %>% select(read_num, tile), by = 'read_num') %>%
+    mutate(tile_indx = dense_rank(tile)) %>%
+    select(tile_indx, cycle, qual) %>%
+    group_by(tile_indx, cycle) %>%
+    summarize(avg_qual = mean(qual, na.rm = T))
 
-    pos_qual <- pos_qual %>%
-      mutate(cycle_cat = trunc((cycle+1)/2)*2) %>%
-      select(cycle_cat, qual) %>%
-      group_by(cycle_cat, qual) %>%
-      summarize(count = n())
+  pos_qual <- pos_qual %>%
+    mutate(cycle_cat = trunc((cycle+1)/2)*2) %>%
+    select(cycle_cat, qual) %>%
+    group_by(cycle_cat, qual) %>%
+    summarize(count = n())
 
-    result$metrics[[data_set_name]] <- list(
-      seq_df = seq_df,
-      zone_qual = zone_qual,
-      tile_qual = tile_qual,
-      pos_qual = pos_qual
-    )
-  }
+  result$metrics <- list(
+    seq_df = seq_df,
+    zone_qual = zone_qual,
+    tile_qual = tile_qual,
+    pos_qual = pos_qual
+  )
+  
   return(result)
 }
 
@@ -128,7 +124,7 @@ print.basicQC <- function(result, config)
   cat('\nOperation: basicQC')
   cat('\n------------------')
   cat('\nLoaded Sequences:\n')
-  print(result$summary[,c('parameters', 'seqs_kept')])
-  return(result)
+  print(result$summary[,c('parameter', 'k_seqs')])
+  invisible(result)
 }
 

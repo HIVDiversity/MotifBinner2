@@ -39,7 +39,7 @@ applyOperation <- function(all_results, config, op_number = NULL, operation = NU
   timing$genSummary <- proc.time() - ptm
   ptm <- proc.time()
 
-  result <- computeMetrics(result, config)
+  result <- computeMetrics(result, config, seq_dat = seq_dat)
   timing$computeMetrics <- proc.time() - ptm
   result$timing <- timing
   ptm <- proc.time()
