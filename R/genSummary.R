@@ -33,6 +33,13 @@ genSummary <- function(result, config)
       stop('implement trimming with multiple categories now')
     }
   }
+  write.csv(
+    summary_tab, 
+    file.path(
+      result$config$op_dir, 
+      paste(result$config$op_full_name, '.csv', sep = '')),
+    row.names = FALSE
+    )
   result$summary <- summary_tab
   return(result)
 }

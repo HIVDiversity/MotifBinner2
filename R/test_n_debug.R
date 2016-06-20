@@ -25,7 +25,7 @@ dummy_test_debug <- function()
                  base_for_names = base_for_names,
                  intermediate_reports = TRUE,
                  verbosity = 3,
-                 report_type = c('html', 'pdf'))
+                 report_type = c('html'))
 
   all_results <- list()
   class(all_results) <- 'allResults'

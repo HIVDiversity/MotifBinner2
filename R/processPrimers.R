@@ -20,8 +20,6 @@ applyOperation <- function(all_results, config, op_number = NULL, operation = NU
     stopifnot(operation == config$operation_list[[op_number]]$op)
   }
   config$current_op_number <- op_number
-  print(op_number)
-  print(config$operation_list)
   op <- get(config$operation_list[[op_number]]$op)
   ptm <- proc.time()
   timing <- list()
