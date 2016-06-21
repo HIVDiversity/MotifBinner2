@@ -1,38 +1,85 @@
+getKept <- function(result, seq_dat=NULL)
+{
+  if (is.null(seq_dat) & (!('input_dat' %in% names(result))))
+  {
+    stop('data to be trimmed must be supplied either via the seq_dat argument or as an element named input_dat in the result list')
+  }
+
+  if (length(result$trim_steps) > 1){stop('implement multiple trimming columns now')}
+  for (trim_step in result$trim_steps)
+  {
+    trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
+    stopifnot(length(trim_dat) == length(seq_dat))
+    if (length(trim_step$breaks) == 1)
+    {
+      stopifnot(all(trim_dat == trim_step$threshold))
+      kept <- seq_dat
+      trimmed <- seq_dat[0]
+    } else {
+      if ('comparator' %in% names(trim_step))
+      {
+        comparator = trim_step$comparator
+      } else {
+        comparator = `<=`
+      }
+      seq_dat <- seq_dat[comparator(trim_dat, trim_step$threshold)]
+    }
+  }
+  return(seq_dat)
+}
+
+getTrimmed <- function(seq_dat, kept_dat)
+{
+  seq_dat[!(seq_dat@id %in% kept_dat@id)]
+}
+
 #' Removes sequences with too many ambig bases
 #' @inheritParams applyOperation
 #' @export
 
 ambigSeqs <- function(all_results, config)
 {
-  op_dir <- file.path(config$output_dir, config$prefix_for_names,
-                      paste('n', sprintf("%03d", length(all_results)+1), '_ambigSeqs', sep = ''))
+  op_number <- config$current_op_number
+  op_args <- config$operation_list[[op_number]]
+  op_full_name <- paste(op_number, op_args$name, sep = '_')
+
+  op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
+  
+  data_source_indx <- grep(op_args$data_source, names(all_results))
+  stopifnot(length(data_source_indx) == 1)
+  seq_dat <- all_results[[data_source_indx]]$seq_dat
+  
+  per_read_metrics <- ambigSeqs_internal(seq_dat)
 
-  kept <- list()
-  trimmed <- list()
-  metrics <- list()
-  for (data_set_name in names(all_results[[length(all_results)]]$kept)){
-    seq_dat <- all_results[[length(all_results)]]$kept[[data_set_name]]
-    if (length(seq_dat) > 0)
-    {
-      tmp <- ambigSeqs_internal(seq_dat, config$ambigSeqs$max_ambig)
-      kept[[data_set_name]] <- tmp$kept
-      trimmed[[data_set_name]] <- tmp$trimmed
-      metrics[[data_set_name]] <- tmp$metrics
-      rm(tmp)
-    }
+  threshold <- op_args$threshold
+  if (is.null(threshold))
+  {
+    threshold <- 0.02
   }
+  trim_steps <- list(step1 = list(name = 'perc_ambig',
+                                  threshold = threshold,
+                                  breaks = c(-Inf, 0, 0.01, 0.02, 0.03, 0.04, 
+                                             0.05, 0.1, 0.25, 0.5, 1)
+                                  )
+                    )
 
-  result <- list(kept = kept,
-                 trimmed = trimmed,
-                 metrics = metrics,
-                 step_num = length(all_results)+1,
-                 op_dir = op_dir)
+  result <- list(trim_steps = trim_steps,
+                 metrics = list(per_read_metrics = per_read_metrics))
+  kept_dat <- getKept(result, seq_dat=seq_dat)
   class(result) <- 'ambigSeqs'
+  if (op_args$cache){
+    result$seq_dat <- kept_dat
+  }
+  result$input_dat <- seq_dat
+  result$config <- list(op_number = op_number,
+                        op_args = op_args,
+                        op_full_name = op_full_name,
+                        op_dir = op_dir)
   return(result)
 }
 
-ambigSeqs_internal <- function(seq_dat, max_ambig)
+ambigSeqs_internal <- function(seq_dat)
 {
   counts <- alphabetFrequency(seq_dat@sread)
   tmp <- data.frame(counts)
@@ -44,16 +91,8 @@ ambigSeqs_internal <- function(seq_dat, max_ambig)
   counts$seq_len <- width(seq_dat@sread)
   counts$ambig <- apply(counts[,ambigCols], 1, sum)
   counts$perc_ambig <- counts$ambig/counts$seq_len
-  counts <- counts[,c('seq_len', 'ambig', 'perc_ambig')]
-  if (max_ambig < 1)
-  {
-    kept_list <- counts$perc_ambig <= max_ambig
-  } else {
-    kept_list <- counts$ambig <= max_ambig
-  }
-  return(list(kept = seq_dat[kept_list],
-              trimmed = seq_dat[(!kept_list)],
-              metrics = list(ambig_counts = counts)))
+  per_read_metrics <- counts[,c('seq_len', 'ambig', 'perc_ambig')]
+  return(per_read_metrics)
 }
 
 saveToDisk.ambigSeqs <- function(result, config)

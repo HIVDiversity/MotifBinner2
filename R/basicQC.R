@@ -31,9 +31,8 @@ basicQC <- function(all_results, config)
   class(result) <- 'basicQC'
   if (op_args$cache){
     stop('Do not cache data in steps that do not alter the datasets')
-  } else {
-    result$tmp <- seq_dat
   }
+  result$input_dat <- seq_dat
   result$config <- list(op_number = op_number,
                         op_args = op_args,
                         op_full_name = op_full_name,

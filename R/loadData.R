@@ -30,6 +30,7 @@ loadData <- function(all_results, config)
   if (op_args$cache){
     result$seq_dat <- seq_dat
   }
+  result$input_dat <- seq_dat
   result$config <- list(op_number = op_number,
                         op_args = op_args,
                         op_full_name = op_full_name,

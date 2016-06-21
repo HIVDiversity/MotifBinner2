@@ -6,6 +6,7 @@ genSummary <- function(result, config, seq_dat)
 {
   op_args <- result$config$op_args
 
+  if (length(result$trim_steps) > 1){stop('implement multiple trimming columns now')}
   for (trim_step in result$trim_steps)
   {
     trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]

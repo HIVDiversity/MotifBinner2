@@ -25,13 +25,8 @@ applyOperation <- function(all_results, config, op_number = NULL, operation = NU
   timing <- list()
 
   result <- op(all_results, config)
-  if ('seq_dat' %in% names(result))
-  {
-    seq_dat <- result$seq_dat
-  } else {
-    seq_dat <- result$tmp
-    result$tmp <- NULL
-  }
+  seq_dat <- result$input_dat
+  result$input_dat <- NULL
   timing$main <- proc.time() - ptm
   ptm <- proc.time()
 

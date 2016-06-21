@@ -18,7 +18,12 @@ dummy_test_debug <- function()
       list(name = 'fwd_basicQC',
         op = 'basicQC',
         data_source = "n001",
-        cache_data = FALSE)
+        cache_data = FALSE),
+    'n003' =
+      list(name = 'fwd_ambigSeqs',
+        op = 'ambigSeqs',
+        data_source = "n001",
+        cache_data = TRUE)
     )
   output_dir = "/fridge/data/MotifBinner2_test"
   base_for_names = "CAP256_3100_030wpi_v1v2_20k"
@@ -41,17 +46,12 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n002'
+  op_number <- 'n003'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
-  if ('seq_dat' %in% names(result))
-  {
-    seq_dat <- result$seq_dat
-  } else {
-    seq_dat <- result$tmp
-    result$tmp <- NULL
-  }
+  seq_dat <- result$input_dat
+  result$input_dat <- NULL
   timing$main <- proc.time() - ptm
   
   ptm <- proc.time()
