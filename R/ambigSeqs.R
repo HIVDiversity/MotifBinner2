@@ -1,3 +1,6 @@
+#' Get the data kept after a trimming step
+#' @export
+
 getKept <- function(result, seq_dat=NULL)
 {
   if (is.null(seq_dat) & (!('input_dat' %in% names(result))))
@@ -28,9 +31,12 @@ getKept <- function(result, seq_dat=NULL)
   return(seq_dat)
 }
 
+#' Get the data trimmed at a trimming step
+#' @export
+
 getTrimmed <- function(seq_dat, kept_dat)
 {
-  seq_dat[!(seq_dat@id %in% kept_dat@id)]
+  seq_dat[!(as.character(seq_dat@id) %in% as.character(kept_dat@id))]
 }
 
 #' Removes sequences with too many ambig bases
@@ -94,23 +100,22 @@ ambigSeqs_internal <- function(seq_dat)
   return(per_read_metrics)
 }
 
-saveToDisk.ambigSeqs <- function(result, config)
+saveToDisk.ambigSeqs <- function(result, config, seq_dat)
 {
-  for (data_set_name in names(result$kept)){
-    seq_dat <- result$kept[[data_set_name]]
-    if (length(seq_dat) > 0)
-    {
-      writeFastq(seq_dat, file.path(result$op_dir, 
-        paste(config$prefix_for_names, '_kept_', data_set_name, '.fastq', sep = '')), compress=F)
-    }
+  kept <- getKept(result, seq_dat)
+  trimmed <- getTrimmed(seq_dat = seq_dat, kept_dat = kept)
+
+  if (length(kept) > 0)
+  {
+    tmp_name <- file.path(result$config$op_dir, 
+      paste(config$base_for_names, '_kept_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(kept, tmp_name, compress=F)
   }
-  for (data_set_name in names(result$trimmed)){
-    seq_dat <- result$trimmed[[data_set_name]]
-    if (length(seq_dat) > 0)
-    {
-      writeFastq(seq_dat, file.path(result$op_dir, 
-        paste(config$prefix_for_names, '_trimmed_', data_set_name, '.fastq', sep = '')), compress=F)
-    }
+  if (length(trimmed) > 0)
+  {
+    tmp_name <- file.path(result$config$op_dir, 
+      paste(config$base_for_names, '_trimmed_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(trimmed, tmp_name, compress=F)
   }
   return(result)
 }
@@ -131,7 +136,7 @@ genSummary.ambigSeqs <- function(result, config)
   return(result)
 }
 
-computeMetrics.ambigSeqs <- function(result, config)
+computeMetrics.ambigSeqs <- function(result, config, seq_dat)
 {
   return(result)
 }

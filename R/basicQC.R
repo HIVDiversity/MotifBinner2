@@ -40,7 +40,7 @@ basicQC <- function(all_results, config)
   return(result)
 }
 
-saveToDisk.basicQC <- function(result, config)
+saveToDisk.basicQC <- function(result, config, seq_dat)
 {
   return(result)
 }

@@ -68,6 +68,10 @@ dummy_test_debug <- function()
   timing$report <- proc.time() - ptm
   
   ptm <- proc.time()
+  result <- saveToDisk(result, config, seq_dat)
+  timing$saveToDisk <- proc.time() - ptm
+
+  ptm <- proc.time()
 
   print('bye')
 

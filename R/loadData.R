@@ -43,7 +43,7 @@ computeMetrics.loadData <- function(result, config, seq_dat)
   return(result)
 }
 
-saveToDisk.loadData <- function(result, config)
+saveToDisk.loadData <- function(result, config, seq_dat)
 {
   return(result)
 }

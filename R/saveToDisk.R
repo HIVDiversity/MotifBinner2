@@ -3,7 +3,7 @@
 #' @inheritParams applyOperation
 #' @export
 
-saveToDisk <- function(result, config)
+saveToDisk <- function(result, config, seq_dat)
 {
   UseMethod('saveToDisk')
 }
