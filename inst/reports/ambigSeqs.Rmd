@@ -20,20 +20,34 @@ if (class(result) != 'ambigSeqs')
 }
 ```
 
-The following datasets were checked for ambiguous bases:
-`r names(result$kept)`
+```{r, include=F}
+fig.cap1 <- 'Histograms of the number of reads based on how many ambiguous bases they contain'
+```
 
-```{r, include=FALSE}
-out <- NULL
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
+options(scipen=99)
+ambig_counts <- result$metrics$per_read_metrics
+ticks <- 10^(0:12)
+ticks <- ticks[ticks < nrow(ambig_counts)]
+p1 <- 
+ggplot(ambig_counts, aes(x=ambig, fill=seq_len)) +
+  geom_histogram(bins=30) + 
+  scale_y_continuous(trans="log1p", breaks = ticks) +
+  ylab('Number of reads') +
+  xlab('Number of ambiguous bases')
 
-for (data_set_name in names(result$kept))
-{
-  out <- c(out, knit_child('ambigSeqs_internal.Rmd'))
-}
+p2 <-
+ggplot(ambig_counts, aes(x=100*perc_ambig, fill=seq_len)) +
+  geom_histogram(bins=30) + 
+  scale_y_continuous(trans="log1p", breaks = ticks) +
+  ylab('Number of reads') +
+  xlab('Percentage of ambiguous bases')
+
+grid.arrange(p1, p2, ncol=2)
 ```
 
 ```{r, results='asis'}
-cat(paste(out, collapse = '\n'))
+cat('\n\n')
 ```
 
 ```{r, results='asis'}
