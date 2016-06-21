@@ -59,8 +59,7 @@ ambigSeqs <- function(all_results, config)
   }
   trim_steps <- list(step1 = list(name = 'perc_ambig',
                                   threshold = threshold,
-                                  breaks = c(-Inf, 0, 0.01, 0.02, 0.03, 0.04, 
-                                             0.05, 0.1, 0.25, 0.5, 1)
+                                  breaks = c(-Inf, 0, 0.01, 0.02, 0.1, 0.5, 1)
                                   )
                     )
 

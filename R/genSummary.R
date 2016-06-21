@@ -22,7 +22,27 @@ genSummary <- function(result, config, seq_dat)
                                      op = class(result),
                                      parameter = parameter)
     } else {
-      stop('implement trimming with multiple categories now')
+      summary_tab <- NULL
+      if ('comparator' %in% names(trim_step))
+      {
+        comparator = trim_step$comparator
+      } else {
+        comparator = `<=`
+      }
+      for (break_indx in 2:length(trim_step$breaks))
+      {
+        kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx])
+        kept_seqs <- seq_dat[kept_vec]
+        seq_dat <- seq_dat[!kept_vec]
+        trim_dat <- trim_dat[!kept_vec]
+        parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
+                           ',', trim_step$breaks[break_indx], ']', sep = '')
+        summary_tab <- rbind(summary_tab,
+          genSummary_comb(kept = kept_seqs,
+                                       trimmed = seq_dat,
+                                       op = class(result),
+                                       parameter = parameter))
+      }
     }
   }
   write.csv(
