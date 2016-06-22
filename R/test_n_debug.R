@@ -43,6 +43,7 @@ dummy_test_debug <- function()
 
   all_results <- applyOperation(all_results, config, operation = 'loadData')
   all_results <- applyOperation(all_results, config, operation = 'basicQC')
+  all_results <- applyOperation(all_results, config, operation = 'ambigSeqs')
 
   timing <- list()
   ptm <- proc.time()

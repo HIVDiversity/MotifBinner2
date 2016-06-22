@@ -39,7 +39,7 @@ applyOperation <- function(all_results, config, op_number = NULL, operation = NU
   result$timing <- timing
   ptm <- proc.time()
 
-  result <- saveToDisk(result, config)
+  result <- saveToDisk(result, config, seq_dat = seq_dat)
   timing$saveToDisk <- proc.time() - ptm
   ptm <- proc.time()
 

@@ -147,11 +147,11 @@ print.ambigSeqs <- function(result, config)
   cat('\nOperation: ambigSeqs')
   cat('\n-------------------')
   cat('\nKept Sequences:\n')
-  print(result$summary[,c('parameters', 'seqs_kept', 'mean_length_kept', 'mean_qual_kept')])
+  print(result$summary[,c('parameter', 'k_seqs', 'k_mean_length', 'k_mean_qual')])
   cat('\n-------------------')
   cat('\nTrimmed Sequences:\n')
-  print(result$summary[,c('parameters', 'seqs_trimmed', 'mean_length_trimmed', 'mean_qual_trimmed')])
-  return(result)
+  print(result$summary[,c('parameter', 't_seqs', 't_mean_length', 't_mean_qual')])
+  invisible(result)
 }
 
 
