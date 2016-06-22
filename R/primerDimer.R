@@ -4,68 +4,67 @@
 
 primerDimer <- function(all_results, config)
 {
-  op_dir <- file.path(config$output_dir, config$prefix_for_names,
-                      paste('n', sprintf("%03d", length(all_results)+1), '_primerDimer', sep = ''))
+  op_number <- config$current_op_number
+  op_args <- config$operation_list[[op_number]]
+  op_full_name <- paste(op_number, op_args$name, sep = '_')
+
+  op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
+  
+  data_source_indx <- grep(op_args$data_source, names(all_results))
+  stopifnot(length(data_source_indx) == 1)
+  seq_dat <- all_results[[data_source_indx]]$seq_dat
+  
+  per_read_metrics <- data.frame(seq_len = width(seq_dat@sread))
 
-  kept <- list()
-  trimmed <- list()
-  for (data_set_name in names(all_results[[length(all_results)]]$kept)){
-    seq_dat <- all_results[[length(all_results)]]$kept[[data_set_name]]
-    if (length(seq_dat) > 0)
-    {
-      kept_list <- width(seq_dat) > config$primerDimer$primer_dimer_len
-      kept[[data_set_name]] <- seq_dat[kept_list]
-      trimmed[[data_set_name]] <- seq_dat[!kept_list]
-    }
+  threshold <- op_args$threshold
+  if (is.null(threshold))
+  {
+    threshold <- 80
   }
+  trim_steps <- list(step1 = list(name = 'seq_len',
+                                  threshold = threshold,
+                                  comparator = `>=`,
+                                  breaks = c(Inf, 295, 100, 80, 50, 30, -Inf)
+                                  )
+                    )
 
-  result <- list(kept = kept,
-                 trimmed = trimmed,
-                 step_num = length(all_results)+1,
-                 op_dir = op_dir)
+  result <- list(trim_steps = trim_steps,
+                 metrics = list(per_read_metrics = per_read_metrics))
+  kept_dat <- getKept(result, seq_dat=seq_dat)
   class(result) <- 'primerDimer'
-  return(result)
-}
-
-saveToDisk.primerDimer <- function(result, config)
-{
-  for (data_set_name in names(result$kept)){
-    seq_dat <- result$kept[[data_set_name]]
-    if (length(seq_dat) > 0)
-    {
-      writeFastq(seq_dat, file.path(result$op_dir, 
-        paste(config$prefix_for_names, '_kept_', data_set_name, '.fastq', sep = '')), compress=F)
-    }
+  if (op_args$cache){
+    result$seq_dat <- kept_dat
   }
-  for (data_set_name in names(result$trimmed)){
-    seq_dat <- result$trimmed[[data_set_name]]
-    if (length(seq_dat) > 0)
-    {
-      writeFastq(seq_dat, file.path(result$op_dir, 
-        paste(config$prefix_for_names, '_trimmed_', data_set_name, '.fastq', sep = '')), compress=F)
-    }
+  result$input_dat <- seq_dat
+  result$config <- list(op_number = op_number,
+                        op_args = op_args,
+                        op_full_name = op_full_name,
+                        op_dir = op_dir)
+  return(result)
+}
+
+saveToDisk.primerDimer <- function(result, config, seq_dat)
+{
+  kept <- getKept(result, seq_dat)
+  trimmed <- getTrimmed(seq_dat = seq_dat, kept_dat = kept)
+
+  if (length(kept) > 0)
+  {
+    tmp_name <- file.path(result$config$op_dir, 
+      paste(config$base_for_names, '_kept_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(kept, tmp_name, compress=F)
+  }
+  if (length(trimmed) > 0)
+  {
+    tmp_name <- file.path(result$config$op_dir, 
+      paste(config$base_for_names, '_trimmed_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(trimmed, tmp_name, compress=F)
   }
   return(result)
 }
 
-genSummary.primerDimer <- function(result, config)
-{
-  summary_tab <- rbind(
-    genSummary_internal(operation = 'primerDimer',
-                        parameters = 'fwd_reads',
-                        kept_seq_dat = result$kept$fwd_reads,
-                        trimmed_seq_dat = result$trimmed$fwd_reads),
-    genSummary_internal(operation = 'primerDimer',
-                        parameters = 'rev_reads',
-                        kept_seq_dat = result$kept$rev_reads,
-                        trimmed_seq_dat = result$trimmed$rev_reads))
-  result$summary <- summary_tab
-  write.csv(summary_tab, file.path(result$op_dir, 'primerDimer_summary.csv'), row.names=FALSE)
-  return(result)
-}
-
-computeMetrics.primerDimer <- function(result, config)
+computeMetrics.primerDimer <- function(result, config, seq_dat)
 {
   return(result)
 }
@@ -76,11 +75,11 @@ print.primerDimer <- function(result, config)
   cat('\nOperation: primerDimer')
   cat('\n-------------------')
   cat('\nKept Sequences:\n')
-  print(result$summary[,c('parameters', 'seqs_kept', 'mean_length_kept', 'mean_qual_kept')])
+  print(result$summary[,c('parameter', 'k_seqs', 'k_mean_length', 'k_mean_qual')])
   cat('\n-------------------')
   cat('\nTrimmed Sequences:\n')
-  print(result$summary[,c('parameters', 'seqs_trimmed', 'mean_length_trimmed', 'mean_qual_trimmed')])
-  return(result)
+  print(result$summary[,c('parameter', 't_seqs', 't_mean_length', 't_mean_qual')])
+  invisible(result)
 }
 
 

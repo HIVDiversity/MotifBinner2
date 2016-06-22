@@ -120,22 +120,6 @@ saveToDisk.ambigSeqs <- function(result, config, seq_dat)
   return(result)
 }
 
-genSummary.ambigSeqs <- function(result, config)
-{
-  summary_tab <- rbind(
-    genSummary_internal(operation = 'ambigSeqs',
-                        parameters = 'fwd_reads',
-                        kept_seq_dat = result$kept$fwd_reads,
-                        trimmed_seq_dat = result$trimmed$fwd_reads),
-    genSummary_internal(operation = 'ambigSeqs',
-                        parameters = 'rev_reads',
-                        kept_seq_dat = result$kept$rev_reads,
-                        trimmed_seq_dat = result$trimmed$rev_reads))
-  result$summary <- summary_tab
-  write.csv(summary_tab, file.path(result$op_dir, 'ambigSeqs_summary.csv'), row.names=FALSE)
-  return(result)
-}
-
 computeMetrics.ambigSeqs <- function(result, config, seq_dat)
 {
   return(result)

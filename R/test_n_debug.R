@@ -23,6 +23,19 @@ dummy_test_debug <- function()
       list(name = 'fwd_ambigSeqs',
         op = 'ambigSeqs',
         data_source = "n001",
+        threshold = 0.02,
+        cache_data = TRUE),
+    'n004' =
+      list(name = 'fwd_primerDimer',
+        op = 'primerDimer',
+        data_source = "n003",
+        threshold = 80,
+        cache_data = TRUE),
+    'n005' =
+      list(name = 'fwd_seqLength',
+        op = 'seqLength',
+        data_source = "n004",
+        threshold = 295,
         cache_data = TRUE)
     )
   output_dir = "/fridge/data/MotifBinner2_test"
@@ -44,10 +57,11 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, operation = 'loadData')
   all_results <- applyOperation(all_results, config, operation = 'basicQC')
   all_results <- applyOperation(all_results, config, operation = 'ambigSeqs')
+  all_results <- applyOperation(all_results, config, operation = 'primerDimer')
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n003'
+  op_number <- 'n004'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
