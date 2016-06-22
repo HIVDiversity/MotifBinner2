@@ -37,6 +37,10 @@ genSummary <- function(result, config, seq_dat)
         trim_dat <- trim_dat[!kept_vec]
         parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
                            ',', trim_step$breaks[break_indx], ']', sep = '')
+        if (trim_step$breaks[break_indx] == trim_step$threshold)
+        {
+          parameter <- paste(parameter, ' *', sep = '')
+        }
         summary_tab <- rbind(summary_tab,
           genSummary_comb(kept = kept_seqs,
                                        trimmed = seq_dat,

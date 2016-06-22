@@ -58,6 +58,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, operation = 'basicQC')
   all_results <- applyOperation(all_results, config, operation = 'ambigSeqs')
   all_results <- applyOperation(all_results, config, operation = 'primerDimer')
+  all_results <- applyOperation(all_results, config, operation = 'seqLength')
 
   timing <- list()
   ptm <- proc.time()
