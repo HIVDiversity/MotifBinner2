@@ -58,15 +58,19 @@ genSummary <- function(result, config, seq_dat)
     }
     for (break_indx in 2:length(trim_step$breaks))
     {
-      kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx])
+      kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx]) &
+                  !comparator(trim_dat, trim_step$breaks[break_indx-1])
+      trim_vec <- !comparator(trim_dat, trim_step$breaks[break_indx])
       kept_seqs <- seq_dat[kept_vec]
-      curr_seq_dat <- seq_dat[!kept_vec]
+      curr_seq_dat <- seq_dat[trim_vec]
       parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
                          ',', trim_step$breaks[break_indx], ']', sep = '')
-      if (trim_step$breaks[break_indx] == trim_step$threshold)
+      if (comparator(trim_step$threshold, trim_step$breaks[break_indx]) &
+          !(comparator(trim_step$threshold, trim_step$breaks[break_indx-1])))
       {
         parameter <- paste(parameter, ' *', sep = '')
       }
+
       summary_tab <- rbind(summary_tab,
         genSummary_comb(kept = kept_seqs,
                         trimmed = curr_seq_dat,
@@ -96,13 +100,17 @@ genSummary <- function(result, config, seq_dat)
       }
       for (break_indx in 2:length(trim_step$breaks))
       {
-        kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx])
+        kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx]) &
+                    !comparator(trim_dat, trim_step$breaks[break_indx-1])
+        trim_vec <- !comparator(trim_dat, trim_step$breaks[break_indx])
         comp_kept_vec <- apply(trim_criteria, 1, all) & kept_vec
+        comp_trim_vec <- apply(trim_criteria, 1, all) & trim_vec
         kept_seqs <- seq_dat[comp_kept_vec]
-        curr_seq_dat <- seq_dat[!comp_kept_vec]
+        curr_seq_dat <- seq_dat[comp_trim_vec]
         parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
                            ',', trim_step$breaks[break_indx], ']', sep = '')
-        if (trim_step$breaks[break_indx] == trim_step$threshold)
+        if (comparator(trim_step$threshold, trim_step$breaks[break_indx]) &
+            !(comparator(trim_step$threshold, trim_step$breaks[break_indx-1])))
         {
           parameter <- paste(parameter, ' *', sep = '')
         }
@@ -115,55 +123,8 @@ genSummary <- function(result, config, seq_dat)
       trim_criteria[,i] <- comparator(trim_dat, trim_step$threshold)
     }
   }
-  # needs major redesign
-  # needs shifting reference set to work from with multiple trim steps. Might
-  # be worthwhile to pre compute them before starting with the major loops.
-  # Also completely seperate the single step and multiple step as well as the
-  # single value and multiple value cases.
-  # FOCUS!
+  print(summary_tab[,c('parameter', 'k_seqs', 't_seqs')])
 
-#  trim_criteria <- matrix(TRUE, nrow = length(seq_dat), ncol = length(result$trim_steps))
-#
-#  i <- 0
-#  for (trim_step in result$trim_steps)
-#  {
-#    i <- i+1
-#    trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
-#    curr_seq_dat <- seq_dat
-#    stopifnot(length(trim_dat) == length(curr_seq_dat))
-#    if (length(trim_step$breaks) == 1)
-#    {
-#    } else {
-#      summary_tab <- NULL
-#      if ('comparator' %in% names(trim_step))
-#      {
-#        comparator = trim_step$comparator
-#      } else {
-#        comparator = `<=`
-#      }
-#      for (break_indx in 2:length(trim_step$breaks))
-#      {
-#        kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx])
-#        kept_seqs <- curr_seq_dat[kept_vec]
-#        curr_seq_dat <- curr_seq_dat[!kept_vec]
-#        trim_dat <- trim_dat[!kept_vec]
-#        parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
-#                           ',', trim_step$breaks[break_indx], ']', sep = '')
-#        if (trim_step$breaks[break_indx] == trim_step$threshold)
-#        {
-#          parameter <- paste(parameter, ' *', sep = '')
-#        }
-#        summary_tab <- rbind(summary_tab,
-#          genSummary_comb(kept = kept_seqs,
-#                          trimmed = curr_seq_dat,
-#                          op = class(result),
-#                          parameter = parameter))
-#      }
-#      if (length(result$trim_steps) > 1){
-#        trim_criteria[,i] <- comparator(trim_dat, trim_step$threshold)
-#      }
-#    }
-#  }
   write.csv(
     summary_tab, 
     file.path(

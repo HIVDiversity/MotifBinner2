@@ -31,7 +31,7 @@ trimAffixes <- function(all_results, config)
                      step2 = list(name = 'score',
                                   threshold = min_score,
                                   comparator = `>=`,
-                                  breaks = c(-Inf, -20, -10, -5, -3, -1, 0, Inf)
+                                  breaks = c(Inf, 0, -1, -3, -5, -10, -20, -Inf)
                                   )
                     )
   result <- list(trim_steps = trim_steps,                                                           
@@ -97,13 +97,12 @@ print.trimAffixes <- function(result, config)
   cat('\n-------------------')
   cat('\nOperation: trimAffixes')
   cat('\n-------------------')
-  print(names(result))
-#  cat('\nKept Sequences:\n')
-#  print(result$summary[,c('parameters', 'seqs_kept', 'mean_length_kept', 'mean_qual_kept')])
-#  cat('\n-------------------')
-#  cat('\nTrimmed Sequences:\n')
-#  print(result$summary[,c('parameters', 'seqs_trimmed', 'mean_length_trimmed', 'mean_qual_trimmed')])
-  return(result)
+  cat('\nKept Sequences:\n')
+  print(result$summary[,c('parameter', 'k_seqs', 'k_mean_length', 'k_mean_qual')])
+  cat('\n-------------------')
+  cat('\nTrimmed Sequences:\n')
+  print(result$summary[,c('parameter', 't_seqs', 't_mean_length', 't_mean_qual')])
+  invisible(result)
 }
 
 
