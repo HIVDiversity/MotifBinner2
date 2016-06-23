@@ -8,9 +8,11 @@ getKept <- function(result, seq_dat=NULL)
     stop('data to be trimmed must be supplied either via the seq_dat argument or as an element named input_dat in the result list')
   }
 
-  if (length(result$trim_steps) > 1){stop('implement multiple trimming columns now')}
+  trim_criteria <- matrix(TRUE, nrow = length(seq_dat), ncol = length(result$trim_steps))
+  i <- 0
   for (trim_step in result$trim_steps)
   {
+    i <- i+1
     trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
     stopifnot(length(trim_dat) == length(seq_dat))
     if (length(trim_step$breaks) == 1)
@@ -25,9 +27,10 @@ getKept <- function(result, seq_dat=NULL)
       } else {
         comparator = `<=`
       }
-      seq_dat <- seq_dat[comparator(trim_dat, trim_step$threshold)]
+      trim_criteria[,i] <- comparator(trim_dat, trim_step$threshold)
     }
   }
+  seq_dat <- seq_dat[apply(trim_criteria, 1, all)]
   return(seq_dat)
 }
 

@@ -4,39 +4,57 @@
 
 trimAffixes <- function(all_results, config)
 {
-  op_dir <- file.path(config$output_dir, config$prefix_for_names,
-                      paste('n', sprintf("%03d", length(all_results)+1), '_trimAffixes', sep = ''))
+  op_number <- config$current_op_number
+  op_args <- config$operation_list[[op_number]]
+  op_full_name <- paste(op_number, op_args$name, sep = '_')
+
+  op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
+  
+  data_source_indx <- grep(op_args$data_source, names(all_results))
+  stopifnot(length(data_source_indx) == 1)
+  seq_dat <- all_results[[data_source_indx]]$seq_dat
 
-  kept <- list()
-  trimmed <- list()
-  metrics <- list()
+  primer_seq <- op_args$primer_seq
 
-  fwd_primer <- config$fwd_primer
-  rev_primer <- config$rev_primer
+  tmp_result <- trimAffixes_internal(seq_dat, primer_seq)
+  trim_seq_dat <- tmp_result$seq_dat
+  per_read_metrics <- tmp_result$trim_stats
 
-  fwd_seq <- all_results[[length(all_results)]]$kept[['fwd_reads']]
-  fwd_result <- trimAffixes_internal(fwd_seq, fwd_primer)
+  min_score <- op_args$min_score
+  if (min_score > 1) stop('Min score must be <= 1')
+  if (min_score < 1 & min_score > 0){min_score <- -nchar(primer_seq)*(1-min_score)}
 
-  rev_seq <- all_results[[length(all_results)]]$kept[['rev_reads']]
-  rev_result <- trimAffixes_internal(rev_seq, rev_primer)
+  trim_steps <- list(step1 = list(name = 'gaps_at_front_of_read',
+                                  threshold = op_args$front_gaps_allowed,
+                                  breaks = c(-Inf, 0, 1, 2, 5, Inf)
+                                  ),
+                     step2 = list(name = 'score',
+                                  threshold = min_score,
+                                  comparator = `>=`,
+                                  breaks = c(Inf, 0, -1, -3, -5, -10, -20, -Inf)
+                                  )
+                    )
+  result <- list(trim_steps = trim_steps,                                                           
+                 metrics = list(per_read_metrics = per_read_metrics))                               
 
-  result <- list(fwd_result = fwd_result,
-                 rev_result = rev_result)
-#  result <- list(kept = kept,
-#                 trimmed = trimmed,
-#                 metrics = metrics,
-#                 step_num = length(all_results)+1,
-#                 op_dir = op_dir)
+  kept_dat <- getKept(result, seq_dat=trim_seq_dat)                                                      
+
+  if (op_args$cache){
+    result$seq_dat <- kept_dat
+  }
+  result$input_dat <- trim_seq_dat
+  result$config <- list(op_number = op_number,
+                        op_args = op_args,
+                        op_full_name = op_full_name,
+                        op_dir = op_dir)
+
   class(result) <- 'trimAffixes'
   return(result)
 }
 
-trimAffixes_internal <- function(seq_dat, prefix, min_score = 0.7, front_gaps_allowed = 0)
+trimAffixes_internal <- function(seq_dat, prefix)
 {
-  if (is.null(min_score)) {min_score <- -Inf}
-  if (min_score < 1 & min_score > 0){min_score <- -nchar(prefix)*(1-min_score)}
-
   trimmed <- trimEnds_cpp(as.character(seq_dat@sread),
                           as.character(seq_dat@id),
                           as.character(seq_dat@quality@quality),
@@ -47,57 +65,30 @@ trimAffixes_internal <- function(seq_dat, prefix, min_score = 0.7, front_gaps_al
                   trim_stats = data.frame(score = trimmed$score,
                                           bases_trimmed = trimmed$trim_spot,
                                           gaps_at_front_of_read = trimmed$gaps_at_front_of_read))
-
-  kept_list <- trimmed$trim_stats$score > min_score &
-               trimmed$trim_stats$gaps_at_front_of_read <= front_gaps_allowed
-  kept <- list(seq_dat = trimmed$seq_dat[kept_list],
-               trim_stats = trimmed$trim_stats[kept_list,])
-  trimmed <- list(seq_dat = trimmed$seq_dat[!kept_list],
-                  trim_stats = trimmed$trim_stats[!kept_list,])
-  return(list(kept = kept,
-              trimmed = trimmed))
+  return(trimmed)
 }
 
-
-
-saveToDisk.trimAffixes <- function(result, config)
+saveToDisk.trimAffixes <- function(result, config, seq_dat)
 {
-  for (data_set_name in names(result$kept)){
-    seq_dat <- result$kept[[data_set_name]]
-    if (length(seq_dat) > 0)
-    {
-      writeFastq(seq_dat, file.path(result$op_dir, 
-        paste(config$prefix_for_names, '_kept_', data_set_name, '.fastq', sep = '')), compress=F)
-    }
+  kept <- getKept(result, seq_dat)
+  trimmed <- getTrimmed(seq_dat = seq_dat, kept_dat = kept)
+
+  if (length(kept) > 0)
+  {
+    tmp_name <- file.path(result$config$op_dir, 
+      paste(config$base_for_names, '_kept_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(kept, tmp_name, compress=F)
   }
-  for (data_set_name in names(result$trimmed)){
-    seq_dat <- result$trimmed[[data_set_name]]
-    if (length(seq_dat) > 0)
-    {
-      writeFastq(seq_dat, file.path(result$op_dir, 
-        paste(config$prefix_for_names, '_trimmed_', data_set_name, '.fastq', sep = '')), compress=F)
-    }
+  if (length(trimmed) > 0)
+  {
+    tmp_name <- file.path(result$config$op_dir, 
+      paste(config$base_for_names, '_trimmed_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(trimmed, tmp_name, compress=F)
   }
   return(result)
 }
 
-genSummary.trimAffixes <- function(result, config)
-{
-  summary_tab <- rbind(
-    genSummary_internal(operation = 'trimAffixes',
-                        parameters = 'fwd_reads',
-                        kept_seq_dat = result$kept$fwd_reads,
-                        trimmed_seq_dat = result$trimmed$fwd_reads),
-    genSummary_internal(operation = 'trimAffixes',
-                        parameters = 'rev_reads',
-                        kept_seq_dat = result$kept$rev_reads,
-                        trimmed_seq_dat = result$trimmed$rev_reads))
-  result$summary <- summary_tab
-  write.csv(summary_tab, file.path(result$op_dir, 'trimAffixes_summary.csv'), row.names=FALSE)
-  return(result)
-}
-
-computeMetrics.trimAffixes <- function(result, config)
+computeMetrics.trimAffixes <- function(result, config, seq_dat)
 {
   return(result)
 }

@@ -36,6 +36,14 @@ dummy_test_debug <- function()
         op = 'seqLength',
         data_source = "n004",
         threshold = 295,
+        cache_data = TRUE),
+    'n006' =
+      list(name = 'fwd_trimAffixes',
+        op = 'trimAffixes',
+        data_source = "n005",
+        primer_seq = 'TATGGGAYSAAAGYCTMAARCCATGTG',
+        min_score = 0.7,
+        front_gaps_allowed = 0,
         cache_data = TRUE)
     )
   output_dir = "/fridge/data/MotifBinner2_test"
@@ -59,10 +67,11 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, operation = 'ambigSeqs')
   all_results <- applyOperation(all_results, config, operation = 'primerDimer')
   all_results <- applyOperation(all_results, config, operation = 'seqLength')
+  all_results <- applyOperation(all_results, config, operation = 'trimAffixes')
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n004'
+  op_number <- 'n006'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)

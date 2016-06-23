@@ -5,23 +5,84 @@
 genSummary <- function(result, config, seq_dat)
 {
   op_args <- result$config$op_args
+## 4 cases: (roughly order of complexity)
+## #1: 1 trim_step + single value: everything kept -> hacky summary_tab
+## #2: >1 trim_step + any step with single value: invalid
+## #3: 1 trim_step + multiple values: normal process
+## #4: >1 trim_steps + multiple values: complex:
+#### iterate over trim steps and breaks.
+#### complex building up of selection criteria to obtain correct datasets
 
-  if (length(result$trim_steps) > 1){stop('implement multiple trimming columns now')}
-  for (trim_step in result$trim_steps)
+## CASE 1: 1 trim_step + single_value
+  if (length(result$trim_steps) == 1 & length(result$trim_steps[[1]]$breaks) == 1)
   {
+    trim_step <- result$trim_steps[[1]]
     trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
-    stopifnot(length(trim_dat) == length(seq_dat))
-    if (length(trim_step$breaks) == 1)
+    print('summary: case 1')
+    stopifnot(all(trim_dat == trim_step$threshold))
+    kept <- seq_dat
+    trimmed <- seq_dat[0]
+    parameter <- paste(trim_step$name, ' = ', trim_step$threshold, sep = '')
+    summary_tab <- genSummary_comb(kept = kept,
+                                   trimmed = trimmed,
+                                   op = class(result),
+                                   parameter = parameter)
+  }
+
+## CASE 2: >1 trim_steps + any step with single value
+  if (length(result$trim_steps) > 1)
+  {
+    for (i in 1:length(result$trim_steps)){
+      if (length(result$trim_steps[[i]]$breaks) == 1){
+        stop('dont use a single value trimming step in a trimming procedure with multiple trim steps - it does not make sense and it is untested')
+      }
+    }
+  }
+
+## CASE 3: 1 trim_step + multiple values
+  if (length(result$trim_steps) == 1 & length(result$trim_steps[[1]]$breaks) > 1)
+  {
+    print('summary: case 3')
+    summary_tab <- NULL
+    trim_step <- result$trim_steps[[1]]
+    trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
+    if ('comparator' %in% names(trim_step))
     {
-      stopifnot(all(trim_dat == trim_step$threshold))
-      kept <- seq_dat
-      trimmed <- seq_dat[0]
-      parameter <- paste(trim_step$name, ' = ', trim_step$threshold, sep = '')
-      summary_tab <- genSummary_comb(kept = kept,
-                                     trimmed = trimmed,
-                                     op = class(result),
-                                     parameter = parameter)
+      comparator = trim_step$comparator
     } else {
+      comparator = `<=`
+    }
+    for (break_indx in 2:length(trim_step$breaks))
+    {
+      kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx])
+      kept_seqs <- seq_dat[kept_vec]
+      curr_seq_dat <- seq_dat[!kept_vec]
+      parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
+                         ',', trim_step$breaks[break_indx], ']', sep = '')
+      if (trim_step$breaks[break_indx] == trim_step$threshold)
+      {
+        parameter <- paste(parameter, ' *', sep = '')
+      }
+      summary_tab <- rbind(summary_tab,
+        genSummary_comb(kept = kept_seqs,
+                        trimmed = curr_seq_dat,
+                        op = class(result),
+                        parameter = parameter))
+    }
+  }
+
+## CASE 4: >1 trim_step + multiple values
+
+  if (length(result$trim_steps) > 1){
+    print('summary: case 4')
+    summary_tab <- NULL
+    trim_criteria <- matrix(TRUE, nrow = length(seq_dat), ncol = length(result$trim_steps))
+    i <- 0
+    for (trim_step in result$trim_steps)
+    {
+      i <- i+1
+      trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
+      stopifnot(length(trim_dat) == length(seq_dat))
       summary_tab <- NULL
       if ('comparator' %in% names(trim_step))
       {
@@ -32,9 +93,9 @@ genSummary <- function(result, config, seq_dat)
       for (break_indx in 2:length(trim_step$breaks))
       {
         kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx])
-        kept_seqs <- seq_dat[kept_vec]
-        seq_dat <- seq_dat[!kept_vec]
-        trim_dat <- trim_dat[!kept_vec]
+        comp_kept_vec <- apply(trim_criteria, 2, all) & kept_vec
+        kept_seqs <- seq_dat[comp_kept_vec]
+        curr_seq_dat <- seq_dat[!comp_kept_vec]
         parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
                            ',', trim_step$breaks[break_indx], ']', sep = '')
         if (trim_step$breaks[break_indx] == trim_step$threshold)
@@ -43,12 +104,62 @@ genSummary <- function(result, config, seq_dat)
         }
         summary_tab <- rbind(summary_tab,
           genSummary_comb(kept = kept_seqs,
-                                       trimmed = seq_dat,
-                                       op = class(result),
-                                       parameter = parameter))
+                          trimmed = curr_seq_dat,
+                          op = class(result),
+                          parameter = parameter))
       }
+      trim_criteria[,i] <- comparator(trim_dat, trim_step$threshold)
     }
   }
+  # needs major redesign
+  # needs shifting reference set to work from with multiple trim steps. Might
+  # be worthwhile to pre compute them before starting with the major loops.
+  # Also completely seperate the single step and multiple step as well as the
+  # single value and multiple value cases.
+  # FOCUS!
+
+#  trim_criteria <- matrix(TRUE, nrow = length(seq_dat), ncol = length(result$trim_steps))
+#
+#  i <- 0
+#  for (trim_step in result$trim_steps)
+#  {
+#    i <- i+1
+#    trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
+#    curr_seq_dat <- seq_dat
+#    stopifnot(length(trim_dat) == length(curr_seq_dat))
+#    if (length(trim_step$breaks) == 1)
+#    {
+#    } else {
+#      summary_tab <- NULL
+#      if ('comparator' %in% names(trim_step))
+#      {
+#        comparator = trim_step$comparator
+#      } else {
+#        comparator = `<=`
+#      }
+#      for (break_indx in 2:length(trim_step$breaks))
+#      {
+#        kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx])
+#        kept_seqs <- curr_seq_dat[kept_vec]
+#        curr_seq_dat <- curr_seq_dat[!kept_vec]
+#        trim_dat <- trim_dat[!kept_vec]
+#        parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
+#                           ',', trim_step$breaks[break_indx], ']', sep = '')
+#        if (trim_step$breaks[break_indx] == trim_step$threshold)
+#        {
+#          parameter <- paste(parameter, ' *', sep = '')
+#        }
+#        summary_tab <- rbind(summary_tab,
+#          genSummary_comb(kept = kept_seqs,
+#                          trimmed = curr_seq_dat,
+#                          op = class(result),
+#                          parameter = parameter))
+#      }
+#      if (length(result$trim_steps) > 1){
+#        trim_criteria[,i] <- comparator(trim_dat, trim_step$threshold)
+#      }
+#    }
+#  }
   write.csv(
     summary_tab, 
     file.path(
