@@ -42,7 +42,7 @@ dummy_test_debug <- function()
         op = 'trimAffixes',
         data_source = "n005",
         primer_seq = 'TATGGGAYSAAAGYCTMAARCCATGTG',
-        min_score = 0.7,
+        min_score = -8,
         front_gaps_allowed = 0,
         cache_data = TRUE)
     )

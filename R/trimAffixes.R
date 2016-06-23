@@ -22,8 +22,7 @@ trimAffixes <- function(all_results, config)
   per_read_metrics <- tmp_result$trim_stats
 
   min_score <- op_args$min_score
-  if (min_score > 1) stop('Min score must be <= 1')
-  if (min_score < 1 & min_score > 0){min_score <- -nchar(primer_seq)*(1-min_score)}
+  if (min_score > 0) stop('Min score must be <= 0')
 
   trim_steps <- list(step1 = list(name = 'gaps_at_front_of_read',
                                   threshold = op_args$front_gaps_allowed,
@@ -32,7 +31,7 @@ trimAffixes <- function(all_results, config)
                      step2 = list(name = 'score',
                                   threshold = min_score,
                                   comparator = `>=`,
-                                  breaks = c(Inf, 0, -1, -3, -5, -10, -20, -Inf)
+                                  breaks = c(-Inf, -20, -10, -5, -3, -1, 0, Inf)
                                   )
                     )
   result <- list(trim_steps = trim_steps,                                                           

@@ -1,3 +1,7 @@
+# How does a summary table work?
+# It summarizes the data that was kept was the parameters are relaxed.
+
+
 #' Generates a summary for a operation or the full process
 #' @inheritParams saveToDisk
 #' @export
@@ -78,12 +82,12 @@ genSummary <- function(result, config, seq_dat)
     summary_tab <- NULL
     trim_criteria <- matrix(TRUE, nrow = length(seq_dat), ncol = length(result$trim_steps))
     i <- 0
+    summary_tab <- NULL
     for (trim_step in result$trim_steps)
     {
       i <- i+1
       trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
       stopifnot(length(trim_dat) == length(seq_dat))
-      summary_tab <- NULL
       if ('comparator' %in% names(trim_step))
       {
         comparator = trim_step$comparator
@@ -93,7 +97,7 @@ genSummary <- function(result, config, seq_dat)
       for (break_indx in 2:length(trim_step$breaks))
       {
         kept_vec <- comparator(trim_dat, trim_step$breaks[break_indx])
-        comp_kept_vec <- apply(trim_criteria, 2, all) & kept_vec
+        comp_kept_vec <- apply(trim_criteria, 1, all) & kept_vec
         kept_seqs <- seq_dat[comp_kept_vec]
         curr_seq_dat <- seq_dat[!comp_kept_vec]
         parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 

@@ -1,0 +1,28 @@
+## trimAffixes
+
+Trims sequences' prefixes or suffixes so that they all start / end with the
+same bases
+
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('trimAffixes', names(all_results))[1]]]
+}
+if (class(result) != 'trimAffixes')
+{
+  result <- all_results[[grep('trimAffixes', names(all_results))[1]]]
+}
+```
+
+```{r, results='asis'}
+kable_summary(result$summary)
+
+timingTable(result)
+```
+
