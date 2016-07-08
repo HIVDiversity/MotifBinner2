@@ -241,7 +241,7 @@ findBacktraceStart(std::vector<std::vector<dynMatEntry> > Fmat,
     }
   }
 
-  std::cout << "The starting position is: (" << i << ", " << j << "). The bottom left position is (" <<
+  std::cout << "The starting position is: (" << i << ", " << j << "). The bottom right position is (" <<
     vseq_len - 1 << ", " << hseq_len - 1 << ")" << std::endl;
   return {i, j};
 }
@@ -318,11 +318,11 @@ fullBacktrace(int i, int j,
   int new_j;
   while (i > 0 and j > 0)
   {
-    std::cout << "Current: (" << i << ", " << j << ")" << 
-      "Next: (" << Fmat[i][j].origin_i << ", " << 
-      Fmat[i][j].origin_j << ")" << std::endl;
-    std::cout << "vseq: " << vseq_align << std::endl;
-    std::cout << "hseq: " << hseq_align << std::endl;
+//    std::cout << "Current: (" << i << ", " << j << ")" << 
+//      "Next: (" << Fmat[i][j].origin_i << ", " << 
+//      Fmat[i][j].origin_j << ")" << std::endl;
+//    std::cout << "vseq: " << vseq_align << std::endl;
+//    std::cout << "hseq: " << hseq_align << std::endl;
     if (Fmat[i][j].origin_i != i and Fmat[i][j].origin_j != j)
     { //diag
       vseq_align += vseq[i];
