@@ -8,7 +8,7 @@ prefix <- 'TATGGGAYSAAAGYCTMAARCCATGTG'
 print(seq_dat@sread)
 
 cat('\n\n\n\n\n\n\n\n\n'); sourceCpp('trimFront.cpp')
-trimmed <- trimFront_cpp(as.character(seq_dat@sread),
+trimmed <- trimFront_cpp(as.character(seq_dat@sread)[4],
                         as.character(seq_dat@quality@quality),
                         prefix, 13, 7, 7,
                         10)

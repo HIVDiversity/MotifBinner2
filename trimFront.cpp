@@ -314,8 +314,15 @@ fullBacktrace(int i, int j,
 //  print_align_mat(Fmat, hseq, vseq);
 
   // Retrieve 'Stored' Backtrace
+  int new_i;
+  int new_j;
   while (i > 0 and j > 0)
   {
+    std::cout << "Current: (" << i << ", " << j << ")" << 
+      "Next: (" << Fmat[i][j].origin_i << ", " << 
+      Fmat[i][j].origin_j << ")" << std::endl;
+    std::cout << "vseq: " << vseq_align << std::endl;
+    std::cout << "hseq: " << hseq_align << std::endl;
     if (Fmat[i][j].origin_i != i and Fmat[i][j].origin_j != j)
     { //diag
       vseq_align += vseq[i];
@@ -331,8 +338,10 @@ fullBacktrace(int i, int j,
     } else {
       throw std::range_error("Back tracing inifite loop issues");
     }
-    i = Fmat[i][j].origin_i;
-    j = Fmat[i][j].origin_j;
+    new_i = Fmat[i][j].origin_i;
+    new_j = Fmat[i][j].origin_j;
+    i = new_i;
+    j = new_j;
   }
 
   std::cout << "tracing endpoint: (" << i << ", " << j << ")" << std::endl;
