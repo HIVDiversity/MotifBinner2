@@ -10,6 +10,12 @@
 
 using namespace Rcpp;
 
+struct dynMatEntry {
+  int origin_i;
+  int origin_j;
+  int Fscore;
+};
+
 std::map<char, int> getBaseOrder()
 {
   std::map<char, int> imap = 
@@ -139,7 +145,8 @@ std::vector<std::vector<int> > fillFmat(std::vector<std::vector<int> > Fmat,
   return Fmat;
 }
 
-std::pair<int, int> findBacktraceStart(std::vector<std::vector<int> > Fmat,
+std::pair<int, int> 
+findBacktraceStart(std::vector<std::vector<int> > Fmat,
     bool hseq_end_gap_pen,
     bool vseq_end_gap_pen,
     int vseq_len,
@@ -211,31 +218,13 @@ std::pair<int, int> findBacktraceStart(std::vector<std::vector<int> > Fmat,
   return {i, j};
 }
 
-std::vector<std::string> align(std::string vseq, std::string hseq,
-    bool vseq_start_gap_pen,
-    bool hseq_start_gap_pen,
-    bool hseq_end_gap_pen,
-    bool vseq_end_gap_pen)
+std::pair<std::string, std::string> 
+fullBacktrace(int i, int j,
+  int vseq_len, int hseq_len,
+  std::string vseq, std::string hseq,
+  std::vector<std::vector<int> > Fmat
+  ) 
 {
-  vseq = '-'+vseq;
-  hseq = '-'+hseq;
-  std::cout << "Seqs to align:" << std::endl;
-  std::cout << "vseq: " << vseq << std::endl;
-  std::cout << "hseq: " << hseq << std::endl;
-  std::vector<std::string> alignment(2);
-
-  int vseq_len = vseq.length();
-  int hseq_len = hseq.length();
-
-  std::vector<std::vector<int> > Fmat(vseq_len, std::vector<int>(hseq_len));
-  Fmat = initializeFmat(Fmat, vseq_start_gap_pen, hseq_start_gap_pen, vseq_len, hseq_len);
-  Fmat = fillFmat(Fmat, vseq, hseq, vseq_len, hseq_len);
-
-  std::pair<int, int> tmp;
-  tmp = findBacktraceStart(Fmat, hseq_end_gap_pen, vseq_end_gap_pen, vseq_len, hseq_len);
-  int i = tmp.first;
-  int j = tmp.second;
-
   // Backtrace
   std::string vseq_align;
   std::string hseq_align;
@@ -313,19 +302,49 @@ std::vector<std::string> align(std::string vseq, std::string hseq,
   }
   std::cout << "vseq: " << vseq_align << std::endl;
   std::cout << "hseq: " << hseq_align << std::endl;
+  return {vseq_align, hseq_align};
+}
+
+std::vector<std::string> align(std::string vseq, std::string hseq,
+    bool vseq_start_gap_pen,
+    bool hseq_start_gap_pen,
+    bool hseq_end_gap_pen,
+    bool vseq_end_gap_pen)
+{
+  vseq = '-'+vseq;
+  hseq = '-'+hseq;
+  std::cout << "Seqs to align:" << std::endl;
+  std::cout << "vseq: " << vseq << std::endl;
+  std::cout << "hseq: " << hseq << std::endl;
+  std::vector<std::string> alignment(2);
+
+  int vseq_len = vseq.length();
+  int hseq_len = hseq.length();
+
+  std::vector<std::vector<int> > Fmat(vseq_len, std::vector<int>(hseq_len));
+  Fmat = initializeFmat(Fmat, vseq_start_gap_pen, hseq_start_gap_pen, vseq_len, hseq_len);
+  Fmat = fillFmat(Fmat, vseq, hseq, vseq_len, hseq_len);
+
+  std::pair<int, int> backtrace_start;
+  backtrace_start = findBacktraceStart(Fmat, hseq_end_gap_pen, vseq_end_gap_pen, vseq_len, hseq_len);
+
+  std::pair<std::string, std::string> aligned_pair;
+  aligned_pair = fullBacktrace(backtrace_start.first, 
+    backtrace_start.second, 
+    vseq_len, hseq_len, 
+    vseq, hseq, Fmat);
 
   //reverse the alignments
-  std::string vseq_align_fwd = vseq_align;
-  std::string hseq_align_fwd = hseq_align;
-  for (int i = vseq_align.length()-1; i != -1; i--)
+  std::string vseq_align_fwd = aligned_pair.first;
+  std::string hseq_align_fwd = aligned_pair.second;
+  for (int i = aligned_pair.first.length()-1; i != -1; i--)
   {
-    vseq_align_fwd[vseq_align.length() - i -1] = vseq_align[i];
-    hseq_align_fwd[vseq_align.length() - i -1] = hseq_align[i];
+    vseq_align_fwd[aligned_pair.first.length() - i -1] = aligned_pair.first[i];
+    hseq_align_fwd[aligned_pair.first.length() - i -1] = aligned_pair.second[i];
   }
 
-
-  alignment[0] = vseq_align;
-  alignment[1] = hseq_align;
+  alignment[0] = vseq_align_fwd;
+  alignment[1] = hseq_align_fwd;
   return alignment;
 }
 
