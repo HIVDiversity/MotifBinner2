@@ -286,33 +286,58 @@ fullBacktrace(int i, int j,
     }
   }
 
-  // Normal Backtrace
+//  // Wrong Normal Backtrace
+//  while (i > 0 and j > 0)
+//  {
+//    if(Fmat[i-1][j-1].Fscore >= Fmat[i][j-1].Fscore and 
+//       Fmat[i-1][j-1].Fscore >= Fmat[i-1][j].Fscore)
+//    { // diag
+//      vseq_align += vseq[i];
+//      hseq_align += hseq[j];
+//      i--;
+//      j--;
+//      continue;
+//    }
+//    if (Fmat[i-1][j].Fscore >= Fmat[i][j-1].Fscore)
+//    { // from_above
+//      vseq_align += vseq[i];
+//      hseq_align += '-';
+//      i--;
+//      continue;
+//    }
+//    // from left
+//    vseq_align += '-';
+//    hseq_align += hseq[j];
+//    j--;
+//  }
+//  std::cout << "tracing endpoint: (" << i << ", " << j << ")" << std::endl;
+//  print_align_mat(Fmat, hseq, vseq);
+
+  // Retrieve 'Stored' Backtrace
   while (i > 0 and j > 0)
   {
-    if(Fmat[i-1][j-1].Fscore >= Fmat[i][j-1].Fscore and 
-       Fmat[i-1][j-1].Fscore >= Fmat[i-1][j].Fscore)
-    { // diag
+    if (Fmat[i][j].origin_i != i and Fmat[i][j].origin_j != j)
+    { //diag
       vseq_align += vseq[i];
       hseq_align += hseq[j];
-      i--;
-      j--;
-      continue;
-    }
-    if (Fmat[i-1][j].Fscore >= Fmat[i][j-1].Fscore)
-    { // from_above
+    } else if (Fmat[i][j].origin_i != i)
+    { //from_above
       vseq_align += vseq[i];
       hseq_align += '-';
-      i--;
-      continue;
+    } else if (Fmat[i][j].origin_j != j)
+    { //from_left
+      vseq_align += '-';
+      hseq_align += hseq[j];
+    } else {
+      throw std::range_error("Back tracing inifite loop issues");
     }
-    // from left
-    vseq_align += '-';
-    hseq_align += hseq[j];
-    j--;
+    i = Fmat[i][j].origin_i;
+    j = Fmat[i][j].origin_j;
   }
+
   std::cout << "tracing endpoint: (" << i << ", " << j << ")" << std::endl;
   print_align_mat(Fmat, hseq, vseq);
-
+  
   // Navigate from true end to the top left
 
   if (i > 0){
