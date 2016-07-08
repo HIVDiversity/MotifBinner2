@@ -64,7 +64,7 @@ std::vector<std::vector<int> > getScoreMatrix()
   return smat;
 }
 
-void print_align_mat(const std::vector<std::vector<int> >& Fmat,
+void print_align_mat(const std::vector<std::vector<dynMatEntry> >& Fmat,
     const std::string & colNames,
     const std::string & rowNames)
 {
@@ -80,40 +80,57 @@ void print_align_mat(const std::vector<std::vector<int> >& Fmat,
     std::cout << rowNames[i];
     for (int j = 0; j != Fmat[0].size(); j ++)
     {
-      std::cout << std::setw(3) << std::right << Fmat[i][j];
+      std::cout << std::setw(3) << std::right << Fmat[i][j].Fscore;
     }
     std::cout << std::endl;
   }
 }
 
-std::vector<std::vector<int> > initializeFmat(std::vector<std::vector<int> > Fmat,
+std::vector<std::vector<dynMatEntry> > 
+initializeFmat(std::vector<std::vector<dynMatEntry> > Fmat,
     bool vseq_start_gap_pen,
     bool hseq_start_gap_pen,
     int vseq_len,
     int hseq_len)
 {
-  // Initialize the first row and column
+  // The scores
   if (!vseq_start_gap_pen)
   {
-    for (int i = 0; i != hseq_len; i++)
-    { Fmat[0][i] = 0; }
+    for (int j = 0; j != hseq_len; j++)
+    { Fmat[0][j].Fscore = 0; }
   } else {
-    for (int i = 0; i != hseq_len; i++)
-    { Fmat[0][i] = -i; }
+    for (int j = 0; j != hseq_len; j++)
+    { Fmat[0][j].Fscore = -j; }
   }
 
   if (!hseq_start_gap_pen)
   {
     for (int i = 0; i != vseq_len; i++)
-    { Fmat[i][0] = 0; }
+    { Fmat[i][0].Fscore = 0; }
   } else {
     for (int i = 0; i != vseq_len; i++)
-    { Fmat[i][0] = -i; }
+    { Fmat[i][0].Fscore = -i; }
   }
+
+  // The origins
+  Fmat[0][0].origin_i = 0; 
+  Fmat[0][0].origin_j = 0; 
+  for (int i = 1; i != vseq_len; i++)
+  { 
+    Fmat[i][0].origin_i = i - 1; 
+    Fmat[i][0].origin_j = 0; 
+  }
+  for (int j = 0; j != hseq_len; j++)
+  { 
+    Fmat[0][j].origin_i = 0; 
+    Fmat[0][j].origin_j = j - 1; 
+  }
+
   return Fmat;
 }
 
-std::vector<std::vector<int> > fillFmat(std::vector<std::vector<int> > Fmat,
+std::vector<std::vector<dynMatEntry> > 
+fillFmat(std::vector<std::vector<dynMatEntry> > Fmat,
     std::string vseq, 
     std::string hseq,
     int vseq_len,
@@ -134,19 +151,30 @@ std::vector<std::vector<int> > fillFmat(std::vector<std::vector<int> > Fmat,
     for (int j = 1; j != hseq_len; j++){
 
       match_score = smat[imap[hseq[j]]][imap[vseq[i]]];
-      from_above = Fmat[i - 1][j    ] - 2;
-      from_left  = Fmat[i    ][j - 1] - 2;
-      from_diag  = Fmat[i - 1][j - 1] + match_score;
+      from_above = Fmat[i - 1][j    ].Fscore - 2;
+      from_left  = Fmat[i    ][j - 1].Fscore - 2;
+      from_diag  = Fmat[i - 1][j - 1].Fscore + match_score;
 
       max = (from_above < from_left) ? from_left : from_above;
-      Fmat[i][j] = (max < from_diag) ? from_diag : max;
+      max = (max < from_diag) ? from_diag : max;
+      Fmat[i][j].Fscore = max;
+      if (max == from_diag){
+        Fmat[i][j].origin_i = i - 1;
+        Fmat[i][j].origin_j = j - 1;
+      } else if (max == from_above) {
+        Fmat[i][j].origin_i = i - 1;
+        Fmat[i][j].origin_j = j;
+      } else {
+        Fmat[i][j].origin_i = i;
+        Fmat[i][j].origin_j = j - 1;
+      }
     }
   }
   return Fmat;
 }
 
 std::pair<int, int> 
-findBacktraceStart(std::vector<std::vector<int> > Fmat,
+findBacktraceStart(std::vector<std::vector<dynMatEntry> > Fmat,
     bool hseq_end_gap_pen,
     bool vseq_end_gap_pen,
     int vseq_len,
@@ -166,10 +194,10 @@ findBacktraceStart(std::vector<std::vector<int> > Fmat,
     max = -10000;
     for (int k = 0; k != vseq_len; k++)
     {
-      if (Fmat[k][j] > max)
+      if (Fmat[k][j].Fscore > max)
       {
         i = k;
-        max = Fmat[k][j];
+        max = Fmat[k][j].Fscore;
       }
     }
   }
@@ -179,10 +207,10 @@ findBacktraceStart(std::vector<std::vector<int> > Fmat,
     max = -10000;
     for (int m = 0; m != hseq_len; m++)
     {
-      if (Fmat[i][m] > max)
+      if (Fmat[i][m].Fscore > max)
       {
         j = m;
-        max = Fmat[i][m];
+        max = Fmat[i][m].Fscore;
       }
     }
   }
@@ -192,11 +220,11 @@ findBacktraceStart(std::vector<std::vector<int> > Fmat,
     max = -10000;
     for (int m = 0; m != hseq_len; m++)
     {
-      if (Fmat[k][m] > max)
+      if (Fmat[k][m].Fscore > max)
       {
         i = k;
         j = m;
-        max = Fmat[k][m];
+        max = Fmat[k][m].Fscore;
       }
     }
 
@@ -204,11 +232,11 @@ findBacktraceStart(std::vector<std::vector<int> > Fmat,
     max = -10000;
     for (int k = 0; k != vseq_len; k++)
     {
-      if (Fmat[k][m] > max)
+      if (Fmat[k][m].Fscore > max)
       {
         i = k;
         j = m;
-        max = Fmat[k][m];
+        max = Fmat[k][m].Fscore;
       }
     }
   }
@@ -222,7 +250,7 @@ std::pair<std::string, std::string>
 fullBacktrace(int i, int j,
   int vseq_len, int hseq_len,
   std::string vseq, std::string hseq,
-  std::vector<std::vector<int> > Fmat
+  std::vector<std::vector<dynMatEntry> > Fmat
   ) 
 {
   // Backtrace
@@ -261,7 +289,8 @@ fullBacktrace(int i, int j,
   // Normal Backtrace
   while (i > 0 and j > 0)
   {
-    if(Fmat[i-1][j-1] >= Fmat[i][j-1] and Fmat[i-1][j-1] >= Fmat[i-1][j])
+    if(Fmat[i-1][j-1].Fscore >= Fmat[i][j-1].Fscore and 
+       Fmat[i-1][j-1].Fscore >= Fmat[i-1][j].Fscore)
     { // diag
       vseq_align += vseq[i];
       hseq_align += hseq[j];
@@ -269,7 +298,7 @@ fullBacktrace(int i, int j,
       j--;
       continue;
     }
-    if (Fmat[i-1][j] >= Fmat[i][j-1])
+    if (Fmat[i-1][j].Fscore >= Fmat[i][j-1].Fscore)
     { // from_above
       vseq_align += vseq[i];
       hseq_align += '-';
@@ -321,7 +350,7 @@ std::vector<std::string> align(std::string vseq, std::string hseq,
   int vseq_len = vseq.length();
   int hseq_len = hseq.length();
 
-  std::vector<std::vector<int> > Fmat(vseq_len, std::vector<int>(hseq_len));
+  std::vector<std::vector<dynMatEntry> > Fmat(vseq_len, std::vector<dynMatEntry>(hseq_len));
   Fmat = initializeFmat(Fmat, vseq_start_gap_pen, hseq_start_gap_pen, vseq_len, hseq_len);
   Fmat = fillFmat(Fmat, vseq, hseq, vseq_len, hseq_len);
 
