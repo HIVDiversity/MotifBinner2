@@ -241,8 +241,8 @@ findBacktraceStart(std::vector<std::vector<dynMatEntry> > Fmat,
     }
   }
 
-  std::cout << "The starting position is: (" << i << ", " << j << "). The bottom right position is (" <<
-    vseq_len - 1 << ", " << hseq_len - 1 << ")" << std::endl;
+//  std::cout << "The starting position is: (" << i << ", " << j << "). The bottom right position is (" <<
+//    vseq_len - 1 << ", " << hseq_len - 1 << ")" << std::endl;
   return {i, j};
 }
 
@@ -344,8 +344,8 @@ fullBacktrace(int i, int j,
     j = new_j;
   }
 
-  std::cout << "tracing endpoint: (" << i << ", " << j << ")" << std::endl;
-  print_align_mat(Fmat, hseq, vseq);
+//  std::cout << "tracing endpoint: (" << i << ", " << j << ")" << std::endl;
+//  print_align_mat(Fmat, hseq, vseq);
   
   // Navigate from true end to the top left
 
@@ -363,8 +363,8 @@ fullBacktrace(int i, int j,
       vseq_align += '-';
     }
   }
-  std::cout << "vseq: " << vseq_align << std::endl;
-  std::cout << "hseq: " << hseq_align << std::endl;
+//  std::cout << "vseq: " << vseq_align << std::endl;
+//  std::cout << "hseq: " << hseq_align << std::endl;
   return {vseq_align, hseq_align};
 }
 
@@ -376,9 +376,9 @@ std::vector<std::string> align(std::string vseq, std::string hseq,
 {
   vseq = '-'+vseq;
   hseq = '-'+hseq;
-  std::cout << "Seqs to align:" << std::endl;
-  std::cout << "vseq: " << vseq << std::endl;
-  std::cout << "hseq: " << hseq << std::endl;
+//  std::cout << "Seqs to align:" << std::endl;
+//  std::cout << "vseq: " << vseq << std::endl;
+//  std::cout << "hseq: " << hseq << std::endl;
   std::vector<std::string> alignment(2);
 
   int vseq_len = vseq.length();
@@ -413,27 +413,112 @@ std::vector<std::string> align(std::string vseq, std::string hseq,
 
 // [[Rcpp::export]]
 Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
-    CharacterVector r_primer, int pref_len, int pid_len, int suf_len, int verbosity)
+    CharacterVector r_primer, std::vector<int> prefix_lens) // int pref_len, int pid_len, int suf_len, int verbosity)
 {
   std::vector<std::string> alignment(2);
   std::string read_start;
+
+  int read_bases;
+  int prefix_bases;
+  int read_gaps;
+  int prefix_gaps;
+
+  int prev_read_bases;
+  int prev_prefix_bases;
+  int prev_read_gaps;
+  int prev_prefix_gaps;
+
+  int cur_prefix_fragment;
+  int next_prefix_break;
+  int cur_fragment_start_in_aln;
+  std::string read_segment;
+  std::string prefix_segment;
+
+  int read_front_gaps;
+  int prefix_front_gaps;
+
   for (int i=0; i!= r_sread.size(); i++)
   {
     read_start = Rcpp::as<std::string>(r_sread[i]);
-    read_start = read_start.substr(0, 20+pref_len+pid_len+suf_len);
+    read_start = read_start.substr(0, 20+Rcpp::as<std::string>(r_primer[0]).length());
 
     alignment = align(read_start,
                       Rcpp::as<std::string>(r_primer),
                       false, false, false, false);
 
-    if (verbosity > 1)
+    if (alignment[0].length() != alignment[1].length())
     {
-      std::cout << "Sequence Number: " << i << std::endl;
-      std::cout << alignment[0] << std::endl;
-      std::cout << alignment[1] << std::endl;
-      std::cout << "*****************************" << std::endl;
-      std::cout << "\n\n\n\n\n\n\n\n\n\n\n" << std::endl;
+      throw std::range_error("Alignments must be of equal lengths");
     }
+
+    std::string& read = alignment[0]; // reference for easier name
+    std::string& prefix = alignment[1]; // reference for easier name
+    read_gaps = 0; read_bases = 0;
+    prefix_gaps = 0; prefix_bases = 0;
+    cur_prefix_fragment = 0;
+    next_prefix_break = prefix_lens[0];
+
+    read_front_gaps = -1; prefix_front_gaps = -1;
+
+    for (int j = 0; j < read.size(); ++j)
+    {
+      // basic tracking
+      if (read[j] == '-'){ ++read_gaps; } else { ++read_bases;}
+      if (prefix[j] == '-'){ ++prefix_gaps; } else { ++prefix_bases; }
+      
+      // once per alignment
+      if (read_front_gaps == -1 and read_bases == 1) {read_front_gaps = read_gaps;}
+      if (prefix_front_gaps == -1 and prefix_bases == 1) 
+      {
+        prefix_front_gaps = prefix_gaps;
+        cur_fragment_start_in_aln = j;
+        if (read[j] == '-')
+        {
+          prev_read_gaps = read_gaps - 1;
+          prev_read_bases = read_bases;
+        } else {
+          prev_read_gaps = read_gaps;
+          prev_read_bases = read_bases - 1;
+        }
+
+        prev_prefix_gaps = prefix_gaps;
+        prev_prefix_bases = prefix_bases - 1;
+      }
+
+      // once for each prefix segment
+      if (prefix_bases >= next_prefix_break)
+      {
+        read_segment = read.substr(cur_fragment_start_in_aln, j - cur_fragment_start_in_aln);
+        prefix_segment = prefix.substr(cur_fragment_start_in_aln, j - cur_fragment_start_in_aln);
+        cur_fragment_start_in_aln = j;
+
+        std::cout << "Prefix break " << cur_prefix_fragment << ";   Alignment position: " << j << std::endl;
+        std::cout << "Read Segment: " << read_segment << "   -   Read gaps: " << read_gaps << "; Read bases: " << read_bases << std::endl;
+        std::cout << "Pref Segment: " << prefix_segment << "   -   Prefix gaps: " << prefix_gaps << "; Prefix bases: " << prefix_bases << std::endl;
+        std::cout << "Read Segment: " << read_segment << "   -   Read gaps: " << read_gaps - prev_read_gaps << 
+          "; Read bases: " << read_bases - prev_read_bases << std::endl;
+        std::cout << "Pref Segment: " << prefix_segment << "   -   Prefix gaps: " << prefix_gaps - prev_prefix_gaps << 
+          "; Prefix bases: " << prefix_bases - prev_prefix_bases << std::endl;
+        cur_prefix_fragment ++;
+        if (cur_prefix_fragment < prefix_lens.size()){
+          next_prefix_break += prefix_lens[cur_prefix_fragment];
+        } else {
+          next_prefix_break += 10000;
+        }
+        
+        prev_read_gaps = read_gaps;
+        prev_read_bases = read_bases;
+        prev_prefix_gaps = prefix_gaps;
+        prev_prefix_bases = prefix_bases;
+      }
+    }
+
+    std::cout << "Sequence Number: " << i << std::endl;
+    std::cout << alignment[0] << std::endl;
+    std::cout << alignment[1] << std::endl;
+    std::cout << "Read Front Gaps: " << read_front_gaps << ";   Prefix Front Gaps: " << prefix_front_gaps << std::endl;
+    std::cout << "*****************************" << std::endl;
+    std::cout << "\n\n" << std::endl;
   }
   Rcpp::List trim_result;
 
