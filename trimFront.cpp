@@ -17,15 +17,11 @@ struct dynMatEntry {
   int Fscore;
 };
 
-struct fragmentStore {
-  std::string read_segment;
-  int read_gaps;
-  int read_bases;
-  std::string prefix_segment;
-  int prefix_gaps;
-  int prefix_bases;
+struct alignResult {
+  std::string vseq;
+  std::string hseq;
+  int score;
 };
-
 
 std::map<char, int> getBaseOrder()
 {
@@ -123,7 +119,7 @@ initializeFmat(std::vector<std::vector<dynMatEntry> > Fmat,
     { Fmat[i][0].Fscore = -i; }
   }
 
-  // The origins
+  // The origins aka the arrows
   Fmat[0][0].origin_i = 0; 
   Fmat[0][0].origin_j = 0; 
   for (int i = 1; i != vseq_len; i++)
@@ -379,7 +375,7 @@ fullBacktrace(int i, int j,
   return {vseq_align, hseq_align};
 }
 
-std::vector<std::string> align(std::string vseq, std::string hseq,
+alignResult align(std::string vseq, std::string hseq,
     bool vseq_start_gap_pen,
     bool hseq_start_gap_pen,
     bool hseq_end_gap_pen,
@@ -390,7 +386,6 @@ std::vector<std::string> align(std::string vseq, std::string hseq,
 //  std::cout << "Seqs to align:" << std::endl;
 //  std::cout << "vseq: " << vseq << std::endl;
 //  std::cout << "hseq: " << hseq << std::endl;
-  std::vector<std::string> alignment(2);
 
   int vseq_len = vseq.length();
   int hseq_len = hseq.length();
@@ -417,9 +412,12 @@ std::vector<std::string> align(std::string vseq, std::string hseq,
     hseq_align_fwd[aligned_pair.first.length() - i -1] = aligned_pair.second[i];
   }
 
-  alignment[0] = vseq_align_fwd;
-  alignment[1] = hseq_align_fwd;
-  return alignment;
+  alignResult result;
+  result.vseq = vseq_align_fwd;
+  result.hseq = hseq_align_fwd;
+  result.score = Fmat[backtrace_start.first][backtrace_start.second].Fscore;
+
+  return result;
 }
 
 // [[Rcpp::export]]
@@ -427,7 +425,7 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
     CharacterVector r_primer, std::vector<int> prefix_lens) // int pref_len, int pid_len, int suf_len, int verbosity)
 {
 
-  std::vector<std::string> alignment(2);
+  alignResult alignment;
   std::string read_start;
   std::string full_read;
 
@@ -446,6 +444,7 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
   int cur_fragment_start_in_aln;
   std::string read_segment;
   std::string prefix_segment;
+  Rcpp::NumericVector scores(r_sread.size());
 
   std::vector<int> read_front_gaps(r_sread.size());
   std::vector<int> prefix_front_gaps(r_sread.size());
@@ -486,13 +485,14 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
                       false, false, false, false);
     align_time += (clock() - loop_start);
 
-    if (alignment[0].length() != alignment[1].length())
+    if (alignment.vseq.length() != alignment.hseq.length())
     {
       throw std::range_error("Alignments must be of equal lengths");
     }
 
-    std::string& read = alignment[0]; // reference for easier name
-    std::string& prefix = alignment[1]; // reference for easier name
+    std::string& read = alignment.vseq; // reference for easier name
+    std::string& prefix = alignment.hseq; // reference for easier name
+    scores[i] = alignment.score;
     read_gaps = 0; read_bases = 0;
     prefix_gaps = 0; prefix_bases = 0;
     cur_prefix_fragment = 0;
@@ -585,6 +585,8 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
   Rcpp::List trim_result;
 
   trim_result = Rcpp::List::create(
+    Rcpp::Named("scores") = scores,
+
     Rcpp::Named("read_front_gaps") = read_front_gaps,
     Rcpp::Named("prefix_front_gaps") = prefix_front_gaps,
     Rcpp::Named("rest_of_read") = rest_of_read,
