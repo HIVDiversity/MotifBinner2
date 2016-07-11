@@ -16,6 +16,16 @@ struct dynMatEntry {
   int Fscore;
 };
 
+struct fragmentStore {
+  std::string read_segment;
+  int read_gaps;
+  int read_bases;
+  std::string prefix_segment;
+  int prefix_gaps;
+  int prefix_bases;
+};
+
+
 std::map<char, int> getBaseOrder()
 {
   std::map<char, int> imap = 
@@ -415,6 +425,7 @@ std::vector<std::string> align(std::string vseq, std::string hseq,
 Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
     CharacterVector r_primer, std::vector<int> prefix_lens) // int pref_len, int pid_len, int suf_len, int verbosity)
 {
+
   std::vector<std::string> alignment(2);
   std::string read_start;
 
@@ -434,8 +445,13 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
   std::string read_segment;
   std::string prefix_segment;
 
-  int read_front_gaps;
-  int prefix_front_gaps;
+  std::vector<int> read_front_gaps(r_sread.size());
+  std::vector<int> prefix_front_gaps(r_sread.size());
+
+  std::vector<std::vector<int> > fragment_ints(r_sread.size(), 
+      std::vector<int>(prefix_lens.size()*4));
+  std::vector<std::vector<std::string> > fragment_strings(r_sread.size(), 
+      std::vector<std::string>(prefix_lens.size()*2));
 
   for (int i=0; i!= r_sread.size(); i++)
   {
@@ -458,7 +474,7 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
     cur_prefix_fragment = 0;
     next_prefix_break = prefix_lens[0];
 
-    read_front_gaps = -1; prefix_front_gaps = -1;
+    read_front_gaps[i] = -1; prefix_front_gaps[i] = -1;
 
     for (int j = 0; j < read.size(); ++j)
     {
@@ -467,10 +483,10 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
       if (prefix[j] == '-'){ ++prefix_gaps; } else { ++prefix_bases; }
       
       // once per alignment
-      if (read_front_gaps == -1 and read_bases == 1) {read_front_gaps = read_gaps;}
-      if (prefix_front_gaps == -1 and prefix_bases == 1) 
+      if (read_front_gaps[i] == -1 and read_bases == 1) {read_front_gaps[i] = read_gaps;}
+      if (prefix_front_gaps[i] == -1 and prefix_bases == 1) 
       {
-        prefix_front_gaps = prefix_gaps;
+        prefix_front_gaps[i] = prefix_gaps;
         cur_fragment_start_in_aln = j;
         if (read[j] == '-')
         {
@@ -492,13 +508,14 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
         prefix_segment = prefix.substr(cur_fragment_start_in_aln, j - cur_fragment_start_in_aln);
         cur_fragment_start_in_aln = j;
 
-        std::cout << "Prefix break " << cur_prefix_fragment << ";   Alignment position: " << j << std::endl;
-        std::cout << "Read Segment: " << read_segment << "   -   Read gaps: " << read_gaps << "; Read bases: " << read_bases << std::endl;
-        std::cout << "Pref Segment: " << prefix_segment << "   -   Prefix gaps: " << prefix_gaps << "; Prefix bases: " << prefix_bases << std::endl;
-        std::cout << "Read Segment: " << read_segment << "   -   Read gaps: " << read_gaps - prev_read_gaps << 
-          "; Read bases: " << read_bases - prev_read_bases << std::endl;
-        std::cout << "Pref Segment: " << prefix_segment << "   -   Prefix gaps: " << prefix_gaps - prev_prefix_gaps << 
-          "; Prefix bases: " << prefix_bases - prev_prefix_bases << std::endl;
+        fragment_ints[i][cur_prefix_fragment*4 + 0] = read_gaps - prev_read_gaps;
+        fragment_ints[i][cur_prefix_fragment*4 + 1] = read_bases - prev_read_bases;
+        fragment_ints[i][cur_prefix_fragment*4 + 2] = prefix_gaps - prev_prefix_gaps;
+        fragment_ints[i][cur_prefix_fragment*4 + 3] = prefix_bases - prev_prefix_bases;
+
+        fragment_strings[i][cur_prefix_fragment*2 + 0] = read_segment;
+        fragment_strings[i][cur_prefix_fragment*2 + 1] = prefix_segment;
+        
         cur_prefix_fragment ++;
         if (cur_prefix_fragment < prefix_lens.size()){
           next_prefix_break += prefix_lens[cur_prefix_fragment];
@@ -512,14 +529,27 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
         prev_prefix_bases = prefix_bases;
       }
     }
+  }
+
+  for (int i = 0; i != read_front_gaps.size(); ++i)
+  {
 
     std::cout << "Sequence Number: " << i << std::endl;
-    std::cout << alignment[0] << std::endl;
-    std::cout << alignment[1] << std::endl;
-    std::cout << "Read Front Gaps: " << read_front_gaps << ";   Prefix Front Gaps: " << prefix_front_gaps << std::endl;
+    std::cout << "Read Front Gaps: " << read_front_gaps[i] << ";   Prefix Front Gaps: " 
+      << prefix_front_gaps[i] << std::endl;
+    for (int j = 0; j != prefix_lens.size(); ++j)
+    {
+        std::cout << "Read Segment: " << fragment_strings[i][j*2+0] << "   -   Read gaps: " 
+          << fragment_ints[i][j*4+0] << "; Read bases: " << fragment_ints[i][j*4+1] << std::endl;
+        std::cout << "Pref Segment: " << fragment_strings[i][j*2+1] << "   -   Prefix gaps: " 
+          << fragment_ints[i][j*4+2] << "; Prefix bases: " << fragment_ints[i][j*4+3] << std::endl;
+    }
     std::cout << "*****************************" << std::endl;
     std::cout << "\n\n" << std::endl;
   }
+
+
+
   Rcpp::List trim_result;
 
   trim_result = Rcpp::List::create(Rcpp::Named("sread") = alignment);
