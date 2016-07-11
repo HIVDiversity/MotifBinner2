@@ -3,7 +3,7 @@ library(ShortRead)
 
 seq_dat <- readFastq('test_dat.fastq')
 #seq_dat <- readFastq('/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R1.fastq')
-#seq_dat <- readFastq('/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq')
+seq_dat <- readFastq('/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq')
 
 prefix <- 'TATGGGAYSAAAGYCTMAARCCATGTG'
 

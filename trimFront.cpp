@@ -451,23 +451,29 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
   std::vector<int> prefix_front_gaps(r_sread.size());
   std::vector<std::string> rest_of_read(r_sread.size());
 
-  std::vector<std::vector<int> > prefix_fragment_gaps(r_sread.size(), 
-      std::vector<int>(prefix_lens.size()));
-  std::vector<std::vector<int> > prefix_fragment_bases(r_sread.size(), 
-      std::vector<int>(prefix_lens.size()));
-  std::vector<std::vector<int> > read_fragment_gaps(r_sread.size(), 
-      std::vector<int>(prefix_lens.size()));
-  std::vector<std::vector<int> > read_fragment_bases(r_sread.size(), 
-      std::vector<int>(prefix_lens.size()));
+//  std::vector<std::vector<int> > prefix_fragment_gaps(r_sread.size(), 
+//      std::vector<int>(prefix_lens.size()));
+//  std::vector<std::vector<int> > prefix_fragment_bases(r_sread.size(), 
+//      std::vector<int>(prefix_lens.size()));
+//  std::vector<std::vector<int> > read_fragment_gaps(r_sread.size(), 
+//      std::vector<int>(prefix_lens.size()));
+//  std::vector<std::vector<int> > read_fragment_bases(r_sread.size(), 
+//      std::vector<int>(prefix_lens.size()));
+  Rcpp::NumericMatrix prefix_fragment_gaps(r_sread.size(), prefix_lens.size());
+  Rcpp::NumericMatrix prefix_fragment_bases(r_sread.size(), prefix_lens.size());
+  Rcpp::NumericMatrix read_fragment_gaps(r_sread.size(), prefix_lens.size());
+  Rcpp::NumericMatrix read_fragment_bases(r_sread.size(), prefix_lens.size());
 
-  std::vector<std::vector<std::string> > read_fragments(r_sread.size(), 
-      std::vector<std::string>(prefix_lens.size()));
-  std::vector<std::vector<std::string> > prefix_fragments(r_sread.size(), 
-      std::vector<std::string>(prefix_lens.size()));
+//  std::vector<std::vector<std::string> > read_fragments(r_sread.size(), 
+//      std::vector<std::string>(prefix_lens.size()));
+//  std::vector<std::vector<std::string> > prefix_fragments(r_sread.size(), 
+//      std::vector<std::string>(prefix_lens.size()));
+  Rcpp::CharacterMatrix prefix_fragments(r_sread.size(), prefix_lens.size());
+  Rcpp::CharacterMatrix read_fragments(r_sread.size(), prefix_lens.size());
 
-  unsigned long loop_start = 0;
-  unsigned long align_time = 0;
-  unsigned long total_loop_time = 0;
+  double loop_start = 0;
+  double align_time = 0;
+  double total_loop_time = 0;
 
   for (int i=0; i!= r_sread.size(); i++)
   {
@@ -535,13 +541,13 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
         prefix_segment = prefix.substr(cur_fragment_start_in_aln, j - cur_fragment_start_in_aln + 1);
         cur_fragment_start_in_aln = j+1;
 
-        read_fragment_gaps[i][cur_prefix_fragment] = read_gaps - prev_read_gaps;
-        read_fragment_bases[i][cur_prefix_fragment] = read_bases - prev_read_bases;
-        prefix_fragment_gaps[i][cur_prefix_fragment] = prefix_gaps - prev_prefix_gaps;
-        prefix_fragment_bases[i][cur_prefix_fragment] = prefix_bases - prev_prefix_bases;
+        read_fragment_gaps(i, cur_prefix_fragment) = read_gaps - prev_read_gaps;
+        read_fragment_bases(i, cur_prefix_fragment) = read_bases - prev_read_bases;
+        prefix_fragment_gaps(i, cur_prefix_fragment) = prefix_gaps - prev_prefix_gaps;
+        prefix_fragment_bases(i, cur_prefix_fragment) = prefix_bases - prev_prefix_bases;
 
-        read_fragments[i][cur_prefix_fragment] = read_segment;
-        prefix_fragments[i][cur_prefix_fragment] = prefix_segment;
+        read_fragments(i, cur_prefix_fragment) = read_segment;
+        prefix_fragments(i, cur_prefix_fragment) = prefix_segment;
 
 //        std::cout << "Read Segment: " << read_fragments[i][cur_prefix_fragment] << "   -   Read gaps: " 
 //          << read_fragment_gaps[i][cur_prefix_fragment] << "; Read bases: " << 
@@ -573,6 +579,8 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
   std::cout << std::endl;
   std::cout << "Total loop time: " << total_loop_time << std::endl;
   std::cout << "Total align time: " << align_time << std::endl;
+  std::cout << "Percentage spent on align: " << align_time/total_loop_time << std::endl;
+  
 
   Rcpp::List trim_result;
 
