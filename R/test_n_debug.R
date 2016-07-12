@@ -37,27 +37,69 @@ dummy_test_debug <- function()
         data_source = "n004",
         threshold = 295,
         cache_data = TRUE),
-    'n005' =
-      list(name = 'fwd_badCycles',
-        op = 'badCycles',
-        data_source = "n005",
-        cache_data = FALSE),
     'n006' =
-      list(name = 'fwd_trimAffixes',
-        op = 'trimAffixes',
-        data_source = "n005",
-        primer_seq = 'TATGGGAYSAAAGYCTMAARCCATGTG',
-        primer_lens = 27,
-        min_score = -8,
-        front_gaps_allowed = 0,
-        cache_data = TRUE),
-    'n007' =
       list(name = 'fwd_qualTrim',
         op = 'qualTrim',
-        data_source = "n006",
+        data_source = "n005",
         avg_qual = 20,
         bad_base_threshold = 10,
         max_bad_bases = 0.05,
+        cache_data = TRUE),
+    'n007' =
+      list(name = 'fwd_trimAffixes',
+        op = 'trimAffixes',
+        data_source = "n006",
+        primer_seq = 'TATGGGAYSAAAGYCTMAARCCATGTG',
+        primer_lens = 27,
+        primer_location = 'front',
+        min_score = 18,
+        front_gaps_allowed = 0,
+        cache_data = TRUE),
+    'n008' = 
+      list(name = 'rev_loadData',
+        op = 'loadData',
+        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R2.fastq",
+        cache_data = TRUE),
+    'n009' =
+      list(name = 'rev_basicQC',
+        op = 'basicQC',
+        data_source = "n008",
+        cache_data = FALSE),
+    'n010' =
+      list(name = 'rev_ambigSeqs',
+        op = 'ambigSeqs',
+        data_source = "n008",
+        threshold = 0.02,
+        cache_data = TRUE),
+    'n011' =
+      list(name = 'rev_primerDimer',
+        op = 'primerDimer',
+        data_source = "n010",
+        threshold = 80,
+        cache_data = TRUE),
+    'n012' =
+      list(name = 'rev_seqLength',
+        op = 'seqLength',
+        data_source = "n011",
+        threshold = 295,
+        cache_data = TRUE),
+    'n013' =
+      list(name = 'rev_qualTrim',
+        op = 'qualTrim',
+        data_source = "n012",
+        avg_qual = 20,
+        bad_base_threshold = 10,
+        max_bad_bases = 0.05,
+        cache_data = TRUE),
+    'n014' =
+      list(name = 'rev_trimAffixes',
+        op = 'trimAffixes',
+        data_source = "n013",
+        primer_seq = 'CAGYACAGTACAATGTACACATGGAATNNNNNNNNNCTGAGCGTGTG',
+        primer_lens = c(27, 9, 11),
+        primer_location = 'back',
+        min_score = 30,
+        front_gaps_allowed = 3,
         cache_data = TRUE)
     )
   output_dir = "/fridge/data/MotifBinner2_test"
@@ -76,16 +118,24 @@ dummy_test_debug <- function()
   all_results <- list()
   class(all_results) <- 'allResults'
 
-  all_results <- applyOperation(all_results, config, operation = 'loadData')
-  all_results <- applyOperation(all_results, config, operation = 'basicQC')
-  all_results <- applyOperation(all_results, config, operation = 'ambigSeqs')
-  all_results <- applyOperation(all_results, config, operation = 'primerDimer')
-  all_results <- applyOperation(all_results, config, operation = 'seqLength')
-  all_results <- applyOperation(all_results, config, operation = 'trimAffixes')
+  all_results <- applyOperation(all_results, config, op_number = 'n001')
+  all_results <- applyOperation(all_results, config, op_number = 'n002')
+  all_results <- applyOperation(all_results, config, op_number = 'n003')
+  all_results <- applyOperation(all_results, config, op_number = 'n004')
+  all_results <- applyOperation(all_results, config, op_number = 'n005')
+  all_results <- applyOperation(all_results, config, op_number = 'n006')
+  all_results <- applyOperation(all_results, config, op_number = 'n007')
+  all_results <- applyOperation(all_results, config, op_number = 'n008')
+  all_results <- applyOperation(all_results, config, op_number = 'n009')
+  all_results <- applyOperation(all_results, config, op_number = 'n010')
+  all_results <- applyOperation(all_results, config, op_number = 'n011')
+  all_results <- applyOperation(all_results, config, op_number = 'n012')
+  all_results <- applyOperation(all_results, config, op_number = 'n013')
+  all_results <- applyOperation(all_results, config, op_number = 'n014')
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n006'
+  op_number <- 'n014'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)

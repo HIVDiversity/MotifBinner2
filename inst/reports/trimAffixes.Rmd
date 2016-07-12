@@ -31,9 +31,9 @@ options(scipen=99)
 aln_stats <- result$metrics$per_read_metrics
 ticks <- 10^(0:12)
 ticks <- ticks[ticks < nrow(aln_stats)]
-aln_stats$bases_trimmed_cat <- cut(aln_stats$bases_trimmed, c(-Inf, 0:5, Inf),
+aln_stats$bases_trimmed_cat <- cut(aln_stats$prefix_front_gaps, c(-Inf, 0:5, Inf),
                                    c(0:5, '>5'))
-aln_stats$gaps_at_front_of_read_cat <- cut(aln_stats$gaps_at_front_of_read, c(-Inf, 0:5, Inf),
+aln_stats$gaps_at_front_of_read_cat <- cut(aln_stats$read_front_gaps, c(-Inf, 0:5, Inf),
                                    c(0:5, '>5'))
 
 p1 <-
