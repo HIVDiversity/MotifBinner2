@@ -47,6 +47,7 @@ dummy_test_debug <- function()
         op = 'trimAffixes',
         data_source = "n005",
         primer_seq = 'TATGGGAYSAAAGYCTMAARCCATGTG',
+        primer_lens = 27,
         min_score = -8,
         front_gaps_allowed = 0,
         cache_data = TRUE),
@@ -84,7 +85,7 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n007'
+  op_number <- 'n006'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
