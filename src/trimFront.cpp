@@ -293,33 +293,6 @@ fullBacktrace(int i, int j,
     }
   }
 
-//  // Wrong Normal Backtrace
-//  while (i > 0 and j > 0)
-//  {
-//    if(Fmat[i-1][j-1].Fscore >= Fmat[i][j-1].Fscore and 
-//       Fmat[i-1][j-1].Fscore >= Fmat[i-1][j].Fscore)
-//    { // diag
-//      vseq_align += vseq[i];
-//      hseq_align += hseq[j];
-//      i--;
-//      j--;
-//      continue;
-//    }
-//    if (Fmat[i-1][j].Fscore >= Fmat[i][j-1].Fscore)
-//    { // from_above
-//      vseq_align += vseq[i];
-//      hseq_align += '-';
-//      i--;
-//      continue;
-//    }
-//    // from left
-//    vseq_align += '-';
-//    hseq_align += hseq[j];
-//    j--;
-//  }
-//  std::cout << "tracing endpoint: (" << i << ", " << j << ")" << std::endl;
-//  print_align_mat(Fmat, hseq, vseq);
-
   // Retrieve 'Stored' Backtrace
   int new_i;
   int new_j;
@@ -443,41 +416,37 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
   int next_prefix_break;
   int cur_fragment_start_in_aln;
   std::string read_segment;
+  std::string read_qual_segment;
   std::string prefix_segment;
   Rcpp::NumericVector scores(r_sread.size());
 
   std::vector<int> read_front_gaps(r_sread.size());
   std::vector<int> prefix_front_gaps(r_sread.size());
   std::vector<std::string> rest_of_read(r_sread.size());
+  std::vector<std::string> rest_of_read_qual(r_sread.size());
 
-//  std::vector<std::vector<int> > prefix_fragment_gaps(r_sread.size(), 
-//      std::vector<int>(prefix_lens.size()));
-//  std::vector<std::vector<int> > prefix_fragment_bases(r_sread.size(), 
-//      std::vector<int>(prefix_lens.size()));
-//  std::vector<std::vector<int> > read_fragment_gaps(r_sread.size(), 
-//      std::vector<int>(prefix_lens.size()));
-//  std::vector<std::vector<int> > read_fragment_bases(r_sread.size(), 
-//      std::vector<int>(prefix_lens.size()));
   Rcpp::NumericMatrix prefix_fragment_gaps(r_sread.size(), prefix_lens.size());
   Rcpp::NumericMatrix prefix_fragment_bases(r_sread.size(), prefix_lens.size());
   Rcpp::NumericMatrix read_fragment_gaps(r_sread.size(), prefix_lens.size());
   Rcpp::NumericMatrix read_fragment_bases(r_sread.size(), prefix_lens.size());
 
-//  std::vector<std::vector<std::string> > read_fragments(r_sread.size(), 
-//      std::vector<std::string>(prefix_lens.size()));
-//  std::vector<std::vector<std::string> > prefix_fragments(r_sread.size(), 
-//      std::vector<std::string>(prefix_lens.size()));
   Rcpp::CharacterMatrix prefix_fragments(r_sread.size(), prefix_lens.size());
   Rcpp::CharacterMatrix read_fragments(r_sread.size(), prefix_lens.size());
+  Rcpp::CharacterMatrix read_qual_fragments(r_sread.size(), prefix_lens.size());
 
   double loop_start = 0;
   double align_time = 0;
   double total_loop_time = 0;
 
+  std::string gapped_qual;
+  std::string full_qual;
+
   for (int i=0; i!= r_sread.size(); i++)
   {
+    gapped_qual.clear();
     loop_start = clock();
     full_read = Rcpp::as<std::string>(r_sread[i]);
+    full_qual = Rcpp::as<std::string>(r_qual[i]);
     read_start = full_read.substr(0, 20+Rcpp::as<std::string>(r_primer[0]).length());
 
     alignment = align(read_start,
@@ -500,9 +469,9 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
 
     read_front_gaps[i] = -1; prefix_front_gaps[i] = -1;
 
-    if (i % 100 == 0) {
-      std::cout << i << " ";
-    }
+//    if (i % 100  == 0) {
+//      std::cout << i << " ";
+//    }
 //    std::cout << "Sequence Number: " << i << std::endl;
 //    std::cout << "Read Front Gaps: " << read_front_gaps[i] << ";   Prefix Front Gaps: " 
 //      << prefix_front_gaps[i] << std::endl;
@@ -512,7 +481,13 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
     for (int j = 0; j < read.size(); ++j)
     {
       // basic tracking
-      if (read[j] == '-'){ ++read_gaps; } else { ++read_bases;}
+      if (read[j] == '-'){ 
+        ++read_gaps; 
+        gapped_qual += '!';
+      } else { 
+        gapped_qual += full_qual[read_bases];
+        ++read_bases;
+      }
       if (prefix[j] == '-'){ ++prefix_gaps; } else { ++prefix_bases; }
       
       // once per alignment
@@ -538,6 +513,7 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
       if (prefix_bases >= next_prefix_break)
       {
         read_segment = read.substr(cur_fragment_start_in_aln, j - cur_fragment_start_in_aln + 1);
+        read_qual_segment = gapped_qual.substr(cur_fragment_start_in_aln, j - cur_fragment_start_in_aln + 1);
         prefix_segment = prefix.substr(cur_fragment_start_in_aln, j - cur_fragment_start_in_aln + 1);
         cur_fragment_start_in_aln = j+1;
 
@@ -548,6 +524,7 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
 
         read_fragments(i, cur_prefix_fragment) = read_segment;
         prefix_fragments(i, cur_prefix_fragment) = prefix_segment;
+        read_qual_fragments(i, cur_prefix_fragment) = read_qual_segment;
 
 //        std::cout << "Read Segment: " << read_fragments[i][cur_prefix_fragment] << "   -   Read gaps: " 
 //          << read_fragment_gaps[i][cur_prefix_fragment] << "; Read bases: " << 
@@ -561,6 +538,7 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
           next_prefix_break += prefix_lens[cur_prefix_fragment];
         } else {
           rest_of_read[i] = full_read.substr(read_bases, std::string::npos); //full_read.size()-read_bases);
+          rest_of_read_qual[i] = full_qual.substr(read_bases, std::string::npos); 
           break; // loop through bases in alignment
         }
         
@@ -580,7 +558,6 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
   std::cout << "Total loop time: " << total_loop_time << std::endl;
   std::cout << "Total align time: " << align_time << std::endl;
   std::cout << "Percentage spent on align: " << align_time/total_loop_time << std::endl;
-  
 
   Rcpp::List trim_result;
 
@@ -590,8 +567,10 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
     Rcpp::Named("read_front_gaps") = read_front_gaps,
     Rcpp::Named("prefix_front_gaps") = prefix_front_gaps,
     Rcpp::Named("rest_of_read") = rest_of_read,
+    Rcpp::Named("rest_of_read_qual") = rest_of_read_qual,
 
     Rcpp::Named("read_fragments") = read_fragments,
+    Rcpp::Named("read_qual_fragments") = read_qual_fragments,
     Rcpp::Named("prefix_fragments") = prefix_fragments,
 
     Rcpp::Named("read_fragment_gaps") = read_fragment_gaps,

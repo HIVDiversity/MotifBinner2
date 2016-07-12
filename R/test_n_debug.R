@@ -205,9 +205,11 @@ alignment_tests <- function()
 
   prefix <- 'TATGGGAYSAAAGYCTMAARCCATGTG'
 
-  trimmed <- trimEnds_cpp(as.character(seq_dat@sread),
-                          as.character(seq_dat@id),
+  trimmed <- trimFront_cpp(as.character(seq_dat@sread),
                           as.character(seq_dat@quality@quality),
-                          prefix, 13, 7, 7)
+                          prefix, c(13, 7, 7))
+
+
+
   trimmed$sread
 }

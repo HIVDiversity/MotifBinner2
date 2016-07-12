@@ -54,16 +54,17 @@ trimAffixes <- function(all_results, config)
 
 trimAffixes_internal <- function(seq_dat, prefix)
 {
-  trimmed <- trimEnds_cpp(as.character(seq_dat@sread),
-                          as.character(seq_dat@id),
-                          as.character(seq_dat@quality@quality),
-                          prefix)
-  trimmed <- list(seq_dat = ShortReadQ(sread = DNAStringSet(trimmed$sread),
-                                       quality = BStringSet(trimmed$qual),
-                                       id = BStringSet(trimmed$id)),
-                  trim_stats = data.frame(score = trimmed$score,
-                                          bases_trimmed = trimmed$trim_spot,
-                                          gaps_at_front_of_read = trimmed$gaps_at_front_of_read))
+#  trimmed <- trimEnds_cpp(as.character(seq_dat@sread),
+#                          as.character(seq_dat@id),
+#                          as.character(seq_dat@quality@quality),
+#                          prefix)
+#  trimmed <- list(seq_dat = ShortReadQ(sread = DNAStringSet(trimmed$sread),
+#                                       quality = BStringSet(trimmed$qual),
+#                                       id = BStringSet(trimmed$id)),
+#                  trim_stats = data.frame(score = trimmed$score,
+#                                          bases_trimmed = trimmed$trim_spot,
+#                                          gaps_at_front_of_read = trimmed$gaps_at_front_of_read))
+  trimmed <- 'oops'
   return(trimmed)
 }
 
