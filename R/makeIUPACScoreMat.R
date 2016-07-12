@@ -32,8 +32,8 @@ makeIUPACScoreMat <- function()
     for (j in names(lets)){
       ilets <- c(lets[[i]], i)
       jlets <- c(lets[[j]], j)
-      any_match <- any(ilets %in% jlets)
-      cat(ifelse(any_match, "  0,", " -1,"))
+      any_match <- any(ilets %in% jlets) | any(jlets %in% ilets)
+      cat(ifelse(any_match, " 1,", " 0,"))
     }
     cat("\n")
   }

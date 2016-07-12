@@ -4,17 +4,22 @@
 \alias{applyOperation}
 \title{Applies a single operation}
 \usage{
-applyOperation(operation, all_results, config)
+applyOperation(all_results, config, op_number = NULL, operation = NULL)
 }
 \arguments{
-\item{operation}{The name of the operation to apply. A function by this name
-with the arguments all_results and config must exists. Additionally, the
-functions saveToDisk, genReport, genSummary and print must be specialized
-for objects of the class matching the name of the operation.}
-
 \item{all_results}{A list of all results given the class 'all_results'.}
 
 \item{config}{A list of configuration options}
+
+\item{op_number}{The operation number. If not specified it will be computed
+based on the length of all_results}
+
+\item{operation}{The name of the operation to apply. A function by this name
+with the arguments all_results and config must exists. Additionally, the
+functions saveToDisk, genReport, genSummary and print must be specialized
+for objects of the class matching the name of the operation. If specified,
+it will be used as a check to ensure that the correct operation was
+retrieved from the operations_list in the config argument.}
 }
 \description{
 Applies a single operation

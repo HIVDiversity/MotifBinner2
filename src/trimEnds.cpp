@@ -69,9 +69,26 @@ std::string convert_to_string(TString x, char filler, int num_fill)
   return y;
 }
 
+//template <typename TGap>
+//std::string convert_to_string_gap(TGap x)
+//{
+//  std::string z;                                                                                    
+//  resize(z, length(x));
+//  typedef Iterator<TGap> TGapIterator;                                                        
+//  TGapIterator it = begin(x), itEnd = end(x);                                                 
+//  int i = 0;                                                                                        
+//  for(; it != itEnd; ++it)                                                                          
+//  {                                                                                                 
+//    Iupac c = isGap(it) ? gapValue<Iupac>() : *it;                                                  
+//    z[i] = c;                                                                                       
+//    i++;                                                                                            
+//  }                                                                                                 
+//  return z;
+//}
+
 Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
   StringSet<CharString> id, StringSet<CharString> qual,
-  IupacString needle)
+  IupacString needle, int pref_len, int pid_len, int suf_len)
 {
   typedef int TValue;
   typedef Score<TValue, ScoreMatrix<Iupac, Default> > TScoringScheme;
@@ -79,8 +96,12 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
   int const gapExtendScore = -1;
   //StringSet<IupacString> trim_haystack(length(haystack));
   //StringSet<CharString> trim_qual(length(qual));
-  std::vector<std::string> trim_haystack(length(haystack));
-  std::vector<std::string> trim_qual(length(qual));
+  //
+  std::vector<std::string> pref(length(haystack));
+  std::vector<std::string> pid(length(haystack));
+  std::vector<std::string> suf(length(haystack));
+  std::vector<std::string> read(length(haystack));
+  std::vector<std::string> read_qual(length(qual));
   std::vector<std::string> trim_id(length(id));
 
   TScoringScheme scoringScheme(gapExtendScore, gapOpenScore);
@@ -94,12 +115,24 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
   }
   setDefaultScoreMatrix(scoringScheme, UserDefinedMatrix());
 
+  // iteration trackers
   int seq_len = 0;
   int gap_search_range;
+  int haystack_gaps;
+  int needle_gaps;
+    
+  int aln_pref_start;
+  int aln_pid_start;
+  int aln_suf_start;
+  int aln_read_start;
+  int gaps_before_read;
+
+  // result storage
   std::vector<int> scores(length(haystack));
   std::vector<int> trim_spots(length(haystack));
   std::vector<int> gaps_at_front_of_read(length(haystack));
-
+    
+  // alginment data structures
   Align<IupacString, ArrayGaps> align;
   resize(rows(align), 2);
   Row<Align<IupacString, ArrayGaps> >::Type & row0 = row(align, 0);
@@ -114,51 +147,107 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
     int score = globalAlignment(align, scoringScheme, AlignConfig<true, false, false, true>(), LinearGaps());
     scores[i] = score;
 
+    haystack_gaps = 0;
+    needle_gaps = 0;
+    aln_pref_start = -1;
+    aln_pid_start = -1;
+    aln_suf_start = -1;
+    aln_read_start = -1;
+    gaps_before_read = -1;
+
     for (unsigned j = 0; j != length(row1); ++j)
     {
-      if (row1[j] != '-')
-      {
-        trim_spots[i] = j;
-        break;
-      }
-    }
-
-    gaps_at_front_of_read[i] = 0;
-    gap_search_range = std::min(length(needle)+trim_spots[i], length(row0));
-    for (unsigned j = trim_spots[i]; j <= gap_search_range; ++j)
-    {
       if (row0[j] == '-')
+      { haystack_gaps++; }
+      if (row1[j] == '-')
+      { needle_gaps++; }
+
+      if (pid_len > 0)
       {
-        gaps_at_front_of_read[i] = j - trim_spots[i] + 1;
+        if (aln_pref_start == -1 and (j - needle_gaps) == 1)
+        { aln_pref_start = j; }
+        if (aln_pid_start == -1 and (j - needle_gaps) == pref_len)
+        { aln_pid_start = j; }
+        if (aln_suf_start == -1 and (j - needle_gaps) == pref_len + pid_len)
+        { aln_suf_start = j; }
+        if (aln_read_start == -1 and (j - needle_gaps) == pref_len + pid_len + suf_len)
+        { aln_read_start = j; 
+          gaps_before_read = haystack_gaps; }
       } else {
-        break;
+        if (aln_pref_start == -1 and (j - needle_gaps) == 1)
+        { aln_pref_start = j; 
+          gaps_before_read = haystack_gaps; }
       }
     }
 
-    trim_haystack[i] = convert_to_string(infix(haystack[i], trim_spots[i], length(haystack[i])-1),
-        '-', std::max(0, gaps_at_front_of_read[i]));
-    trim_qual[i] = convert_to_string(infix(qual[i], trim_spots[i], length(qual[i])-1),
-        '!', std::max(0, gaps_at_front_of_read[i]));
+//    // old trim_spot calc - keep for now to test against.
+//    for (unsigned j = 0; j != length(row1); ++j)
+//    {
+//      if (row1[j] != '-')
+//      {
+//        trim_spots[i] = j;
+//        break;
+//      }
+//    }
+
+//    // front gaps - do not incorporate with other tracking
+//    //   it gets too complex and leads to many unnecessary
+//    //   if evaluations
+//    gaps_at_front_of_read[i] = 0;
+//    gap_search_range = std::min(length(needle)+trim_spots[i], length(row0));
+//    for (unsigned j = trim_spots[i]; j <= gap_search_range; ++j)
+//    {
+//      if (row0[j] == '-')
+//      {
+//        gaps_at_front_of_read[i] = j - trim_spots[i] + 1;
+//      } else {
+//        break;
+//      }
+//    }
+
+    std::cout << "pref" << std::endl;
+    pref[i] = convert_to_string(infix(row0, 5, 10), '-', 0);
+//    pref[i] = convert_to_string(infix(row0, aln_pref_start, aln_pid_start), '-', 0);
+//    if (pid_len > 0)
+//    {
+//    std::cout << "pid" << std::endl;
+//      pid[i] = convert_to_string(infix(row0, aln_pid_start, aln_suf_start), '-', 0);
+//    }
+//    if (suf_len > 0)
+//    {
+//    std::cout << "suf" << std::endl;
+//      suf[i] = convert_to_string(infix(row0, aln_suf_start, aln_read_start), '-', 0);
+//    }
+    std::cout << "read" << std::endl;
+    read[i] = convert_to_string(infix(haystack[i], aln_read_start - gaps_before_read, 
+          length(haystack[i])-1), '-', 0);
+    read_qual[i] = convert_to_string(infix(qual[i], aln_read_start - gaps_before_read, 
+          length(qual[i])-1), '!', 0);
     trim_id[i] = toCString(id[i]);  //convert_to_string(id[i], '-', 0);
-//    std::cout << "Sequence " << i << std::endl;
-//    std::cout << align;
-//    std::cout << "Score = " << scores[i] << ";  Trim Spot = " << trim_spots[i] << "; Last Read Gap = " << gaps_at_front_of_read[i] << std::endl;
-//    std::cout << " --------------------- " << std::endl;
-//    std::cout << std::endl;
+
+
+    std::cout << "Aligned Prefix " << pref[i] << std::endl;
+    std::cout << "Sequence " << i << std::endl;
+    std::cout << align;
+    std::cout << "Score = " << scores[i] << ";  Trim Spot = " << trim_spots[i] << "; Last Read Gap = " << gaps_at_front_of_read[i] << std::endl;
+    std::cout << " --------------------- " << std::endl;
+    std::cout << std::endl;
+
   }
   std::cout << std::endl;
   std::cout << "number of alignments performed " << length(haystack) << std::endl;
-  std::cout << "number of alignments results obtained " << length(trim_haystack) << std::endl;
-  assignSource(row(align, 0), needle);
-  assignSource(row(align, 1), needle);
+  std::cout << "number of alignments results obtained " << length(pref) << std::endl;
 
-  int score = globalAlignment(align, Score<int, Simple>(0, -1, -1), AlignConfig<true, false, false, true>(), LinearGaps());
+//  // compute best possible score
+//  assignSource(row(align, 0), needle);
+//  assignSource(row(align, 1), needle);
+//  int score = globalAlignment(align, Score<int, Simple>(0, -1, -1), AlignConfig<true, false, false, true>(), LinearGaps());
 //  std::cout << "best alignment: prefix to prefix" << std::endl;
 //  std::cout << score << std::endl;
 
-  return Rcpp::List::create(Rcpp::Named("sread") = trim_haystack,
+  return Rcpp::List::create(Rcpp::Named("sread") = read,
                             Rcpp::Named("id") = trim_id,
-                            Rcpp::Named("qual") = trim_qual,
+                            Rcpp::Named("qual") = read_qual,
                             Rcpp::Named("score") = scores,
                             Rcpp::Named("trim_spot") = trim_spots,
                             Rcpp::Named("gaps_at_front_of_read") = gaps_at_front_of_read);
@@ -167,7 +256,8 @@ Rcpp::List findPrefixMatch(StringSet<IupacString> haystack,
 // [[Rcpp::export]]
 
 Rcpp::List trimEnds_cpp(CharacterVector r_sread, CharacterVector r_id, 
-    CharacterVector r_qual, CharacterVector r_prefix)
+    CharacterVector r_qual, CharacterVector r_prefix, 
+    int pref_len, int pid_len, int suf_len)
 {
   StringSet<IupacString> sq_sread;
   StringSet<CharString> sq_id;
@@ -184,8 +274,9 @@ Rcpp::List trimEnds_cpp(CharacterVector r_sread, CharacterVector r_id,
   std::cout << "length of first element of prefix " << length(sq_prefix[0]) << std::endl;
 
   Rcpp::List trim_result;
-  trim_result = findPrefixMatch(sq_sread, sq_id, sq_qual, sq_prefix[0]);
+  trim_result = findPrefixMatch(sq_sread, sq_id, // haystack, id
+      sq_qual, sq_prefix[0], // qual, needle
+      pref_len, pid_len, suf_len); //pref_len, pid_len, suf_len
 
   return trim_result;
 }
-

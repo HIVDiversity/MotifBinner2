@@ -4,7 +4,7 @@
 \alias{genSummary}
 \title{Generates a summary for a operation or the full process}
 \usage{
-genSummary(result, config)
+genSummary(result, config, seq_dat)
 }
 \arguments{
 \item{result}{The result produced from a specific operation}

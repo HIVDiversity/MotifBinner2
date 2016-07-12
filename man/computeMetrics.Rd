@@ -4,7 +4,7 @@
 \alias{computeMetrics}
 \title{Computes metrics useful for reporting}
 \usage{
-computeMetrics(result, config)
+computeMetrics(result, config, seq_dat)
 }
 \arguments{
 \item{result}{The result produced from a specific operation}

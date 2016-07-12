@@ -37,6 +37,11 @@ dummy_test_debug <- function()
         data_source = "n004",
         threshold = 295,
         cache_data = TRUE),
+    'n005' =
+      list(name = 'fwd_badCycles',
+        op = 'badCycles',
+        data_source = "n005",
+        cache_data = FALSE),
     'n006' =
       list(name = 'fwd_trimAffixes',
         op = 'trimAffixes',
@@ -44,6 +49,14 @@ dummy_test_debug <- function()
         primer_seq = 'TATGGGAYSAAAGYCTMAARCCATGTG',
         min_score = -8,
         front_gaps_allowed = 0,
+        cache_data = TRUE),
+    'n007' =
+      list(name = 'fwd_qualTrim',
+        op = 'qualTrim',
+        data_source = "n006",
+        avg_qual = 20,
+        bad_base_threshold = 10,
+        max_bad_bases = 0.05,
         cache_data = TRUE)
     )
   output_dir = "/fridge/data/MotifBinner2_test"
@@ -71,7 +84,7 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n006'
+  op_number <- 'n007'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
@@ -178,4 +191,23 @@ dummy_test_debug <- function()
 #
 #  return(all_results)
 #
+}
+
+alignment_tests <- function()
+{
+  library(devtools)
+  setwd('~/projects/MotifBinner2/code/MotifBinner2')
+  Rcpp::compileAttributes()
+#  load_all(quiet=TRUE)
+  cat('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'); load_all()
+  seq_dat <- readFastq('~/projects/MotifBinner2/code/MotifBinner2/inst/test_dat.fastq')
+  seq_dat@sread
+
+  prefix <- 'TATGGGAYSAAAGYCTMAARCCATGTG'
+
+  trimmed <- trimEnds_cpp(as.character(seq_dat@sread),
+                          as.character(seq_dat@id),
+                          as.character(seq_dat@quality@quality),
+                          prefix, 13, 7, 7)
+  trimmed$sread
 }

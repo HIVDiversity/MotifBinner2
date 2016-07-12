@@ -4,7 +4,7 @@
 \alias{saveToDisk}
 \title{Save the relevant results of an operation to disk}
 \usage{
-saveToDisk(result, config)
+saveToDisk(result, config, seq_dat)
 }
 \arguments{
 \item{result}{The result produced from a specific operation}

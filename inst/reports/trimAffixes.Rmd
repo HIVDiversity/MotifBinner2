@@ -20,6 +20,54 @@ if (class(result) != 'trimAffixes')
 }
 ```
 
+```{r, include=F}
+print(result$config$op_args$primer_seq)
+fig.cap1 <- 'Histograms of the number of missing bases / superflous bases at the front of reads'
+fig.cap2 <- 'Histograms of the alignment score between the primer and the sequences'
+```
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
+options(scipen=99)
+aln_stats <- result$metrics$per_read_metrics
+ticks <- 10^(0:12)
+ticks <- ticks[ticks < nrow(aln_stats)]
+aln_stats$bases_trimmed_cat <- cut(aln_stats$bases_trimmed, c(-Inf, 0:5, Inf),
+                                   c(0:5, '>5'))
+aln_stats$gaps_at_front_of_read_cat <- cut(aln_stats$gaps_at_front_of_read, c(-Inf, 0:5, Inf),
+                                   c(0:5, '>5'))
+
+p1 <-
+ggplot(aln_stats, aes(x=bases_trimmed_cat)) +
+  geom_bar(stat="count", colour = 'black') + 
+  scale_y_continuous(trans="log1p", breaks = ticks) +
+  ylab('Number of reads') +
+  xlab('Number of bases trimmed from start of read')
+
+p2 <- 
+ggplot(aln_stats, aes(x=gaps_at_front_of_read_cat)) +
+  geom_bar(stat='count', colour = 'black') + 
+  scale_y_continuous(trans="log1p", breaks = ticks) +
+  ylab('Number of reads') +
+  xlab('Missing bases at the start of the read')
+
+p3 <- 
+ggplot(aln_stats, aes(x=score)) +
+  geom_bar(stat='count', colour = 'black') + 
+  scale_y_continuous(trans="log1p", breaks = ticks) +
+  ylab('Number of reads') +
+  xlab('Score of Alignment to Primer')
+
+grid.arrange(p1, p2, ncol=2)
+```
+```{r}
+cat('\n\n')
+```
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2}
+print(p3)
+```
+
+
 ```{r, results='asis'}
 kable_summary(result$summary)
 

@@ -1,0 +1,56 @@
+## qualTrim
+
+Removes sequences that are low quality.
+
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('qualTrim', names(all_results))[1]]]
+}
+if (class(result) != 'qualTrim')
+{
+  result <- all_results[[grep('qualTrim', names(all_results))[1]]]
+}
+```
+
+```{r}
+per_read_metrics <- result$metrics$per_read_metrics
+
+fig.cap1 <- "Histograms of the average qualities and percentage of bad bases in the reads"
+```
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
+options(scipen=99)
+
+ticks <- 10^(0:12)
+ticks <- ticks[ticks < nrow(per_read_metrics)]
+
+p1 <- 
+ggplot(per_read_metrics, aes(x=avg_qual)) + 
+  geom_histogram(bins=30) +
+  scale_y_continuous(trans="log1p", breaks = ticks) +
+  xlab('Average quality\n(per read)') +
+  ylab('Number of Reads')
+p2 <- 
+ggplot(per_read_metrics, aes(x=perc_bad)) + 
+  geom_histogram(bins=30) +
+  scale_y_continuous(trans="log1p", breaks = ticks) +
+  xlab(paste('Percentage of bad bases\n(<',
+             result$config$op_args$bad_base_threshold, ' quality score)',
+             sep = '')) +
+  ylab('Number of Reads')
+grid.arrange(p1, p2, ncol=2)
+```
+
+```{r, results='asis'}
+kable_summary(result$summary)
+
+timingTable(result)
+```
+
