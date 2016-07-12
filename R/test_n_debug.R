@@ -95,9 +95,9 @@ dummy_test_debug <- function()
       list(name = 'rev_trimAffixes',
         op = 'trimAffixes',
         data_source = "n013",
-        primer_seq = 'CAGYACAGTACAATGTACACATGGAATNNNNNNNNNCTGAGCGTGTG',
-        primer_lens = c(27, 9, 11),
-        primer_location = 'back',
+        primer_seq = 'CACACGCTCAGNNNNNNNNNATTCCATGTGTACATTGTACTGTRCTG',
+        primer_lens = c(11, 9, 27),
+        primer_location = 'front',
         min_score = 30,
         front_gaps_allowed = 3,
         cache_data = TRUE)
