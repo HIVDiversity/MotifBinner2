@@ -65,7 +65,7 @@ trimAffixes_internal <- function(seq_dat, primer_seq, primer_lens, primer_locati
   if (primer_location == 'back')
   {
     seq_dat <- reverse(seq_dat)
-    primer_seq <- reverse(primer_seq)
+    primer_seq <- stri_reverse(primer_seq)
     primer_lens <- rev(primer_lens)
   } else if (primer_location != 'front')
     stop('invalid primer location')
@@ -92,9 +92,9 @@ trimAffixes_internal <- function(seq_dat, primer_seq, primer_lens, primer_locati
       )
     } else {
     tmp <- data.frame(
-      read_fragment_ = reverse(trimmed$read_fragments[,i]),
-      read_qual_fragment_ = reverse(trimmed$read_qual_fragments[,i]),
-      prefix_fragment_ = reverse(trimmed$prefix_fragments[,i]),
+      read_fragment_ = stri_reverse(trimmed$read_fragments[,i]),
+      read_qual_fragment_ = stri_reverse(trimmed$read_qual_fragments[,i]),
+      prefix_fragment_ = stri_reverse(trimmed$prefix_fragments[,i]),
       stringsAsFactors = FALSE
       )
     }
@@ -118,8 +118,8 @@ trimAffixes_internal <- function(seq_dat, primer_seq, primer_lens, primer_locati
                                   quality = BStringSet(trimmed$rest_of_read_qual),
                                   id = seq_dat@id)
   } else {
-    trimmed_seq_dat <- ShortReadQ(sread = DNAStringSet(reverse(trimmed$rest_of_read)),
-                                  quality = BStringSet(reverse(trimmed$rest_of_read_qual)),
+    trimmed_seq_dat <- ShortReadQ(sread = DNAStringSet(stri_reverse(trimmed$rest_of_read)),
+                                  quality = BStringSet(stri_reverse(trimmed$rest_of_read_qual)),
                                   id = seq_dat@id)
   }
   return(list(seq_dat = trimmed_seq_dat,
