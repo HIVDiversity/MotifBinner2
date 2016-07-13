@@ -1,0 +1,30 @@
+## extractPIDs
+
+Processes the primers that were trimmed to retrieve the PIDs and prepare the
+sequence names for matching pairs.
+
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  stop('result list not available')
+}
+if (class(result) != 'extractPIDs')
+{
+  stop('result class incorrect')
+}
+```
+
+Nothing here yet
+
+```{r, results='asis'}
+kable_summary(result$summary)
+
+timingTable(result)
+```
+

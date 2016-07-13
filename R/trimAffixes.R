@@ -73,9 +73,11 @@ trimAffixes_internal <- function(seq_dat, primer_seq, primer_lens, primer_locati
                           as.character(seq_dat@quality@quality),
                           primer_seq, primer_lens)
   per_read_metrics <- data.frame(
+    id = as.character(seq_dat@id),
     score = trimmed$score,
     read_front_gaps = trimmed$read_front_gaps,
-    prefix_front_gaps = trimmed$prefix_front_gaps
+    prefix_front_gaps = trimmed$prefix_front_gaps,
+    stringsAsFactors = FALSE
     )
   if (primer_location == 'front') {
   tmp_primer_lens <- 1:length(primer_lens)
@@ -104,7 +106,8 @@ trimAffixes_internal <- function(seq_dat, primer_seq, primer_lens, primer_locati
       read_bases_fragment_ = trimmed$read_fragment_bases[,i],
       prefix_gaps_fragment_ = trimmed$prefix_fragment_gaps[,i],
       prefix_bases_fragment_ = trimmed$prefix_fragment_bases[,i]
-      ))
+      )
+    )
 
     if (primer_location == 'front') {
       names(tmp) <- paste(names(tmp), i, sep = '')
@@ -163,25 +166,4 @@ print.trimAffixes <- function(result, config)
   print(result$summary[,c('parameter', 't_seqs', 't_mean_length', 't_mean_qual')])
   invisible(result)
 }
-
-
-#  result <- operation_function(all_results, config)
-#  result <- saveToDisk(result, config)
-#  result <- genReport(result, config)
-#  result <- genSummary(result, config)
-#  result <- print(result, config)
-#library(Rcpp)
-#library(ShortRead)
-#
-#Sys.setenv("PKG_CXXFLAGS"="-std=c++11")
-#
-##seq_dat <- readFastq('/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq')
-#seq_dat <- readFastq('test_dat.fastq')
-#seq_dat <- seq_dat[1:4]
-#
-#sourceCpp('trimAffixes.cpp')
-#prefix <- "TATGGGAYSAAAGYCTMAARCCATGTG"
-
-#trimmed <- trimAffixes_internal(seq_dat, prefix)
-
 

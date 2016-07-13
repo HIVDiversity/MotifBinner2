@@ -100,8 +100,23 @@ dummy_test_debug <- function()
         primer_location = 'front',
         min_score = 30,
         front_gaps_allowed = 3,
+        cache_data = TRUE),
+    'n015' =
+      list(name = 'fwd_extractPIDs',
+        op = 'extractPIDs',
+        data_source = "n007",
+        pid_in_which_fragment = NULL,
+        pid_gaps_allowed = 0,
+        cache_data = TRUE),
+    'n016' =
+      list(name = 'rev_extractPIDs',
+        op = 'extractPIDs',
+        data_source = "n014",
+        pid_in_which_fragment = 2,
+        pid_gaps_allowed = 0,
         cache_data = TRUE)
     )
+
   output_dir = "/fridge/data/MotifBinner2_test"
   base_for_names = "CAP256_3100_030wpi_v1v2_20k"
   intermediate_reports = TRUE
@@ -132,10 +147,12 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n012')
   all_results <- applyOperation(all_results, config, op_number = 'n013')
   all_results <- applyOperation(all_results, config, op_number = 'n014')
+  all_results <- applyOperation(all_results, config, op_number = 'n015')
+  all_results <- applyOperation(all_results, config, op_number = 'n016')
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n014'
+  op_number <- 'n016'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
