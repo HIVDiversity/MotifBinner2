@@ -114,6 +114,11 @@ dummy_test_debug <- function()
         data_source = "n014",
         pid_in_which_fragment = 2,
         pid_gaps_allowed = 0,
+        cache_data = TRUE),
+    'n017' =
+      list(name = 'matchPairs',
+        op = 'matchPairs',
+        data_source = c("fwd" = "n015", "rev" = "n016"),
         cache_data = TRUE)
     )
 
@@ -152,7 +157,7 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n016'
+  op_number <- 'n017'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
