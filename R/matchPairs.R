@@ -42,19 +42,26 @@ matchPairs <- function(all_results, config)
   rev_kept <- seq_dat_rev[match(paste(merged_names$raw_name, '_PID:', merged_names$pid_rev, sep = ''), 
                                 as.character(seq_dat_rev@id))]
   rev_trim <- seq_dat_rev[!(as.character(seq_dat_rev@id) %in% paste(merged_names$raw_name, '_PID:', merged_names$pid_rev, sep = ''))]
-  fwd_kept@id <- BStringSet(
+  fwd_kept@id <- BStringSet(merged_names$new_name)
+  rev_kept@id <- BStringSet(merged_names$new_name)
 
-  per_read_metrics <- data.frame('read_exists' = rep(1, length(fwd_kept)))
-  trim_steps <- list(step1 = list(name = 'read_exists',
+  per_read_metrics <- rbind(
+                      data.frame('has_pair' = rep(1, length(fwd_kept))),
+                      data.frame('has_pair' = rep(0, length(fwd_trim) + length(rev_trim))))
+  trim_steps <- list(step1 = list(name = 'has_pair',
                                   threshold = 1,
-                                  breaks = c(1)))
+                                  comparator = `>=`,
+                                  breaks = c(Inf, 1, 0, -Inf)))
 
   result <- list(trim_steps = trim_steps,
                  metrics = list(per_read_metrics = per_read_metrics))
   kept_dat <- list(fwd = fwd_kept,
                    rev = rev_kept)
+  trim_dat <- list(fwd = fwd_trim,
+                   rev = rev_trim)
   class(result) <- 'matchPairs'
   result$seq_dat <- kept_dat
+  result$trim_dat <- trim_dat
   result$input_dat <- list(fwd = seq_dat_fwd,
                            rev = seq_dat_rev)
   result$config <- list(op_number = op_number,
@@ -66,22 +73,66 @@ matchPairs <- function(all_results, config)
 
 saveToDisk.matchPairs <- function(result, config, seq_dat)
 {
-  kept <- getKept(result, seq_dat)
-  trimmed <- getTrimmed(seq_dat = seq_dat, kept_dat = kept)
+  kept <- result$seq_dat
+  trimmed <- result$trim_dat
 
-  if (length(kept) > 0)
+  if (length(kept[['fwd']]) > 0)
   {
     tmp_name <- file.path(result$config$op_dir, 
-      paste(config$base_for_names, '_kept_', result$config$op_args$name, '.fastq', sep = ''))
-    writeFastq(kept, tmp_name, compress=F)
+      paste(config$base_for_names, '_fwd_kept_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(kept[['fwd']], tmp_name, compress=F)
   }
-  if (length(trimmed) > 0)
+  if (length(kept[['rev']]) > 0)
   {
     tmp_name <- file.path(result$config$op_dir, 
-      paste(config$base_for_names, '_trimmed_', result$config$op_args$name, '.fastq', sep = ''))
-    writeFastq(trimmed, tmp_name, compress=F)
+      paste(config$base_for_names, '_rev_kept_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(kept[['rev']], tmp_name, compress=F)
+  }
+  if (length(trimmed[['fwd']]) > 0)
+  {
+    tmp_name <- file.path(result$config$op_dir, 
+      paste(config$base_for_names, '_fwd_trimmed_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(trimmed[['fwd']], tmp_name, compress=F)
+  }
+  if (length(trimmed[['rev']]) > 0)
+  {
+    tmp_name <- file.path(result$config$op_dir, 
+      paste(config$base_for_names, '_rev_trimmed_', result$config$op_args$name, '.fastq', sep = ''))
+    writeFastq(trimmed[['rev']], tmp_name, compress=F)
   }
   return(result)
+}
+
+genSummary_matchPairs <- function(result)
+{
+  summary_tab <-
+    rbind(
+  genSummary_comb(kept = result$seq_dat$fwd,
+                  trimmed = BiocGenerics::append(
+                              BiocGenerics::append(
+                                result$seq_dat$rev,
+                                result$trim_dat$fwd),
+                              result$trim_dat$rev),
+                  op = class(result),
+                  parameter = 'fwd_with_rev')
+  ,
+  genSummary_comb(kept = result$seq_dat$rev,
+                  trimmed = BiocGenerics::append(result$trim_dat$fwd,
+                                   result$trim_dat$rev),
+                  op = class(result),
+                  parameter = 'rev_with_fwd *')
+  ,
+  genSummary_comb(kept = result$trim_dat$fwd,
+                  trimmed = result$trim_dat$rev,
+                  op = class(result),
+                  parameter = 'fwd_only')
+  , 
+  genSummary_comb(kept = result$trim_dat$rev,
+                  trimmed = result$trim_dat$rev[0],
+                  op = class(result),
+                  parameter = 'rev_only')
+  )
+  return(summary_tab)
 }
 
 computeMetrics.matchPairs <- function(result, config, seq_dat)
