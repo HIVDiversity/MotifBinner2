@@ -54,8 +54,15 @@ explorePIDRelationships <- function(){
     facet_grid(pid_dist ~ pid_len)
 
   ggplot(subset(result_df, pid_dist == 1 & pid_len == 9 & b2_size_eff < 1000), 
-         aes(x = b2_size_eff, y = off_spring_prob,
-             col = b1_size)) +
+         aes(x = b2_size_eff, y = off_spring_prob, col = b1_size)) +
     geom_line(aes(group = b1_size)) +
     facet_grid(pid_dist ~ pid_len)
+}
+
+explorePCRAmplificationRates <- function()
+{
+  n_start <- 10000
+  n_sample <- 200000
+  n_rounds <- 35
+  efficiency <- .25
 }

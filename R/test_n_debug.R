@@ -12,7 +12,8 @@ dummy_test_debug <- function()
     'n001' = 
       list(name = 'fwd_loadData',
         op = 'loadData',
-        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R1.fastq",
+        #data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R1.fastq",
+        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
         cache_data = TRUE),
     'n002' =
       list(name = 'fwd_basicQC',
@@ -58,7 +59,8 @@ dummy_test_debug <- function()
     'n008' = 
       list(name = 'rev_loadData',
         op = 'loadData',
-        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R2.fastq",
+        #data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_20k_R2.fastq",
+        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
         cache_data = TRUE),
     'n009' =
       list(name = 'rev_basicQC',
@@ -119,6 +121,11 @@ dummy_test_debug <- function()
       list(name = 'matchPairs',
         op = 'matchPairs',
         data_source = c("fwd" = "n015", "rev" = "n016"),
+        cache_data = TRUE),
+    'n018' =
+      list(name = 'processBadPIDs',
+        op = 'processBadPIDs',
+        data_source = "n017",
         cache_data = TRUE)
     )
 
@@ -154,10 +161,11 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n014')
   all_results <- applyOperation(all_results, config, op_number = 'n015')
   all_results <- applyOperation(all_results, config, op_number = 'n016')
+  all_results <- applyOperation(all_results, config, op_number = 'n017')
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n017'
+  op_number <- 'n018'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
