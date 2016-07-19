@@ -64,7 +64,7 @@ genSummary_case3 <- function(result, config, seq_dat)
 #' @inheritParams saveToDisk
 #' @export
 
-genSummary_case4 <- function(result, config, seq_dat)
+genSummary_case4 <- function(result, config, seq_dat, round_digits = 0)
 {
   summary_tab <- NULL
   trim_criteria <- matrix(TRUE, nrow = length(seq_dat), ncol = length(result$trim_steps))
@@ -90,8 +90,11 @@ genSummary_case4 <- function(result, config, seq_dat)
       comp_trim_vec <- apply(trim_criteria, 1, all) & trim_vec
       kept_seqs <- seq_dat[comp_kept_vec]
       curr_seq_dat <- seq_dat[comp_trim_vec]
-      parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
-                         ',', trim_step$breaks[break_indx], ']', sep = '')
+      parameter <- paste(trim_step$name, ' (', 
+                         round(trim_step$breaks[break_indx-1], round_digits), 
+                         ',', 
+                         round(trim_step$breaks[break_indx], round_digits),
+                         ']', sep = '')
       if (comparator(trim_step$threshold, trim_step$breaks[break_indx]) &
           !(comparator(trim_step$threshold, trim_step$breaks[break_indx-1])))
       {
@@ -129,11 +132,7 @@ genSummary <- function(result, config, seq_dat)
   {
     summary_tab <- genSummary_matchPairs(result)
   } else if (class(result) == 'processBadPIDs') {
-    summary_tab <- rbind(
-      genSummary_processBadPIDs(result, 'fwd'),
-      genSummary_processBadPIDs(result, 'rev'),
-    )
-
+    summary_tab <- genSummary_processBadPIDs(result)
   } else { 
 ## So if a specialized genSummary is not needed:
   ## CASE 1: 1 trim_step + single_value

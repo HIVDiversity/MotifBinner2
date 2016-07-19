@@ -18,8 +18,6 @@ processBadPIDs <- function(all_results, config)
   seq_dat_rev <- all_results[[data_source_indx]]$seq_dat$rev
   stopifnot(all(seq_dat_fwd@id == seq_dat_rev@id))
 
-  pid_len <- nchar(bin_metrics$pid[1])
-
   per_read_metrics <- data.frame(read_name = as.character(seq_dat_fwd@id),
                                  stringsAsFactors = F)
   per_read_metrics$pid <- gsub("^.*_PID:" , "", per_read_metrics$read_name)
@@ -29,6 +27,7 @@ processBadPIDs <- function(all_results, config)
   bin_metrics <- data.frame(pid = names(table(per_read_metrics$clean_pid)),
                             raw_size = as.numeric(table(per_read_metrics$clean_pid)),
                             stringsAsFactors = F)
+  pid_len <- nchar(bin_metrics$pid[1])
   cc <- get_consensus_cutoff(pid_len, max(bin_metrics$raw_size),
                              get_cutoff_models(), phi = 1/100)
   bin_metrics$big_enough <- bin_metrics$raw_size > 2*cc
@@ -61,7 +60,6 @@ processBadPIDs <- function(all_results, config)
   min_bin_size <- 3
   max_chimeric_content <- 0.3
   offspring_prob_cutoff <- sum(bin_metrics$big_enough)/(4^pid_len)
-
 
   bin_metrics$off_spring_prob <- NA_real_
 ### compute prob that content from parent
@@ -160,11 +158,16 @@ saveToDisk.processBadPIDs <- function(result, config, seq_dat)
   return(result)
 }
 
-genSummary_matchPairs <- function(result)
+genSummary_processBadPIDs <- function(result)
 {
-
+  class(result) <- 'processBadPIDs_fwd'
+  seq_dat <- append(result$seq_dat$fwd, result$trim_dat$fwd)
+  summary_tab_fwd <- genSummary_case4(result, NULL, seq_dat, round_digits = 4)
+  class(result) <- 'processBadPIDs_rev'
+  seq_dat <- append(result$seq_dat$rev, result$trim_dat$rev)
+  summary_tab_rev <- genSummary_case4(result, NULL, seq_dat, round_digits = 4)
+  return(rbind(summary_tab_fwd, summary_tab_rev))
 }
-
 
 computeMetrics.processBadPIDs <- function(result, config, seq_dat)
 {
