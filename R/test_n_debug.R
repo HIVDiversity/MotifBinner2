@@ -126,6 +126,12 @@ dummy_test_debug <- function()
       list(name = 'processBadPIDs',
         op = 'processBadPIDs',
         data_source = "n017",
+        cache_data = TRUE),
+    'n019' =
+      list(name = 'alignBins',
+        op = 'alignBins',
+        data_source = "n018",
+        profile_file = "/fridge/data/MotifBinner2_test/v1v2_profile1.fasta",
         cache_data = TRUE)
     )
 
@@ -166,7 +172,7 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n018'
+  op_number <- 'n019'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
