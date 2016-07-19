@@ -160,6 +160,12 @@ saveToDisk.processBadPIDs <- function(result, config, seq_dat)
   return(result)
 }
 
+genSummary_matchPairs <- function(result)
+{
+
+}
+
+
 computeMetrics.processBadPIDs <- function(result, config, seq_dat)
 {
   return(result)
