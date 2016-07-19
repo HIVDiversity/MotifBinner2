@@ -162,6 +162,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n015')
   all_results <- applyOperation(all_results, config, op_number = 'n016')
   all_results <- applyOperation(all_results, config, op_number = 'n017')
+  all_results <- applyOperation(all_results, config, op_number = 'n018')
 
   timing <- list()
   ptm <- proc.time()

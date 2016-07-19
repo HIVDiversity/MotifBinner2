@@ -158,14 +158,28 @@ saveToDisk.processBadPIDs <- function(result, config, seq_dat)
   return(result)
 }
 
+#' Forces two ShortReadQ objects to append
+#' @param x ShortReadQ object
+#' @param y ShortReadQ object
+#' @export
+
+shortReadQ_forced_append <- function(x, y)
+{
+  stopifnot(all(c(class(x), class(y)) == 'ShortReadQ'))
+  sread <- append(x@sread, y@sread)
+  ids <- append(x@id, y@id)
+  quals <- FastqQuality(append(x@quality@quality, y@quality@quality))
+  ShortReadQ(sread = sread, id = ids, qual = quals)
+}
+
 genSummary_processBadPIDs <- function(result)
 {
   class(result) <- 'processBadPIDs_fwd'
-  seq_dat <- append(result$seq_dat$fwd, result$trim_dat$fwd)
-  summary_tab_fwd <- genSummary_case4(result, NULL, seq_dat, round_digits = 4)
+  seq_dat_fwd <- shortReadQ_forced_append(result$seq_dat$fwd, result$trim_dat$fwd)
+  summary_tab_fwd <- genSummary_case4(result, NULL, seq_dat_fwd, round_digits = 4)
   class(result) <- 'processBadPIDs_rev'
-  seq_dat <- append(result$seq_dat$rev, result$trim_dat$rev)
-  summary_tab_rev <- genSummary_case4(result, NULL, seq_dat, round_digits = 4)
+  seq_dat_rev <- shortReadQ_forced_append(result$seq_dat$rev, result$trim_dat$rev)
+  summary_tab_rev <- genSummary_case4(result, NULL, seq_dat_rev, round_digits = 4)
   return(rbind(summary_tab_fwd, summary_tab_rev))
 }
 
