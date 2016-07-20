@@ -1,0 +1,27 @@
+## alignBins
+
+Removes sequences that are either too short or too long.
+
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('alignBins', names(all_results))[1]]]
+}
+if (class(result) != 'alignBins')
+{
+  result <- all_results[[grep('alignBins', names(all_results))[1]]]
+}
+```
+
+```{r, results='asis'}
+kable_summary(result$summary)
+
+timingTable(result)
+```
+

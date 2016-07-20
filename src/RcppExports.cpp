@@ -19,3 +19,16 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// transfer_gaps_cpp
+Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qual, NumericVector gap_only_cols);
+RcppExport SEXP MotifBinner2_transfer_gaps_cpp(SEXP aligned_readSEXP, SEXP r_qualSEXP, SEXP gap_only_colsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type aligned_read(aligned_readSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type r_qual(r_qualSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gap_only_cols(gap_only_colsSEXP);
+    __result = Rcpp::wrap(transfer_gaps_cpp(aligned_read, r_qual, gap_only_cols));
+    return __result;
+END_RCPP
+}

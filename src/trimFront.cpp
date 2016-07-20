@@ -582,3 +582,47 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
   return trim_result;
 }
 
+// [[Rcpp::export]]
+Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qual, NumericVector gap_only_cols)
+{
+  int read_bases;
+  std::string read;
+  std::string gapped_qual;
+  std::string gapped_read;
+  std::string qual;
+  Rcpp::CharacterVector all_gapped_qual(aligned_read.size());
+  Rcpp::CharacterVector all_gapped_read(aligned_read.size());
+  for (int i=0; i!= aligned_read.size(); i++)
+  {
+    read_bases = 0;
+    read = Rcpp::as<std::string>(aligned_read[i]);
+    qual = Rcpp::as<std::string>(r_qual[i]);
+    gapped_qual.clear();
+    gapped_read.clear();
+    for (int j = 0; j < read.size(); ++j)
+    {
+      if (std::find(gap_only_cols.begin(), gap_only_cols.end(), j) != gap_only_cols.end()){
+        if (read[j] != '-'){
+          throw std::range_error("Non-gap letter in gap only column");
+        }
+      } else if (read[j] == '-'){ 
+        gapped_qual += '!';
+        gapped_read += '-';
+      } else { 
+        gapped_qual += qual[read_bases];
+        gapped_read += read[j];
+        ++read_bases;
+      }
+    }
+    all_gapped_qual[i] = gapped_qual;
+    all_gapped_read[i] = gapped_read;
+  }
+
+  Rcpp::List result;
+
+  result = Rcpp::List::create(
+    Rcpp::Named("reads") = all_gapped_read,
+    Rcpp::Named("quals") = all_gapped_qual
+      );
+  return result;
+}

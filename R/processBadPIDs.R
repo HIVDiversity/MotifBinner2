@@ -40,7 +40,7 @@ processBadPIDs <- function(all_results, config)
   bin_metrics$parentage_conflict <- -1
   for (i in 1:nrow(bin_metrics)){
     if (!bin_metrics$big_enough[i]){
-      dist_to_bigs <- stringdist::stringdist(bin_metrics$pid[i], big_enough_pids, 'hamming', nthread=1, ncores=1)
+      dist_to_bigs <- stringdist::stringdist(bin_metrics$pid[i], big_enough_pids, 'hamming', nthread=1)
       bin_metrics$dist_to_big[i] <- min(dist_to_bigs)
       if (min(dist_to_bigs) <= 2){
         can_pids <- big_enough_pids[which(dist_to_bigs == min(dist_to_bigs))]
