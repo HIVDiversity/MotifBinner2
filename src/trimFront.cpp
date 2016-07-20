@@ -626,3 +626,63 @@ Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qua
       );
   return result;
 }
+
+std::map<char, int> getConsensusMatrixRowOrder()
+{
+  std::map<char, int> imap = 
+  {
+    {'A',  0},
+    {'C',  1},
+    {'G',  2},
+    {'T',  3},
+    {'M',  4},
+    {'R',  5},
+    {'W',  6},
+    {'S',  7},
+    {'Y',  8},
+    {'K',  9},
+    {'V', 10},
+    {'H', 11},
+    {'D', 12},
+    {'B', 13},
+    {'N', 14},
+    {'-', 15},
+    {'+', 16},
+    {'.', 17}
+  };
+  return imap;
+}
+
+// [[Rcpp::export]]
+Rcpp::List score_alignment_positions(CharacterVector reads, NumericMatrix q_mat)
+{
+  int k = 0;
+  char c_let;
+  int c_qual;
+  int score_mat_row;
+  std::map<char, int> score_mat_row_lookup;
+  score_mat_row_lookup = getConsensusMatrixRowOrder();
+  Rcpp::NumericMatrix score_mat (18, reads[1].size());
+  Rcpp::NumericMatrix occurrence_mat (18, reads[1].size());
+  for (int j = 0; j < reads[1].size(); ++j)
+  {
+    for (int i = 0; i < reads.size(); ++i)
+    {
+      c_let = reads[i][j];
+      c_qual = q_mat(i,j);
+      score_mat_row = score_mat_row_lookup[c_let];
+      score_mat(score_mat_row, j) += c_qual;
+      occurrence_mat(score_mat_row, j) ++;
+//      std::cout << j << " " << i << " " << score_mat_row << " " << c_qual << std::endl;
+    }
+  }
+//  std::cout << k << std::endl;
+
+  Rcpp::List result;
+
+  result = Rcpp::List::create(
+    Rcpp::Named("score_mat") = score_mat,
+    Rcpp::Named("occurrence_mat") = occurrence_mat
+      );
+  return result;
+}
