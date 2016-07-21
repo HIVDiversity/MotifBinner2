@@ -32,3 +32,15 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// score_alignment_positions
+Rcpp::List score_alignment_positions(CharacterVector reads, NumericMatrix q_mat);
+RcppExport SEXP MotifBinner2_score_alignment_positions(SEXP readsSEXP, SEXP q_matSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type reads(readsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type q_mat(q_matSEXP);
+    __result = Rcpp::wrap(score_alignment_positions(reads, q_mat));
+    return __result;
+END_RCPP
+}

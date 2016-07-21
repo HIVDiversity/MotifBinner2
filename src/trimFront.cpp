@@ -627,9 +627,11 @@ Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qua
   return result;
 }
 
-std::map<char, int> getConsensusMatrixRowOrder()
+
+// [[Rcpp::export]]
+Rcpp::List score_alignment_positions(CharacterVector reads, NumericMatrix q_mat)
 {
-  std::map<char, int> imap = 
+  std::map<char, int> score_mat_row_lookup = 
   {
     {'A',  0},
     {'C',  1},
@@ -650,18 +652,11 @@ std::map<char, int> getConsensusMatrixRowOrder()
     {'+', 16},
     {'.', 17}
   };
-  return imap;
-}
 
-// [[Rcpp::export]]
-Rcpp::List score_alignment_positions(CharacterVector reads, NumericMatrix q_mat)
-{
   int k = 0;
   char c_let;
   int c_qual;
   int score_mat_row;
-  std::map<char, int> score_mat_row_lookup;
-  score_mat_row_lookup = getConsensusMatrixRowOrder();
   Rcpp::NumericMatrix score_mat (18, reads[1].size());
   Rcpp::NumericMatrix occurrence_mat (18, reads[1].size());
   for (int j = 0; j < reads[1].size(); ++j)
