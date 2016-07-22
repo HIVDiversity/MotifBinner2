@@ -24,11 +24,13 @@ buildConsensus <- function(all_results, config)
   for (pid in unique(per_read_metrics$clean_pid)){
     bin_seq_indx <- which(per_read_metrics$clean_pid == pid)
     bin_seqs <- seq_dat[bin_seq_indx]
-#    writeFastq(bin_seqs, '/tmp/bin.fastq', compress=F)
+    writeFastq(bin_seqs, '/tmp/bin.fastq', compress=F)
 
     qual_mat <- as(FastqQuality(quality(quality(bin_seqs))), 'matrix')
-    x <- score_alignment_positions(as.character(seq_dat@sread),
+    system.time(
+    x <- score_alignment_positions(as.character(bin_seqs@sread),
                                    qual_mat)
+    )
   }
 
 

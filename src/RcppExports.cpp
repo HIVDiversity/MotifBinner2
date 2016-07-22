@@ -5,6 +5,30 @@
 
 using namespace Rcpp;
 
+// gapQualityTweaker
+Rcpp::NumericMatrix gapQualityTweaker(CharacterVector reads, NumericMatrix q_mat);
+RcppExport SEXP MotifBinner2_gapQualityTweaker(SEXP readsSEXP, SEXP q_matSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type reads(readsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type q_mat(q_matSEXP);
+    __result = Rcpp::wrap(gapQualityTweaker(reads, q_mat));
+    return __result;
+END_RCPP
+}
+// score_alignment_positions
+Rcpp::List score_alignment_positions(CharacterVector reads, NumericMatrix q_mat);
+RcppExport SEXP MotifBinner2_score_alignment_positions(SEXP readsSEXP, SEXP q_matSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type reads(readsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type q_mat(q_matSEXP);
+    __result = Rcpp::wrap(score_alignment_positions(reads, q_mat));
+    return __result;
+END_RCPP
+}
 // trimFront_cpp
 Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual, CharacterVector r_primer, std::vector<int> prefix_lens);
 RcppExport SEXP MotifBinner2_trimFront_cpp(SEXP r_sreadSEXP, SEXP r_qualSEXP, SEXP r_primerSEXP, SEXP prefix_lensSEXP) {

@@ -9,7 +9,6 @@ genSummary_case1 <- function(result, config, seq_dat)
 {
   trim_step <- result$trim_steps[[1]]
   trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
-  print('summary: case 1')
   stopifnot(all(trim_dat == trim_step$threshold))
   kept <- seq_dat
   trimmed <- seq_dat[0]
@@ -162,7 +161,6 @@ genSummary <- function(result, config, seq_dat)
       summary_tab <- genSummary_case4(result, config, seq_dat)
     }
   } ## else - this block runs the generic version of genSummary
-  print(summary_tab[,c('parameter', 'k_seqs', 't_seqs')])
 
   write.csv(
     summary_tab, 

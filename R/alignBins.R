@@ -116,7 +116,6 @@ alignBins <- function(all_results, config)
 #     }
     aligned_with_qual
   }
-  print(tmp_x[[1]])
   all_bins_aligned_with_qual <- tmp_x[[1]]
   for (i in 2:length(tmp_x)){
     all_bins_aligned_with_qual <- shortReadQ_forced_append(all_bins_aligned_with_qual,
