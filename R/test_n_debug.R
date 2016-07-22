@@ -6,6 +6,7 @@ dummy_test_debug <- function()
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
   #Rcpp::compileAttributes()
   load_all(quiet=TRUE)
+#  load_all()
 
   # arguments passed in:
   operation_list = list(

@@ -14,26 +14,58 @@ buildConsensus <- function(all_results, config)
   data_source_indx <- grep(op_args$data_source, names(all_results))
   stopifnot(length(data_source_indx) == 1)
   seq_dat <- all_results[[data_source_indx]]$seq_dat
+
+  required_dominance <- .05
   
   per_read_metrics <- data.frame(read_name = as.character(seq_dat@id),
                                  stringsAsFactors = F)
   per_read_metrics$pid <- gsub("_(fwd)|_(rev)$", "", gsub("^.*_PID:" , "", per_read_metrics$read_name))
   per_read_metrics$clean_pid <- gsub("_" , "", per_read_metrics$pid)
+  full_alphabet <- row.names(consensusMatrix(DNAStringSet('A')))
 
+  all_consensuses <- NULL
   pid <- unique(per_read_metrics$clean_pid)[1]
-  for (pid in unique(per_read_metrics$clean_pid)){
+  uniq_pids <- unique(per_read_metrics$clean_pid)
+  tmp_x <- foreach(pid = uniq_pids, .combine = "c") %dopar% {
+#  for (pid in unique(per_read_metrics$clean_pid)){
     bin_seq_indx <- which(per_read_metrics$clean_pid == pid)
     bin_seqs <- seq_dat[bin_seq_indx]
-    writeFastq(bin_seqs, '/tmp/bin.fastq', compress=F)
+#    writeFastq(bin_seqs, '/tmp/bin.fastq', compress=F)
 
     qual_mat <- as(FastqQuality(quality(quality(bin_seqs))), 'matrix')
-    system.time(
-    x <- score_alignment_positions(as.character(bin_seqs@sread),
+    tweaked_qual_mat <- gapQualityTweaker_cpp(as.character(bin_seqs@sread),
                                    qual_mat)
-    )
+    x <- scoreAlignmentPositions_cpp(as.character(bin_seqs@sread),
+                                   tweaked_qual_mat)
+    gsub('-', '', buildConsensus_cpp(x$score_mat, required_dominance)$consensus)
   }
 
+  fake_qualities <- NULL
+  for (i in 1:length(tmp_x)){
+    fake_qualities <- c(fake_qualities, paste(rep('G', nchar(tmp_x[i])), collapse = ''))
+  }
 
+  consensuses <-
+  ShortReadQ(sread = DNAStringSet(tmp_x),
+             quality = BStringSet(fake_qualities),
+             id = BStringSet(uniq_pids))
+  
+  per_read_metrics <- data.frame('read_exists' = rep(1, length(consensuses)))
+  trim_steps <- list(step1 = list(name = 'read_exists',
+                                  threshold = 1,
+                                  breaks = c(1)))
+
+  result <- list(trim_steps = trim_steps,
+                 metrics = list(per_read_metrics = per_read_metrics))
+  class(result) <- 'buildConsensus'
+  if (op_args$cache){
+    result$seq_dat <- consensuses
+  }
+  result$input_dat <- consensuses
+  result$config <- list(op_number = op_number,
+                        op_args = op_args,
+                        op_full_name = op_full_name,
+                        op_dir = op_dir)
   return(result)
 }
 

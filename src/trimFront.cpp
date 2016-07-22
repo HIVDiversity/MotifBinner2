@@ -6,6 +6,7 @@
 #include <map>
 #include <utility>
 #include <time.h>
+#include <queue>
 
 // [[Rcpp::plugins("cpp11")]]
 
@@ -627,9 +628,104 @@ Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qua
   return result;
 }
 
+// [[Rcpp::export]]
+Rcpp::NumericMatrix gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat)
+{
+  std::queue<int> last_sizes;
+  last_sizes.push(0);
+  double current_avg_quality = 0;
+  int read_length;
+  int jj;
+  read_length = reads[1].size();
+  bool read_has_begun;
+  for (int i = 0; i < reads.size(); ++i)
+  {
+    read_has_begun = false;
+    current_avg_quality = 0;
+    while (!last_sizes.empty()){
+      last_sizes.pop();
+    }
+    if (i %2 == 0)
+    {
+      for (int j = 0; j < read_length; ++j)
+      {
+//          std::cout << j << " (" << jj << "), " << current_avg_quality << ": ";
+        // even number - fwd read
+        jj = read_length - 1 - j;
+        if (jj < 0) {
+          throw std::range_error("fwd read tracing went out of bounds");
+        }
+
+        if (read_has_begun & reads[i][jj] == '-')
+        {
+//          std::cout << " gap: update q_mat: ";
+          q_mat(i,jj) = current_avg_quality;
+//          std::cout << "q_mat(" << i << ", " << jj << ") = " << current_avg_quality;
+        }
+
+        if (read_has_begun & reads[i][jj] != '-')
+        {
+          last_sizes.push(q_mat(i,jj));
+          current_avg_quality = std::max(0.0,
+              current_avg_quality + last_sizes.back()/5.0 - last_sizes.front()/5.0);
+          last_sizes.pop();
+//            std::cout << " base: " << reads[i][jj] << ", update curr Q ";
+//            std::cout << " new Q: " << q_mat(i,jj) << " " << last_sizes.back() << 
+//                         " old Q: " << last_sizes.front();
+        }
+
+        if (reads[i][jj] != '-' & !read_has_begun)
+        {
+//            std::cout << "read begins now ";
+          read_has_begun = true;
+          for (int k = 0; k < 5; ++k)
+          {
+            last_sizes.push(q_mat(i,jj));
+          }
+          current_avg_quality = q_mat(i,jj);
+        }
+
+//        std::cout << std::endl;
+      } 
+    } else {
+      for (int j = 0; j < read_length; ++j)
+      {
+//        std::cout << j << " " << current_avg_quality << " ";
+        // odd number - rev read
+        if (reads[i][j] != '-' & !read_has_begun)
+        {
+//          std::cout << "read begins now ";
+          read_has_begun = true;
+          for (int k = 0; k < 5; ++k)
+          {
+            last_sizes.push(q_mat(i,j));
+          }
+          current_avg_quality = q_mat(i,j);
+        }
+        if (read_has_begun & reads[i][j] == '-')
+        {
+//          std::cout << " gap detected, updating q_mat ";
+          q_mat(i,j) = current_avg_quality;
+        }
+        if (read_has_begun & reads[i][j] != '-')
+        {
+          last_sizes.push(q_mat(i,j));
+          current_avg_quality = std::max(0.0,
+              current_avg_quality + last_sizes.back()/5.0 - last_sizes.front()/5.0);
+//          std::cout << " base detected, updating curr_qual ";
+//          std::cout << " new qual: " << q_mat(i,j) << " " << last_sizes.back() << 
+//                       " old qual: " << last_sizes.front();
+          last_sizes.pop();
+        }
+//        std::cout << std::endl;
+      }
+    }
+  }
+  return q_mat;
+}
 
 // [[Rcpp::export]]
-Rcpp::List score_alignment_positions(CharacterVector reads, NumericMatrix q_mat)
+Rcpp::List scoreAlignmentPositions_cpp(CharacterVector reads, NumericMatrix q_mat)
 {
   std::map<char, int> score_mat_row_lookup = 
   {
@@ -681,3 +777,78 @@ Rcpp::List score_alignment_positions(CharacterVector reads, NumericMatrix q_mat)
       );
   return result;
 }
+
+// [[Rcpp::export]]
+Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance)
+{
+  double position_max;
+  double position_threshold;
+  int consensus_int;
+  int number_of_options;
+  std::string consensus (score_mat.ncol(), '.');
+
+  std::map<char, int> int_to_char_lookup = 
+  {
+    { 0, 'A'},
+    { 1, 'C'},
+    { 2, 'G'},
+    { 3, 'T'},
+    { 4, 'M'},
+    { 5, 'R'},
+    { 6, 'W'},
+    { 7, 'S'},
+    { 8, 'Y'},
+    { 9, 'K'},
+    {10, 'V'},
+    {11, 'H'},
+    {12, 'D'},
+    {13, 'B'},
+    {14, 'N'},
+    {15, '-'},
+    {16, '+'},
+    {17, '.'}
+  };
+
+  for (int j = 0; j < score_mat.ncol(); ++j)
+  {
+    consensus_int = -1;
+    number_of_options = 0;
+    position_max = 0;
+    for (int i = 0; i < score_mat.nrow(); ++i)
+    {
+      if (position_max < score_mat(i,j)){
+        position_max = score_mat(i,j);
+      }
+    }
+    position_threshold = (1-required_dominance)*position_max;
+    for (int i = 0; i < score_mat.nrow(); ++i)
+    {
+      if (score_mat(i,j) >= position_threshold){
+        consensus_int = i;
+        ++number_of_options;
+      }
+    }
+    if (number_of_options == 0){
+      throw std::range_error("no options tallied for position");
+    } else if (number_of_options > 1){
+//      std::cout << j << " N many options" << std::endl;
+      consensus[j] = 'N';
+    } else if (consensus_int >= 15){
+//      std::cout << j << " -" << std::endl;
+      consensus[j] = '-';
+    } else if (consensus_int >= 4){
+//      std::cout << j << " N ambig consent" << std::endl;
+      consensus[j] = 'N';
+    } else {
+//      std::cout << j << " real letter" << consensus_int << " " << int_to_char_lookup[consensus_int] << std::endl;
+      consensus[j] = int_to_char_lookup[consensus_int];
+    }
+  }
+  Rcpp::List result;
+
+  result = Rcpp::List::create(
+    Rcpp::Named("consensus") = consensus
+      );
+  return result;
+}
+

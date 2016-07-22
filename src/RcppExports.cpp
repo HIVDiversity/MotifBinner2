@@ -5,30 +5,6 @@
 
 using namespace Rcpp;
 
-// gapQualityTweaker
-Rcpp::NumericMatrix gapQualityTweaker(CharacterVector reads, NumericMatrix q_mat);
-RcppExport SEXP MotifBinner2_gapQualityTweaker(SEXP readsSEXP, SEXP q_matSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< CharacterVector >::type reads(readsSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type q_mat(q_matSEXP);
-    __result = Rcpp::wrap(gapQualityTweaker(reads, q_mat));
-    return __result;
-END_RCPP
-}
-// score_alignment_positions
-Rcpp::List score_alignment_positions(CharacterVector reads, NumericMatrix q_mat);
-RcppExport SEXP MotifBinner2_score_alignment_positions(SEXP readsSEXP, SEXP q_matSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject __result;
-    Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< CharacterVector >::type reads(readsSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type q_mat(q_matSEXP);
-    __result = Rcpp::wrap(score_alignment_positions(reads, q_mat));
-    return __result;
-END_RCPP
-}
 // trimFront_cpp
 Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual, CharacterVector r_primer, std::vector<int> prefix_lens);
 RcppExport SEXP MotifBinner2_trimFront_cpp(SEXP r_sreadSEXP, SEXP r_qualSEXP, SEXP r_primerSEXP, SEXP prefix_lensSEXP) {
@@ -56,15 +32,39 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// score_alignment_positions
-Rcpp::List score_alignment_positions(CharacterVector reads, NumericMatrix q_mat);
-RcppExport SEXP MotifBinner2_score_alignment_positions(SEXP readsSEXP, SEXP q_matSEXP) {
+// gapQualityTweaker_cpp
+Rcpp::NumericMatrix gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat);
+RcppExport SEXP MotifBinner2_gapQualityTweaker_cpp(SEXP readsSEXP, SEXP q_matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< CharacterVector >::type reads(readsSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type q_mat(q_matSEXP);
-    __result = Rcpp::wrap(score_alignment_positions(reads, q_mat));
+    __result = Rcpp::wrap(gapQualityTweaker_cpp(reads, q_mat));
+    return __result;
+END_RCPP
+}
+// scoreAlignmentPositions_cpp
+Rcpp::List scoreAlignmentPositions_cpp(CharacterVector reads, NumericMatrix q_mat);
+RcppExport SEXP MotifBinner2_scoreAlignmentPositions_cpp(SEXP readsSEXP, SEXP q_matSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type reads(readsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type q_mat(q_matSEXP);
+    __result = Rcpp::wrap(scoreAlignmentPositions_cpp(reads, q_mat));
+    return __result;
+END_RCPP
+}
+// buildConsensus_cpp
+Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance);
+RcppExport SEXP MotifBinner2_buildConsensus_cpp(SEXP score_matSEXP, SEXP required_dominanceSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericMatrix >::type score_mat(score_matSEXP);
+    Rcpp::traits::input_parameter< double >::type required_dominance(required_dominanceSEXP);
+    __result = Rcpp::wrap(buildConsensus_cpp(score_mat, required_dominance));
     return __result;
 END_RCPP
 }
