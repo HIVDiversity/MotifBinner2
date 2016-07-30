@@ -13,7 +13,7 @@ dummy_test_debug <- function()
     'n001' = 
       list(name = 'fwd_loadData',
         op = 'loadData',
-        #data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R1.fastq",
+#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R1.fastq",
         data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
         cache_data = TRUE),
     'n002' =
@@ -60,7 +60,7 @@ dummy_test_debug <- function()
     'n008' = 
       list(name = 'rev_loadData',
         op = 'loadData',
-        #data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R2.fastq",
+#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R2.fastq",
         data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
         cache_data = TRUE),
     'n009' =
@@ -139,7 +139,12 @@ dummy_test_debug <- function()
       list(name = 'buildConsensus',
         op = 'buildConsensus',
         data_source = "n019",
-        cache_data = TRUE)
+        cache_data = TRUE),
+    'n021' =
+      list(name = 'primerSeqErr',
+        op = 'primerSeqErr',
+        data_source = c("fwd" = "n007", "rev" = "n014"),
+        cache_data = FALSE)
     )
 
   output_dir = "/fridge/data/MotifBinner2_test"
@@ -181,7 +186,7 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n020'
+  op_number <- 'n021'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)

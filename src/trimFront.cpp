@@ -852,3 +852,33 @@ Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance
   return result;
 }
 
+// [[Rcpp::export]]
+std::map<char, std::map<char, std::map<char, int> > >
+tallyPrimerSeqErrors_cpp(CharacterVector r_sread,
+                         CharacterVector r_primer,
+                         CharacterVector r_qual){
+  std::map<char, std::map<char, std::map<char, int> > > tallies;
+  int qual_offset;
+  for (int i = 0; i != r_sread.size(); ++i)
+  {
+    if (r_sread[i].size() != r_primer[i].size() ||
+        r_sread[i].size() != r_qual[i].size()){
+      throw std::range_error("read, quality and primer must be equal length");
+    }
+    qual_offset = 0;
+    for (int j = 0; j != r_sread[i].size(); ++j)
+    {
+      if (r_sread[i][j] == '-'){
+        tallies['1']['1']['!']++;
+        qual_offset++;
+      }
+      else if (r_primer[i][j] == '-'){
+        tallies['2']['2']['!']++;
+      } else {
+        tallies[r_primer[i][j]][r_sread[i][j]][r_qual[i][j-qual_offset]]++;
+      }
+    }
+  }
+  return tallies;
+}
+
