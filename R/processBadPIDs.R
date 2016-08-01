@@ -165,6 +165,8 @@ saveToDisk.processBadPIDs <- function(result, config, seq_dat)
 
 shortReadQ_forced_append <- function(x, y)
 {
+  if (is.null(x)) return(y)
+  if (is.null(y)) return(x)
   stopifnot(all(c(class(x), class(y)) == 'ShortReadQ'))
   sread <- append(x@sread, y@sread)
   ids <- append(x@id, y@id)

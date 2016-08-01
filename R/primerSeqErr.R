@@ -16,11 +16,15 @@ primerSeqErr <- function(all_results, config)
   stopifnot(!op_args$cache) #makes no sense to cache this...
 
   data_source_name <- names(op_args$data_source)[2]
+
+  all_tallies <- NULL
+  seq_dat <- NULL
   for (data_source_name in names(op_args$data_source)){
     data_source_indx <- grep(op_args$data_source[data_source_name], names(all_results))
     stopifnot(length(data_source_indx) == 1)
 
     dat <- all_results[[data_source_indx]]$metrics$per_read_metrics
+    seq_dat <- shortReadQ_forced_append(seq_dat, all_results[[data_source_indx]]$seq_dat)
     n_fragments <- length(grep('read_fragment_', names(dat)))
     reads <- NULL
     primers <- NULL
@@ -30,8 +34,8 @@ primerSeqErr <- function(all_results, config)
       primers <- paste(primers, dat[,paste('prefix_fragment_', i, sep = '')], sep = '')
       quals <- paste(quals, dat[,paste('read_qual_fragment_', i, sep = '')], sep = '')
     }
-    stopifnot(all(sapply(reads, nchar) == sapply(primers, nchar)))
-    stopifnot(all(sapply(reads, nchar) == sapply(quals, nchar)))
+#    stopifnot(all(sapply(reads, nchar) == sapply(primers, nchar)))
+#    stopifnot(all(sapply(reads, nchar) == sapply(quals, nchar)))
 
     tallies_list <- tallyPrimerSeqErrors_cpp(reads, primers, quals)
     tallies_df <- data.frame(from = character(0),
@@ -59,37 +63,31 @@ primerSeqErr <- function(all_results, config)
       }
     }
     tallies_df$data_source <- data_source_name
-    
-#    write.csv(data.frame(reads = reads, primers = primers, quals = quals), '/fridge/data/primer_seq_err.csv',
-#                         row.names=F)
-
-
+    all_tallies <- rbind(all_tallies, tallies_df)
   }
 
+  if (length(unique(all_tallies$data_source))){
+    x <- all_tallies %>%
+      group_by(from, to, qual) %>%
+      summarize(count = sum(count))
+    x <- as.data.frame(x)
+    x$data_source <- 'all'
+    all_tallies <- rbind(all_tallies, as.data.frame(x))
+  }
 
-
-
-
-
-  per_read_metrics <- rbind(
-                      data.frame('has_pair' = rep(1, length(fwd_kept))),
-                      data.frame('has_pair' = rep(0, length(fwd_trim) + length(rev_trim))))
-  trim_steps <- list(step1 = list(name = 'has_pair',
+  per_read_metrics <- data.frame('read_exists' = rep(1, length(seq_dat)))
+  trim_steps <- list(step1 = list(name = 'read_exists',
                                   threshold = 1,
-                                  comparator = `>=`,
-                                  breaks = c(Inf, 1, 0, -Inf)))
+                                  breaks = c(1)))
 
   result <- list(trim_steps = trim_steps,
-                 metrics = list(per_read_metrics = per_read_metrics))
-  kept_dat <- list(fwd = fwd_kept,
-                   rev = rev_kept)
-  trim_dat <- list(fwd = fwd_trim,
-                   rev = rev_trim)
+                 metrics = list(per_read_metrics = per_read_metrics,
+                                primer_sequencing_stats = all_tallies))
   class(result) <- 'primerSeqErr'
-  result$seq_dat <- kept_dat
-  result$trim_dat <- trim_dat
-  result$input_dat <- list(fwd = seq_dat_fwd,
-                           rev = seq_dat_rev)
+  if (op_args$cache){
+    stop('Do not cache data in steps that do not alter the datasets')
+  }
+  result$input_dat <- seq_dat
   result$config <- list(op_number = op_number,
                         op_args = op_args,
                         op_full_name = op_full_name,

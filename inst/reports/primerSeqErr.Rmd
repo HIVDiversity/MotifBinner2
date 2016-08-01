@@ -1,0 +1,42 @@
+## primerSeqErr
+
+Computes the sequencing error rate as a function of quality score based on the
+known primer sequences.
+
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('primerSeqErr', names(all_results))[1]]]
+}
+if (class(result) != 'primerSeqErr')
+{
+  result <- all_results[[grep('primerSeqErr', names(all_results))[1]]]
+}
+```
+
+Both forward and reverse reads must be looked at. They will be looked at
+seperately as well as pooled.
+
+```{r, include=FALSE}
+out <- NULL
+for (data_source_name in sort(unique(result$metrics$primer_sequencing_stats$data_source)))
+{
+  out <- c(out, knit_child('primerSeqErr_internal.Rmd'))
+}
+```
+
+```{r, results='asis'}
+cat(paste(out, collapse = '\n'))
+cat('\n\n')
+
+kable_summary(result$summary)
+
+timingTable(result)
+```
+

@@ -21,3 +21,7 @@ buildConsensus_cpp <- function(score_mat, required_dominance) {
     .Call('MotifBinner2_buildConsensus_cpp', PACKAGE = 'MotifBinner2', score_mat, required_dominance)
 }
 
+tallyPrimerSeqErrors_cpp <- function(r_sread, r_primer, r_qual) {
+    .Call('MotifBinner2_tallyPrimerSeqErrors_cpp', PACKAGE = 'MotifBinner2', r_sread, r_primer, r_qual)
+}
+

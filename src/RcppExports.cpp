@@ -68,3 +68,16 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// tallyPrimerSeqErrors_cpp
+std::map<char, std::map<char, std::map<char, int> > > tallyPrimerSeqErrors_cpp(CharacterVector r_sread, CharacterVector r_primer, CharacterVector r_qual);
+RcppExport SEXP MotifBinner2_tallyPrimerSeqErrors_cpp(SEXP r_sreadSEXP, SEXP r_primerSEXP, SEXP r_qualSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type r_sread(r_sreadSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type r_primer(r_primerSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type r_qual(r_qualSEXP);
+    __result = Rcpp::wrap(tallyPrimerSeqErrors_cpp(r_sread, r_primer, r_qual));
+    return __result;
+END_RCPP
+}
