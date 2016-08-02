@@ -17,9 +17,9 @@ dat <- subset(result$metrics$primer_sequencing_stats,
 dat$match <- dat$from == dat$to
 dat$match_count <- dat$match * dat$count
 
-denominator_for_indels <- sum(dat$count) - n_deletions
-del_rate <- subset(dat, from == 'del', select = 'count', drop=T)/denominator_for_indels
-ins_rate <- subset(dat, from == 'ins', select = 'count', drop=T)/denominator_for_indels
+denominator_for_indels <- sum(dat$count) - sum(subset(dat, from == 'del', select = 'count', drop=T))
+del_rate <- sum(subset(dat, from == 'del', select = 'count', drop=T))/denominator_for_indels
+ins_rate <- sum(subset(dat, from == 'ins', select = 'count', drop=T))/denominator_for_indels
 #1 - (n_deletions / denominator_for_indels)
 #1 - (n_insertions / denominator_for_indels)
 
