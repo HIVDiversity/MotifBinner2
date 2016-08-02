@@ -2,7 +2,7 @@
 #' @inheritParams applyOperation
 #' @export
 
-primerSeqErr <- function(all_results, config)
+binSeqErr <- function(all_results, config)
 {
   op_number <- config$current_op_number
   op_args <- config$operation_list[[op_number]]
@@ -11,33 +11,31 @@ primerSeqErr <- function(all_results, config)
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   
-  stopifnot(length(op_args$data_source) == 1 | length(op_args$data_source) == 2)
-  stopifnot(all(names(op_args$data_source) %in% c("fwd", "rev"))) # must have fwd and/or rev primers
+  stopifnot(length(op_args$data_source) == 2)
+  stopifnot(all(names(op_args$data_source) %in% c("bin_msa", "cons"))) # must have fwd and/or rev primers
   stopifnot(!op_args$cache) #makes no sense to cache this...
 
-  data_source_name <- names(op_args$data_source)[2]
+  msa_indx <- grep(op_args$data_source['bin_msa'], names(all_results))
+  msa_dat <- all_results[[msa_indx]]$seq_dat
+
+  cons_indx <- grep(op_args$data_source['cons'], names(all_results))
+  cons_dat <- all_results[[cons_indx]]$seq_dat
 
   all_tallies <- NULL
-  seq_dat <- NULL
-  for (data_source_name in names(op_args$data_source)){
-    data_source_indx <- grep(op_args$data_source[data_source_name], names(all_results))
-    stopifnot(length(data_source_indx) == 1)
+  bin_name <- as.character(cons_dat@id)[1]
 
-    dat <- all_results[[data_source_indx]]$metrics$per_read_metrics
-    seq_dat <- shortReadQ_forced_append(seq_dat, all_results[[data_source_indx]]$seq_dat)
-    n_fragments <- length(grep('read_fragment_', names(dat)))
-    reads <- NULL
-    primers <- NULL
-    quals <- NULL
-    for (i in 1:n_fragments){
-      reads <- paste(reads, dat[,paste('read_fragment_', i, sep = '')], sep = '')
-      primers <- paste(primers, dat[,paste('prefix_fragment_', i, sep = '')], sep = '')
-      quals <- paste(quals, dat[,paste('read_qual_fragment_', i, sep = '')], sep = '')
-    }
-#    stopifnot(all(sapply(reads, nchar) == sapply(primers, nchar)))
-#    stopifnot(all(sapply(reads, nchar) == sapply(quals, nchar)))
+  counter <- 0
+  for (bin_name in as.character(cons_dat@id)){
+    counter <- counter+1
+    print(counter)
+    cons_seq <- cons_dat[as.character(cons_dat@id) == bin_name]
+    bin_seq <- msa_dat[grep(bin_name, as.character(msa_dat@id))]
+    
+    cons_seq <- rep(as.character(cons_seq@sread), length(bin_seq))
 
-    tallies_list <- tallyPrimerSeqErrors_cpp(reads, primers, quals)
+    tallies_list <- tallyPrimerSeqErrors_cpp(as.character(bin_seq@sread), 
+                                             cons_seq, 
+                                             as.character(bin_seq@quality@quality))
     tallies_df <- data.frame(from = character(0),
                     to = character(0),
                     qual = character(0),
@@ -62,7 +60,7 @@ primerSeqErr <- function(all_results, config)
         }
       }
     }
-    tallies_df$data_source <- data_source_name
+    tallies_df$data_source <- bin_name
     all_tallies <- rbind(all_tallies, tallies_df)
   }
 
@@ -83,7 +81,7 @@ primerSeqErr <- function(all_results, config)
   result <- list(trim_steps = trim_steps,
                  metrics = list(per_read_metrics = per_read_metrics,
                                 primer_sequencing_stats = all_tallies))
-  class(result) <- 'primerSeqErr'
+  class(result) <- 'binSeqErr'
   if (op_args$cache){
     stop('Do not cache data in steps that do not alter the datasets')
   }
@@ -95,7 +93,7 @@ primerSeqErr <- function(all_results, config)
   return(result)
 }
 
-saveToDisk.primerSeqErr <- function(result, config, seq_dat)
+saveToDisk.binSeqErr <- function(result, config, seq_dat)
 {
   kept <- result$seq_dat
   trimmed <- result$trim_dat
@@ -127,7 +125,7 @@ saveToDisk.primerSeqErr <- function(result, config, seq_dat)
   return(result)
 }
 
-genSummary_primerSeqErr <- function(result)
+genSummary_binSeqErr <- function(result)
 {
   summary_tab <-
     rbind(
@@ -159,7 +157,7 @@ genSummary_primerSeqErr <- function(result)
   return(summary_tab)
 }
 
-computeMetrics.primerSeqErr <- function(result, config, seq_dat)
+computeMetrics.binSeqErr <- function(result, config, seq_dat)
 {
 
   #silly little private function
@@ -251,10 +249,10 @@ computeMetrics.primerSeqErr <- function(result, config, seq_dat)
   return(result)
 }
 
-print.primerSeqErr <- function(result, config)
+print.binSeqErr <- function(result, config)
 {
   cat('\n-------------------')
-  cat('\nOperation: primerSeqErr')
+  cat('\nOperation: binSeqErr')
   cat('\n-------------------')
   cat('\nKept Sequences:\n')
   print(result$summary[,c('parameter', 'k_seqs', 'k_mean_length', 'k_mean_qual')])

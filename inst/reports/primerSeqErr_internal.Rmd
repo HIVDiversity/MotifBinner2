@@ -2,12 +2,6 @@
 
 ```{r, include=F}
 fig.cap1 <- 'Substitution error rate by quality score'
-let_to_int <- function(x){
-  if (x == 'A') return(1)
-  if (x == 'C') return(2)
-  if (x == 'G') return(3)
-  if (x == 'T') return(4)
-}
 
 ```
 

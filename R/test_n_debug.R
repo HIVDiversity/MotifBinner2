@@ -13,8 +13,8 @@ dummy_test_debug <- function()
     'n001' = 
       list(name = 'fwd_loadData',
         op = 'loadData',
-#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R1.fastq",
-        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
+        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R1.fastq",
+#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
         cache_data = TRUE),
     'n002' =
       list(name = 'fwd_basicQC',
@@ -60,8 +60,8 @@ dummy_test_debug <- function()
     'n008' = 
       list(name = 'rev_loadData',
         op = 'loadData',
-#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R2.fastq",
-        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
+        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R2.fastq",
+#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
         cache_data = TRUE),
     'n009' =
       list(name = 'rev_basicQC',
@@ -144,6 +144,11 @@ dummy_test_debug <- function()
       list(name = 'primerSeqErr',
         op = 'primerSeqErr',
         data_source = c("fwd" = "n007", "rev" = "n014"),
+        cache_data = FALSE),
+    'n022' =
+      list(name = 'binSeqErr',
+        op = 'binSeqErr',
+        data_source = c("bin_msa" = "n019", "cons" = "n020"),
         cache_data = FALSE)
     )
 
@@ -177,17 +182,17 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n012')
   all_results <- applyOperation(all_results, config, op_number = 'n013')
   all_results <- applyOperation(all_results, config, op_number = 'n014')
-  all_results <- applyOperation(all_results, config, op_number = 'n015')
-  all_results <- applyOperation(all_results, config, op_number = 'n016')
-  all_results <- applyOperation(all_results, config, op_number = 'n017')
-  all_results <- applyOperation(all_results, config, op_number = 'n018')
-  all_results <- applyOperation(all_results, config, op_number = 'n019')
-  all_results <- applyOperation(all_results, config, op_number = 'n020')
-  all_results <- applyOperation(all_results, config, op_number = 'n021')
+  all_results <- applyOperation(all_results, config, op_number = 'n015') # fwdExtractPIDs
+  all_results <- applyOperation(all_results, config, op_number = 'n016') # revExtractPIDs
+  all_results <- applyOperation(all_results, config, op_number = 'n017') # matchPairs
+  all_results <- applyOperation(all_results, config, op_number = 'n018') # processBadPIDs
+  all_results <- applyOperation(all_results, config, op_number = 'n019') # alignBins
+  all_results <- applyOperation(all_results, config, op_number = 'n020') # buildConsensus
+  all_results <- applyOperation(all_results, config, op_number = 'n021') # primerSeqErr
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n020'
+  op_number <- 'n022'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
