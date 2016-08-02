@@ -161,6 +161,84 @@ genSummary_primerSeqErr <- function(result)
 
 computeMetrics.primerSeqErr <- function(result, config, seq_dat)
 {
+  error_parameters <- list()
+  for (data_source_name in unique(result$metrics$primer_sequencing_stats$data_source))
+  {
+    dat <- subset(result$metrics$primer_sequencing_stats,
+                  data_source == data_source_name)
+    dat$match <- dat$from == dat$to
+    dat$match_count <- dat$match * dat$count
+    
+    denominator_for_indels <- sum(dat$count) - sum(subset(dat, from == 'del', select = 'count', drop=T))
+    del_rate <- sum(subset(dat, from == 'del', select = 'count', drop=T))/denominator_for_indels
+    ins_rate <- sum(subset(dat, from == 'ins', select = 'count', drop=T))/denominator_for_indels
+    #1 - (n_deletions / denominator_for_indels)
+    #1 - (n_insertions / denominator_for_indels)
+    
+    subs_dat <- subset(dat, 
+                       from %in% c('A', 'C', 'G', 'T') &
+                         to %in% c('A', 'C', 'G', 'T'))
+    subs_rate <- 1-(sum(subs_dat$match_count) / sum(subs_dat$count))
+    
+    qual_subs <- subs_dat %>%
+           group_by(match, qual) %>%
+           summarize(numerator = sum(count))
+    qual_subs <- data.frame(qual_subs)
+    qual_totals <- subs_dat %>%
+                     group_by(qual) %>%
+                     summarize(denominator = sum(count))
+    qual_totals <- data.frame(qual_totals)
+    qual_subs <- merge(qual_subs, qual_totals, all.x = TRUE)
+    
+    subs_by_qual <- 
+    subset(qual_subs, 
+           match == TRUE, 
+           select = c('qual', 'denominator', 'numerator'))
+    names(subs_by_qual) <- c('qual', 'total', 'matches')
+    mismatches_by_qual <- 
+    subset(qual_subs, 
+           match == FALSE, 
+           select = c('qual', 'numerator'))
+    names(mismatches_by_qual) <- c('qual', 'mismatches')
+    subs_by_qual <- merge(subs_by_qual, mismatches_by_qual, all.x = TRUE)
+    subs_by_qual$matches[is.na(subs_by_qual$matches)] <- 0
+    subs_by_qual$mismatches[is.na(subs_by_qual$mismatches)] <- 0
+    subs_by_qual <- subset(subs_by_qual, total > 1000)
+    
+    subs_by_qual$num_qual <- sapply(subs_by_qual$qual, utf8ToInt) - 33
+    subs_by_qual$rate <- subs_by_qual$mismatches / subs_by_qual$total
+    subs_by_qual$SE <- sqrt(subs_by_qual$rate*(1-subs_by_qual$rate)/subs_by_qual$total)
+    subs_by_qual$E <- qnorm(.975)*subs_by_qual$SE
+    subs_by_qual$LB <- subs_by_qual$rate - subs_by_qual$E
+    subs_by_qual$UB <- subs_by_qual$rate + subs_by_qual$E
+    
+    
+    
+    from_let <- 'A'
+    to_let <- 'A'
+    to_let <- 'T'
+    rate_mat <- matrix(rep(0, 4*4),ncol=4,nrow=4)
+    for (from_let in c('A', 'C', 'G', 'T')){
+      for (to_let in c('A', 'C', 'G', 'T')){
+        count <- sum(subset(dat, from == from_let & to == to_let, select='count', drop=T))
+        total <- sum(subset(dat, from == from_let, select='count', drop=T))
+        rate <- count / total
+        rate_mat[let_to_int(from_let), let_to_int(to_let)] <- rate
+      }
+    }
+    rate_mat <- data.frame(round(rate_mat, 5))
+    names(rate_mat) <- c('A', 'C', 'G', 'T')
+    row.names(rate_mat) <- c('A', 'C', 'G', 'T')
+
+
+    error_parameters[[data_source_name]] <- list(
+      subs_rate = subs_rate,
+      ins_rate = ins_rate,
+      del_rate = del_rate,
+      rate_mat = rate_mat,
+      subs_by_qual = subs_by_qual)
+  }
+  result$metrics$error_parameters <- error_parameters
   return(result)
 }
 
