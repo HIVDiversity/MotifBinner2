@@ -37,18 +37,26 @@ buildConsensus <- function(all_results, config)
                                    qual_mat)
     x <- scoreAlignmentPositions_cpp(as.character(bin_seqs@sread),
                                    tweaked_qual_mat)
-    gsub('-', '', buildConsensus_cpp(x$score_mat, required_dominance)$consensus)
+    z <- list()
+    z[[pid]] <- buildConsensus_cpp(x$score_mat, required_dominance)
+    z
   }
-
-  fake_qualities <- NULL
+  con_seqs <- vector(mode = 'character', length=length(tmp_x))
+  con_scores <- vector(mode = 'character', length=length(tmp_x))
+  i <- 1
   for (i in 1:length(tmp_x)){
-    fake_qualities <- c(fake_qualities, paste(rep('G', nchar(tmp_x[i])), collapse = ''))
+    stopifnot(nchar(tmp_x[[i]]$consensus) == length(tmp_x[[i]]$consensus_score))
+    con_seqs[i] <- tmp_x[[i]]$consensus
+    x <- tmp_x[[i]]$consensus_score
+    x[x>38] <- 38
+    x[x<0] <- 0
+    con_scores[i] <- paste(sapply(x+33, intToUtf8), sep = '', collapse='')
   }
 
   consensuses <-
-  ShortReadQ(sread = DNAStringSet(tmp_x),
-             quality = BStringSet(fake_qualities),
-             id = BStringSet(uniq_pids))
+  ShortReadQ(sread = DNAStringSet(con_seqs),
+             quality = BStringSet(con_scores),
+             id = BStringSet(names(tmp_x)))
   
   per_read_metrics <- data.frame('read_exists' = rep(1, length(consensuses)))
   trim_steps <- list(step1 = list(name = 'read_exists',

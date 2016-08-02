@@ -782,10 +782,12 @@ Rcpp::List scoreAlignmentPositions_cpp(CharacterVector reads, NumericMatrix q_ma
 Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance)
 {
   double position_max;
+  double position_total;
   double position_threshold;
   int consensus_int;
   int number_of_options;
   std::string consensus (score_mat.ncol(), '.');
+  std::vector<int> consensus_score (score_mat.ncol(), 0);
 
   std::map<char, int> int_to_char_lookup = 
   {
@@ -814,11 +816,13 @@ Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance
     consensus_int = -1;
     number_of_options = 0;
     position_max = 0;
+    position_total = 0;
     for (int i = 0; i < score_mat.nrow(); ++i)
     {
       if (position_max < score_mat(i,j)){
         position_max = score_mat(i,j);
       }
+      position_total += score_mat(i,j);
     }
     position_threshold = (1-required_dominance)*position_max;
     for (int i = 0; i < score_mat.nrow(); ++i)
@@ -833,21 +837,26 @@ Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance
     } else if (number_of_options > 1){
 //      std::cout << j << " N many options" << std::endl;
       consensus[j] = 'N';
+      consensus_score[j] = 0;
     } else if (consensus_int >= 15){
 //      std::cout << j << " -" << std::endl;
       consensus[j] = '-';
+      consensus_score[j] = 0;
     } else if (consensus_int >= 4){
 //      std::cout << j << " N ambig consent" << std::endl;
       consensus[j] = 'N';
+      consensus_score[j] = 0;
     } else {
 //      std::cout << j << " real letter" << consensus_int << " " << int_to_char_lookup[consensus_int] << std::endl;
       consensus[j] = int_to_char_lookup[consensus_int];
+      consensus_score[j] = 2*position_max - position_total;
     }
   }
   Rcpp::List result;
 
   result = Rcpp::List::create(
-    Rcpp::Named("consensus") = consensus
+    Rcpp::Named("consensus") = consensus,
+    Rcpp::Named("consensus_score") = consensus_score
       );
   return result;
 }
