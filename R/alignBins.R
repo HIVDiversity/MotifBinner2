@@ -28,7 +28,7 @@ alignBins <- function(all_results, config)
 
   profile_seqs <- readDNAStringSet(op_args$profile_file)
 
-#  pid <- unique(per_read_metrics$clean_pid)[1]
+  pid <- unique(per_read_metrics$clean_pid)[1]
 #  counter <- 1
 #  loop_length <- length(unique(per_read_metrics$clean_pid))
 #  ptm <- proc.time()
@@ -102,9 +102,13 @@ alignBins <- function(all_results, config)
                                          as.character(interleaved_quals), 
                                          gap_only_cols_cpp_indexing)
      
+     qual_mat <- as(FastqQuality(reads_and_qual$quals), 'matrix')
+     cat('\n\n\n\n\n'); Rcpp::sourceCpp('src/trimFront.cpp')
+     tweaked_qual_mat <- gapQualityTweaker_cpp(reads_and_qual$reads, qual_mat)
+
      aligned_with_qual <-
-     ShortReadQ(sread = DNAStringSet(reads_and_qual$reads),
-                quality = BStringSet(reads_and_qual$quals),
+     ShortReadQ(sread = DNAStringSet(tweaked_qual_mat$reads),
+                quality = BStringSet(tweaked_qual_mat$quals),
                 id = BStringSet(names(aligned_seqs)))
 
 # for normal for loop

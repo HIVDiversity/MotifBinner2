@@ -97,66 +97,7 @@ primerSeqErr <- function(all_results, config)
 
 saveToDisk.primerSeqErr <- function(result, config, seq_dat)
 {
-  kept <- result$seq_dat
-  trimmed <- result$trim_dat
-
-  if (length(kept[['fwd']]) > 0)
-  {
-    tmp_name <- file.path(result$config$op_dir, 
-      paste(config$base_for_names, '_fwd_kept_', result$config$op_args$name, '.fastq', sep = ''))
-    writeFastq(kept[['fwd']], tmp_name, compress=F)
-  }
-  if (length(kept[['rev']]) > 0)
-  {
-    tmp_name <- file.path(result$config$op_dir, 
-      paste(config$base_for_names, '_rev_kept_', result$config$op_args$name, '.fastq', sep = ''))
-    writeFastq(kept[['rev']], tmp_name, compress=F)
-  }
-  if (length(trimmed[['fwd']]) > 0)
-  {
-    tmp_name <- file.path(result$config$op_dir, 
-      paste(config$base_for_names, '_fwd_trimmed_', result$config$op_args$name, '.fastq', sep = ''))
-    writeFastq(trimmed[['fwd']], tmp_name, compress=F)
-  }
-  if (length(trimmed[['rev']]) > 0)
-  {
-    tmp_name <- file.path(result$config$op_dir, 
-      paste(config$base_for_names, '_rev_trimmed_', result$config$op_args$name, '.fastq', sep = ''))
-    writeFastq(trimmed[['rev']], tmp_name, compress=F)
-  }
   return(result)
-}
-
-genSummary_primerSeqErr <- function(result)
-{
-  summary_tab <-
-    rbind(
-  genSummary_comb(kept = result$seq_dat$fwd,
-                  trimmed = BiocGenerics::append(
-                              BiocGenerics::append(
-                                result$seq_dat$rev,
-                                result$trim_dat$fwd),
-                              result$trim_dat$rev),
-                  op = class(result),
-                  parameter = 'fwd_with_rev')
-  ,
-  genSummary_comb(kept = result$seq_dat$rev,
-                  trimmed = BiocGenerics::append(result$trim_dat$fwd,
-                                   result$trim_dat$rev),
-                  op = class(result),
-                  parameter = 'rev_with_fwd *')
-  ,
-  genSummary_comb(kept = result$trim_dat$fwd,
-                  trimmed = result$trim_dat$rev,
-                  op = class(result),
-                  parameter = 'fwd_only')
-  , 
-  genSummary_comb(kept = result$trim_dat$rev,
-                  trimmed = result$trim_dat$rev[0],
-                  op = class(result),
-                  parameter = 'rev_only')
-  )
-  return(summary_tab)
 }
 
 computeMetrics.primerSeqErr <- function(result, config, seq_dat)

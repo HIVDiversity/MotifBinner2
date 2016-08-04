@@ -629,8 +629,11 @@ Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qua
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat)
+Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat)
 {
+  std::vector<std::string> dotted_reads(reads.size(), "");
+  std::vector<std::string> quals(reads.size(), "");
+
   std::queue<int> last_sizes;
   last_sizes.push(0);
   double current_avg_quality = 0;
@@ -640,6 +643,8 @@ Rcpp::NumericMatrix gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q
   bool read_has_begun;
   for (int i = 0; i < reads.size(); ++i)
   {
+    dotted_reads[i] = reads[i];
+    quals[i] = reads[i];
     read_has_begun = false;
     current_avg_quality = 0;
     while (!last_sizes.empty()){
@@ -660,11 +665,11 @@ Rcpp::NumericMatrix gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q
         {
 //          std::cout << " gap: update q_mat: ";
           q_mat(i,jj) = current_avg_quality;
+          quals[i][jj] = current_avg_quality+33;
 //          std::cout << "q_mat(" << i << ", " << jj << ") = " << current_avg_quality;
-        }
-
-        if (read_has_begun & reads[i][jj] != '-')
+        } else if (read_has_begun & reads[i][jj] != '-')
         {
+          quals[i][jj] = q_mat(i,jj)+33;
           last_sizes.push(q_mat(i,jj));
           current_avg_quality = std::max(0.0,
               current_avg_quality + last_sizes.back()/5.0 - last_sizes.front()/5.0);
@@ -672,17 +677,20 @@ Rcpp::NumericMatrix gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q
 //            std::cout << " base: " << reads[i][jj] << ", update curr Q ";
 //            std::cout << " new Q: " << q_mat(i,jj) << " " << last_sizes.back() << 
 //                         " old Q: " << last_sizes.front();
-        }
-
-        if (reads[i][jj] != '-' & !read_has_begun)
+        } else if (reads[i][jj] != '-' & !read_has_begun)
         {
 //            std::cout << "read begins now ";
+          quals[i][jj] = q_mat(i,jj)+33;
           read_has_begun = true;
           for (int k = 0; k < 5; ++k)
           {
             last_sizes.push(q_mat(i,jj));
           }
           current_avg_quality = q_mat(i,jj);
+        } else
+        {
+          quals[i][jj] = 0+33;
+          dotted_reads[i][jj] = '.';
         }
 
 //        std::cout << std::endl;
@@ -692,23 +700,14 @@ Rcpp::NumericMatrix gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q
       {
 //        std::cout << j << " " << current_avg_quality << " ";
         // odd number - rev read
-        if (reads[i][j] != '-' & !read_has_begun)
-        {
-//          std::cout << "read begins now ";
-          read_has_begun = true;
-          for (int k = 0; k < 5; ++k)
-          {
-            last_sizes.push(q_mat(i,j));
-          }
-          current_avg_quality = q_mat(i,j);
-        }
         if (read_has_begun & reads[i][j] == '-')
         {
 //          std::cout << " gap detected, updating q_mat ";
           q_mat(i,j) = current_avg_quality;
-        }
-        if (read_has_begun & reads[i][j] != '-')
+          quals[i][j] = current_avg_quality+33;
+        } else if (read_has_begun & reads[i][j] != '-')
         {
+          quals[i][j] = q_mat(i,j)+33;
           last_sizes.push(q_mat(i,j));
           current_avg_quality = std::max(0.0,
               current_avg_quality + last_sizes.back()/5.0 - last_sizes.front()/5.0);
@@ -716,12 +715,34 @@ Rcpp::NumericMatrix gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q
 //          std::cout << " new qual: " << q_mat(i,j) << " " << last_sizes.back() << 
 //                       " old qual: " << last_sizes.front();
           last_sizes.pop();
+        } else if (reads[i][j] != '-' & !read_has_begun)
+        {
+//          std::cout << "read begins now ";
+          quals[i][j] = q_mat(i,j)+33;
+          read_has_begun = true;
+          for (int k = 0; k < 5; ++k)
+          {
+            last_sizes.push(q_mat(i,j));
+          }
+          current_avg_quality = q_mat(i,j);
+        } else
+        {
+          quals[i][j] = 0+33;
+          dotted_reads[i][j] = '.';
         }
+
 //        std::cout << std::endl;
       }
     }
   }
-  return q_mat;
+  Rcpp::List result;
+
+  result = Rcpp::List::create(
+    Rcpp::Named("reads") = dotted_reads,
+    Rcpp::Named("q_mat") = q_mat,
+    Rcpp::Named("quals") = quals
+      );
+  return result;
 }
 
 // [[Rcpp::export]]
