@@ -21,6 +21,7 @@ Depends:
     reshape2,
     stringi
 Imports:
+    data.table,
     BiocGenerics,
     Biostrings,
     Rcpp

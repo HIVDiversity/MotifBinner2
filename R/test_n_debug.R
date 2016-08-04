@@ -1,6 +1,6 @@
 dummy_test_debug <- function()
 {
-  unlink('/fridge/data/MotifBinner2_test/CAP256_3100_030wpi_v1v2_20k', recursive=T)
+#  unlink('/fridge/data/MotifBinner2_test/CAP256_3100_030wpi_v1v2_20k', recursive=T)
   unlink('/fridge/data/MotifBinner2_test/CAP256_4190_094wpi_v1v2', recursive=T)
   getwd()
   library(devtools)
@@ -16,7 +16,7 @@ dummy_test_debug <- function()
         op = 'loadData',
 #        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R1.fastq",
 #        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
-#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_4190_094wpi_v1v2_R1.fastq",
+        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_4190_094wpi_v1v2_R1.fastq",
         cache_data = TRUE),
     'n002' =
       list(name = 'fwd_basicQC',
@@ -64,7 +64,7 @@ dummy_test_debug <- function()
         op = 'loadData',
 #        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R2.fastq",
 #        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
-#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_4190_094wpi_v1v2_R2.fastq",
+        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_4190_094wpi_v1v2_R2.fastq",
         cache_data = TRUE),
     'n009' =
       list(name = 'rev_basicQC',
@@ -196,7 +196,7 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n020'
+  op_number <- 'n022'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
