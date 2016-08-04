@@ -1,6 +1,7 @@
 dummy_test_debug <- function()
 {
   unlink('/fridge/data/MotifBinner2_test/CAP256_3100_030wpi_v1v2_20k', recursive=T)
+  unlink('/fridge/data/MotifBinner2_test/CAP256_4190_094wpi_v1v2', recursive=T)
   getwd()
   library(devtools)
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
@@ -13,8 +14,9 @@ dummy_test_debug <- function()
     'n001' = 
       list(name = 'fwd_loadData',
         op = 'loadData',
-        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R1.fastq",
+#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R1.fastq",
 #        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
+#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_4190_094wpi_v1v2_R1.fastq",
         cache_data = TRUE),
     'n002' =
       list(name = 'fwd_basicQC',
@@ -60,8 +62,9 @@ dummy_test_debug <- function()
     'n008' = 
       list(name = 'rev_loadData',
         op = 'loadData',
-        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R2.fastq",
+#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_80k_R2.fastq",
 #        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
+#        data_source = "/fridge/data/MotifBinner2_test/raw/CAP256_4190_094wpi_v1v2_R2.fastq",
         cache_data = TRUE),
     'n009' =
       list(name = 'rev_basicQC',
@@ -153,7 +156,8 @@ dummy_test_debug <- function()
     )
 
   output_dir = "/fridge/data/MotifBinner2_test"
-  base_for_names = "CAP256_3100_030wpi_v1v2_20k"
+#  base_for_names = "CAP256_3100_030wpi_v1v2_20k"
+  base_for_names = "CAP256_4190_094wpi_v1v2"
   intermediate_reports = TRUE
   verbosity = 3
   report_type = c('html')
@@ -192,7 +196,7 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n019'
+  op_number <- 'n020'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)

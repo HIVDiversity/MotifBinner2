@@ -33,7 +33,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // gapQualityTweaker_cpp
-Rcpp::NumericMatrix gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat);
+Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat);
 RcppExport SEXP MotifBinner2_gapQualityTweaker_cpp(SEXP readsSEXP, SEXP q_matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;

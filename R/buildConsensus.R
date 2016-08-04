@@ -33,10 +33,10 @@ buildConsensus <- function(all_results, config)
 #    writeFastq(bin_seqs, '/tmp/bin.fastq', compress=F)
 
     qual_mat <- as(FastqQuality(quality(quality(bin_seqs))), 'matrix')
-    tweaked_qual_mat <- gapQualityTweaker_cpp(as.character(bin_seqs@sread),
-                                   qual_mat)
+#    tweaked_qual_mat <- gapQualityTweaker_cpp(as.character(bin_seqs@sread),
+#                                   qual_mat)
     x <- scoreAlignmentPositions_cpp(as.character(bin_seqs@sread),
-                                   tweaked_qual_mat)
+                                   qual_mat)
     z <- list()
     z[[pid]] <- buildConsensus_cpp(x$score_mat, required_dominance)
     z
