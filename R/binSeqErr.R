@@ -126,7 +126,7 @@ computeMetrics.binSeqErr <- function(result, config, seq_dat)
 
     del_rate <- n_dels / (sum(x$countx) - n_ins)
     ins_rate <- n_ins / (sum(x$countx) - n_ins)
-    sub_rate <- sum(x$match_countx) / (sum(x$countx) - n_dels - n_ins)
+    sub_rate <- 1-(sum(x$match_countx) / (sum(x$countx) - n_dels - n_ins))
 
     error_parameters[[i]] <- data.frame(bin = data_source_name,
                                         del_rate = del_rate,

@@ -1,0 +1,51 @@
+## binSeqErr
+
+computes the sequencing error rates based on the assumption that the bins are
+non-chimeric and 0% pcr recombination.
+
+By comparing this to the error rates in the primer region you can then get an
+idea of the actual chimerism / pcr recombination rates.
+
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('binSeqErr', names(all_results))[1]]]
+}
+if (class(result) != 'binSeqErr')
+{
+  result <- all_results[[grep('binSeqErr', names(all_results))[1]]]
+}
+```
+
+```{r}
+err_dat <- result$metrics$error_parameters
+plot_dat <- rbind(
+  data.frame(bin = err_dat$bin,
+             param = 'del',
+             rates = err_dat$del_rate),
+  data.frame(bin = err_dat$bin,
+             param = 'ins',
+             rates = err_dat$ins_rate),
+  data.frame(bin = err_dat$bin,
+             param = 'sub',
+             rates = err_dat$sub_rate))
+p1 <- ggplot(plot_dat, aes(x = rates)) + 
+        geom_density() + 
+        facet_grid(param ~ .)
+
+print(p1)
+
+```
+
+```{r, results='asis'}
+kable_summary(result$summary)
+
+timingTable(result)
+```
+
