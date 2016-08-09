@@ -24,7 +24,7 @@ primerSeqErr <- function(all_results, config)
     stopifnot(length(data_source_indx) == 1)
 
     dat <- all_results[[data_source_indx]]$metrics$per_read_metrics
-    seq_dat <- shortReadQ_forced_append(seq_dat, all_results[[data_source_indx]]$seq_dat)
+    seq_dat <- shortReadQ_forced_append(list(seq_dat, all_results[[data_source_indx]]$seq_dat))
     n_fragments <- length(grep('read_fragment_', names(dat)))
     reads <- NULL
     primers <- NULL

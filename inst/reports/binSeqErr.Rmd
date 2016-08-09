@@ -23,7 +23,17 @@ if (class(result) != 'binSeqErr')
 }
 ```
 
-```{r}
+```{r, include=F}
+ref_sub_rate <- result$metrics$ref_err_dat$subs_rate
+ref_ins_rate <- result$metrics$ref_err_dat$ins_rate
+ref_del_rate <- result$metrics$ref_err_dat$del_rate
+
+ref_rates <- data.frame(param = c('del', 'ins', 'sub'),
+                        rates = c(ref_del_rate,
+                                  ref_ins_rate,
+                                  ref_sub_rate),
+                        stringsAsFactors = F)
+
 err_dat <- result$metrics$error_parameters
 plot_dat <- rbind(
   data.frame(bin = err_dat$bin,
@@ -37,10 +47,15 @@ plot_dat <- rbind(
              rates = err_dat$sub_rate))
 p1 <- ggplot(plot_dat, aes(x = rates)) + 
         geom_density() + 
-        facet_grid(param ~ .)
+        facet_grid(param ~ .) +
+        geom_vline(aes(xintercept=rates), ref_rates, color = 'darkblue') +
+        expand_limits(x=0)
 
+fig.cap1 <- 'Distributions of error parameters for indels and substitution in the bins. Reference error rates in primer regions shown as vertical blue lines.'
+```
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
 print(p1)
-
 ```
 
 ```{r, results='asis'}

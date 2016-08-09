@@ -40,7 +40,7 @@ processBadPIDs <- function(all_results, config)
   bin_metrics$parentage_conflict <- -1
   for (i in 1:nrow(bin_metrics)){
     if (!bin_metrics$big_enough[i]){
-      dist_to_bigs <- stringdist(bin_metrics$pid[i], big_enough_pids, 'hamming', nthread=1)
+      dist_to_bigs <- stringdist(bin_metrics$pid[i], big_enough_pids, 'hamming', nthread=config$ncpu)
       bin_metrics$dist_to_big[i] <- min(dist_to_bigs)
       if (min(dist_to_bigs) <= 2){
         can_pids <- big_enough_pids[which(dist_to_bigs == min(dist_to_bigs))]
@@ -158,29 +158,30 @@ saveToDisk.processBadPIDs <- function(result, config, seq_dat)
   return(result)
 }
 
-#' Forces two ShortReadQ objects to append
-#' @param x ShortReadQ object
-#' @param y ShortReadQ object
+#' Forces ShortReadQ objects to append into a single ShortReadQ object
+#' @param x list of ShortReadQ objects
 #' @export
 
-shortReadQ_forced_append <- function(x, y)
+shortReadQ_forced_append <- function(x)
 {
-  if (is.null(x)) return(y)
-  if (is.null(y)) return(x)
-  stopifnot(all(c(class(x), class(y)) == 'ShortReadQ'))
-  sread <- append(x@sread, y@sread)
-  ids <- append(x@id, y@id)
-  quals <- FastqQuality(append(x@quality@quality, y@quality@quality))
-  ShortReadQ(sread = sread, id = ids, qual = quals)
+  stopifnot(class(x) == 'list')
+  if (length(x) == 1){
+    return(x[[1]])
+  } else {
+    sread <- DNAStringSet(c(sapply(x, {function(y) as.character(y@sread)})))
+    ids <- BStringSet(c(sapply(x, {function(y) as.character(y@id)})))
+    quals <- FastqQuality(c(sapply(x, {function(y) as.character(y@quality@quality)})))
+    return (ShortReadQ(sread = sread, id = ids, qual = quals))
+  }
 }
 
 genSummary_processBadPIDs <- function(result)
 {
   class(result) <- 'processBadPIDs_fwd'
-  seq_dat_fwd <- shortReadQ_forced_append(result$seq_dat$fwd, result$trim_dat$fwd)
+  seq_dat_fwd <- shortReadQ_forced_append(list(result$seq_dat$fwd, result$trim_dat$fwd))
   summary_tab_fwd <- genSummary_case4(result, NULL, seq_dat_fwd, round_digits = 4)
   class(result) <- 'processBadPIDs_rev'
-  seq_dat_rev <- shortReadQ_forced_append(result$seq_dat$rev, result$trim_dat$rev)
+  seq_dat_rev <- shortReadQ_forced_append(list(result$seq_dat$rev, result$trim_dat$rev))
   summary_tab_rev <- genSummary_case4(result, NULL, seq_dat_rev, round_digits = 4)
   return(rbind(summary_tab_fwd, summary_tab_rev))
 }

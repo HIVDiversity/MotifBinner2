@@ -11,8 +11,8 @@ binSeqErr <- function(all_results, config)
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   
-  stopifnot(length(op_args$data_source) == 2)
-  stopifnot(all(names(op_args$data_source) %in% c("bin_msa", "cons"))) # must have fwd and/or rev primers
+  stopifnot(length(op_args$data_source) == 3)
+  stopifnot(all(names(op_args$data_source) %in% c("bin_msa", "cons", "primer_err"))) # must have fwd and/or rev primers
   stopifnot(!op_args$cache) #makes no sense to cache this...
 
   msa_indx <- grep(op_args$data_source['bin_msa'], names(all_results))
@@ -21,18 +21,14 @@ binSeqErr <- function(all_results, config)
   cons_indx <- grep(op_args$data_source['cons'], names(all_results))
   cons_dat <- all_results[[cons_indx]]$seq_dat
 
+  ref_err_indx <- grep(op_args$data_source['primer_err'], names(all_results))
+  ref_err_dat <- all_results[[ref_err_indx]]$metrics$error_parameters$all
+
   all_tallies <- NULL
   bin_name <- as.character(cons_dat@id)[1]
 
-  data_table_rbindlist <- function(...){
-    data.table::rbindlist(..., use.names = FALSE, fill = FALSE, idcol=NULL)
-  }
-
-#  counter <- 0
   all_tallies <- foreach(bin_name = as.character(cons_dat@id)) %dopar% {
 #  for (bin_name in as.character(cons_dat@id)){
-#    counter <- counter+1
-#    print(counter)
     cons_seq <- cons_dat[as.character(cons_dat@id) == bin_name]
     bin_seq <- msa_dat[grep(bin_name, as.character(msa_dat@id))]
     
@@ -71,19 +67,20 @@ binSeqErr <- function(all_results, config)
   }
   all_tallies <- data.frame(data.table::rbindlist(all_tallies))
 
-  per_read_metrics <- data.frame('read_exists' = rep(1, length(seq_dat)))
+  per_read_metrics <- data.frame('read_exists' = rep(1, length(msa_dat)))
   trim_steps <- list(step1 = list(name = 'read_exists',
                                   threshold = 1,
                                   breaks = c(1)))
 
   result <- list(trim_steps = trim_steps,
                  metrics = list(per_read_metrics = per_read_metrics,
-                                bin_sequencing_stats = all_tallies))
+                                bin_sequencing_stats = all_tallies,
+                                ref_err_dat = ref_err_dat))
   class(result) <- 'binSeqErr'
   if (op_args$cache){
     stop('Do not cache data in steps that do not alter the datasets')
   }
-  result$input_dat <- seq_dat
+  result$input_dat <- msa_dat
   result$config <- list(op_number = op_number,
                         op_args = op_args,
                         op_full_name = op_full_name,

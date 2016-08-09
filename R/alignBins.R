@@ -28,11 +28,7 @@ alignBins <- function(all_results, config)
 
   profile_seqs <- readDNAStringSet(op_args$profile_file)
 
-#  pid <- unique(per_read_metrics$clean_pid)[1]
-#  counter <- 1
-#  loop_length <- length(unique(per_read_metrics$clean_pid))
-#  ptm <- proc.time()
-  registerDoMC(cores = 8)
+  registerDoMC(cores = config$ncpu)
   uniq_pids <- unique(per_read_metrics$clean_pid)
   if (is.null(bins_to_process)){
     bins_to_process <- length(uniq_pids)
@@ -40,90 +36,18 @@ alignBins <- function(all_results, config)
     bins_to_process <- min(length(uniq_pids), bins_to_process)
   }
   tmp_x <- foreach(pid = uniq_pids[1:bins_to_process], .combine = "c") %dopar% {
-#  for (pid in unique(per_read_metrics$clean_pid)){
-#    elapsed_time <- proc.time() - ptm
-#    print (c(counter, loop_length, round(counter/loop_length,3), elapsed_time[3], elapsed_time[3]/round(counter/loop_length,3)  ))
-#    counter <- counter + 1
     cur_seqs <- which(per_read_metrics$clean_pid == pid)
     cur_seq_names <- per_read_metrics$read_name[cur_seqs]
     stopifnot(all(cur_seq_names == as.character(seq_dat_fwd@id)[cur_seqs]))
     stopifnot(all(cur_seq_names == as.character(seq_dat_rev@id)[cur_seqs]))
+
     cur_fwd_seqs <- seq_dat_fwd[cur_seqs]
     cur_rev_seqs <- seq_dat_rev[cur_seqs]
 
-    interleaving_vector <- NULL
-    for (fwd_indx in 1:length(cur_fwd_seqs)){
-      rev_indx <- length(cur_fwd_seqs) + fwd_indx
-      interleaving_vector <- c(interleaving_vector, fwd_indx, rev_indx)
-    }
-
-    interleaved_seqs <- c(cur_fwd_seqs@sread, reverseComplement(cur_rev_seqs@sread))[interleaving_vector]
-    names(interleaved_seqs) <- c(paste(as.character(cur_fwd_seqs@id), 'fwd', sep = '_'),
-                                 paste(as.character(cur_fwd_seqs@id), 'rev', sep = '_'))[interleaving_vector]
-    interleaved_seqs <- c(profile_seqs, interleaved_seqs)
-#    if (!all(cur_fwd_seqs@sread %in% interleaved_seqs)){
-#        stop('not all fwd reads in interleaved seqs - something is fishy')
-#    }
-#    if (!all(reverseComplement(cur_rev_seqs@sread) %in% interleaved_seqs)){
-#        stop('not all rev reads in interleaved seqs - time to handle this edge case now...')
-#    }
-    mafft_guide_tree <- data.frame(r1 = 1,
-                                   r2 = 2:length(interleaved_seqs),
-                                   r3 = 0.01,
-                                   r4 = 0.01)
-    gt_file_name <- file.path(op_dir, 'bins', paste(pid, '_guide_tree.txt', sep = ''))
-    write.table(mafft_guide_tree,
-                gt_file_name,
-                col.names = FALSE, row.names = FALSE, sep = '\t')
-    interleaved_file_name <- file.path(op_dir, 'bins', paste(pid, '_interleaved', '.fasta', sep = ''))
-    writeXStringSet(interleaved_seqs,
-                    interleaved_file_name,
-                    width=20000)
-    aligned_file_name <- file.path(op_dir, 'bins', paste(pid, '_aligned', '.fasta', sep = ''))
-    system(paste('mafft --quiet --retree 1 --treein ', gt_file_name, ' ', interleaved_file_name, 
-                 ' > ', aligned_file_name, sep = ''))
-    stopifnot(file.exists(aligned_file_name))
-    aligned_seqs <- readDNAStringSet(aligned_file_name)
-    aligned_seqs <- aligned_seqs[!(names(aligned_seqs) %in% names(profile_seqs))]
-    interleaved_quals <- c(cur_fwd_seqs@quality@quality, reverse(cur_rev_seqs@quality@quality))[interleaving_vector]
-    names(interleaved_quals) <- c(paste(as.character(cur_fwd_seqs@id), 'fwd', sep = '_'),
-                                  paste(as.character(cur_fwd_seqs@id), 'rev', sep = '_'))[interleaving_vector]
-
-#    output for c++ developemnt and testing
-#    x <- paste('!', interleaved_quals, sep = '')
-#    x <- BStringSet(x)
-#    names(x) <- names(interleaved_quals)
-#    writeXStringSet(x, gsub('fasta', 'bstring', gsub('interleaved', 'interleaved_quals', interleaved_file_name)), compress=F, width=20000)
-  
-     gap_only_cols_cpp_indexing <-
-     which(consensusMatrix(aligned_seqs)['-',] == length(aligned_seqs)) - 1
-     
-     reads_and_qual <- transfer_gaps_cpp(as.character(aligned_seqs),
-                                         as.character(interleaved_quals), 
-                                         gap_only_cols_cpp_indexing)
-     
-     qual_mat <- as(FastqQuality(reads_and_qual$quals), 'matrix')
-     tweaked_qual_mat <- gapQualityTweaker_cpp(reads_and_qual$reads, qual_mat)
-
-     aligned_with_qual <-
-     ShortReadQ(sread = DNAStringSet(tweaked_qual_mat$reads),
-                quality = BStringSet(tweaked_qual_mat$quals),
-                id = BStringSet(names(aligned_seqs)))
-
-# for normal for loop
-#     if (is.null(all_bins_aligned_with_qual )){
-#       all_bins_aligned_with_qual <- aligned_with_qual
-#     } else {
-#       all_bins_aligned_with_qual <- shortReadQ_forced_append(all_bins_aligned_with_qual,
-#                                                              aligned_with_qual)
-#     }
+    aligned_with_qual <- alignBins_internal(cur_fwd_seqs, cur_rev_seqs, profile_seqs, op_dir, pid)
     aligned_with_qual
   }
-  all_bins_aligned_with_qual <- tmp_x[[1]]
-  for (i in 2:length(tmp_x)){
-    all_bins_aligned_with_qual <- shortReadQ_forced_append(all_bins_aligned_with_qual,
-                                                           tmp_x[[i]])
-  }
+  all_bins_aligned_with_qual <- shortReadQ_forced_append(tmp_x[[i]])
   rm(tmp_x)
 
   per_read_metrics <- data.frame('read_exists' = rep(1, length(all_bins_aligned_with_qual)))
@@ -143,6 +67,64 @@ alignBins <- function(all_results, config)
                         op_full_name = op_full_name,
                         op_dir = op_dir)
   return(result)
+}
+
+#' aligns fwd and rev sequences to a profile
+#'
+#' a custom guide tree is constructed to ensure that the alignment of the fwd
+#' reads does not interfere with the alignment of the rev reads and vice versa.
+#' @export
+
+alignBins_internal <- function(cur_fwd_seqs, cur_rev_seqs, profile_seqs, working_dir, pid)
+{
+  interleaving_vector <- NULL
+  for (fwd_indx in 1:length(cur_fwd_seqs)){
+    rev_indx <- length(cur_fwd_seqs) + fwd_indx
+    interleaving_vector <- c(interleaving_vector, fwd_indx, rev_indx)
+  }
+
+  interleaved_seqs <- c(cur_fwd_seqs@sread, reverseComplement(cur_rev_seqs@sread))[interleaving_vector]
+  names(interleaved_seqs) <- c(paste(as.character(cur_fwd_seqs@id), 'fwd', sep = '_'),
+                               paste(as.character(cur_fwd_seqs@id), 'rev', sep = '_'))[interleaving_vector]
+  interleaved_seqs <- c(profile_seqs, interleaved_seqs)
+  mafft_guide_tree <- data.frame(r1 = 1,
+                                 r2 = 2:length(interleaved_seqs),
+                                 r3 = 0.01,
+                                 r4 = 0.01)
+  gt_file_name <- file.path(working_dir, 'bins', paste(pid, '_guide_tree.txt', sep = ''))
+  write.table(mafft_guide_tree,
+              gt_file_name,
+              col.names = FALSE, row.names = FALSE, sep = '\t')
+  interleaved_file_name <- file.path(working_dir, 'bins', paste(pid, '_interleaved', '.fasta', sep = ''))
+  writeXStringSet(interleaved_seqs,
+                  interleaved_file_name,
+                  width=20000)
+  aligned_file_name <- file.path(working_dir, 'bins', paste(pid, '_aligned', '.fasta', sep = ''))
+  system(paste('mafft --quiet --retree 1 --treein ', gt_file_name, ' ', interleaved_file_name, 
+               ' > ', aligned_file_name, sep = ''))
+  stopifnot(file.exists(aligned_file_name))
+  aligned_seqs <- readDNAStringSet(aligned_file_name)
+  aligned_seqs <- aligned_seqs[!(names(aligned_seqs) %in% names(profile_seqs))]
+  interleaved_quals <- c(cur_fwd_seqs@quality@quality, reverse(cur_rev_seqs@quality@quality))[interleaving_vector]
+  names(interleaved_quals) <- c(paste(as.character(cur_fwd_seqs@id), 'fwd', sep = '_'),
+                                paste(as.character(cur_fwd_seqs@id), 'rev', sep = '_'))[interleaving_vector]
+
+  
+  gap_only_cols_cpp_indexing <-
+  which(consensusMatrix(aligned_seqs)['-',] == length(aligned_seqs)) - 1
+  
+  reads_and_qual <- transfer_gaps_cpp(as.character(aligned_seqs),
+                                      as.character(interleaved_quals), 
+                                      gap_only_cols_cpp_indexing)
+  
+  qual_mat <- as(FastqQuality(reads_and_qual$quals), 'matrix')
+  tweaked_qual_mat <- gapQualityTweaker_cpp(reads_and_qual$reads, qual_mat)
+
+  aligned_with_qual <-
+  ShortReadQ(sread = DNAStringSet(tweaked_qual_mat$reads),
+             quality = BStringSet(tweaked_qual_mat$quals),
+             id = BStringSet(names(aligned_seqs)))
+  return(aligned_with_qual)
 }
 
 saveToDisk.alignBins <- function(result, config, seq_dat)

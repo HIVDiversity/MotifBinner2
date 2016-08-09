@@ -13,6 +13,7 @@ extractPIDs <- function(all_results, config)
   
   pid_in_which_fragment <- op_args$pid_in_which_fragment
   pid_gaps_allowed <- op_args$pid_gaps_allowed
+  pattern_to_chop_from_names <- op_args$pattern_to_chop_from_names
   
   data_source_indx <- grep(op_args$data_source, names(all_results))
   stopifnot(length(data_source_indx) == 1)
@@ -40,7 +41,7 @@ extractPIDs <- function(all_results, config)
   }
   seq_ids <- as.character(seq_dat@id)
   per_read_metrics <- per_read_metrics[match(seq_ids, per_read_metrics$id),]
-  seq_ids <- gsub(' [0-9]:N:[0-9]*:[0-9]*$', '', seq_ids)
+  seq_ids <- gsub(pattern_to_chop_from_names, '', seq_ids)
   per_read_metrics$id <- seq_ids
   seq_ids <- paste(seq_ids, '_PID:', per_read_metrics$read, sep = '')
   seq_dat@id <- BStringSet(seq_ids)

@@ -51,6 +51,28 @@ applyOperation <- function(all_results, config, op_number = NULL, operation = NU
   timing$print <- proc.time() - ptm
   result$timing <- timing
 
+  if (config$erase_history){
+    dependencies <- list()
+    for (i in 1:length(config$operation_list)){
+      dependencies[[names(config$operation_list)[i]]] <- NULL
+      for (j in config$operation_list[[i]]$data_source){
+        if (grepl("^n[0-9]*$", j)){
+          dependencies[[j]] <- c(dependencies[[j]], names(config$operation_list)[i])
+        }
+      }
+    }
+    ops_performed <- gsub("_.*$", "", names(all_results))
+    for (purge_step in names(dependencies)){
+      if (all(dependencies[[purge_step]] %in% ops_performed)){
+        indx <- grep(purge_step, names(all_results))
+        stopifnot(length(indx) == 1)
+        all_results[[indx]]$seq_dat <- NULL
+        all_results[[indx]]$trim_dat <- NULL
+      } else {
+      }
+    }
+  }
+
   all_results[[result$config$op_full_name]] <- result
   
   return(all_results)
