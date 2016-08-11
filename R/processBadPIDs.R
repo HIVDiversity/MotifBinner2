@@ -168,9 +168,9 @@ shortReadQ_forced_append <- function(x)
   if (length(x) == 1){
     return(x[[1]])
   } else {
-    sread <- DNAStringSet(c(sapply(x, {function(y) as.character(y@sread)})))
-    ids <- BStringSet(c(sapply(x, {function(y) as.character(y@id)})))
-    quals <- FastqQuality(c(sapply(x, {function(y) as.character(y@quality@quality)})))
+    sread <- DNAStringSet(unlist(lapply(x, {function(y) as.character(y@sread)})))
+    ids <- BStringSet(unlist(lapply(x, {function(y) as.character(y@id)})))
+    quals <- FastqQuality(unlist(lapply(x, {function(y) as.character(y@quality@quality)})))
     return (ShortReadQ(sread = sread, id = ids, qual = quals))
   }
 }

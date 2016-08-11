@@ -47,7 +47,7 @@ alignBins <- function(all_results, config)
     aligned_with_qual <- alignBins_internal(cur_fwd_seqs, cur_rev_seqs, profile_seqs, op_dir, pid)
     aligned_with_qual
   }
-  all_bins_aligned_with_qual <- shortReadQ_forced_append(tmp_x[[i]])
+  all_bins_aligned_with_qual <- shortReadQ_forced_append(tmp_x)
   rm(tmp_x)
 
   per_read_metrics <- data.frame('read_exists' = rep(1, length(all_bins_aligned_with_qual)))

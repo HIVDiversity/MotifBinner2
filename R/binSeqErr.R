@@ -24,24 +24,50 @@ binSeqErr <- function(all_results, config)
   ref_err_indx <- grep(op_args$data_source['primer_err'], names(all_results))
   ref_err_dat <- all_results[[ref_err_indx]]$metrics$error_parameters$all
 
+  cons_pids <- as.character(cons_dat@id)
+  cons_dat <- cons_dat[order(cons_pids)]
+  cons_pids <- sort(cons_pids)
+  msa_pids <- gsub('_.*$', '', gsub('^.*PID:_', '', as.character(msa_dat@id)))
+  msa_dat <- msa_dat[order(msa_pids)]
+  msa_pids <- sort(msa_pids)
+  stopifnot(all(msa_pids %in% as.character(cons_dat@id)))
+
+  dat_list <- list()
+  cons_pids_i <- 1
+  current_msa_indxs <- NULL
+  for (msa_pids_i in 1:length(msa_pids)){
+    if (msa_pids[msa_pids_i] != cons_pids[cons_pids_i]){
+      # moved to next pid
+      # save the current pid's sequences
+      dat_list[[cons_pids[cons_pids_i]]] <- list(cons_dat_bin = cons_dat[cons_pids_i],
+                                                msa_dat_bin = msa_dat[current_msa_indxs])
+
+      # move/reset indexes to next pids
+      cons_pids_i <- cons_pids_i + 1
+      stopifnot(msa_pids[msa_pids_i] == cons_pids[cons_pids_i])
+      current_msa_indxs <- NULL
+    } else {
+      current_msa_indxs <- c(current_msa_indxs, msa_pids_i)
+    }
+  }
+  # remember to save the last element in the dat_list!!!
+  dat_list[[cons_pids[cons_pids_i]]] <- list(cons_dat_bin = cons_dat[cons_pids_i],
+                                            msa_dat_bin = msa_dat[current_msa_indxs])
+
   all_tallies <- NULL
   bin_name <- as.character(cons_dat@id)[1]
-
+  bin_name <- as.character(cons_dat@id)[610]
   all_tallies <- foreach(bin_name = as.character(cons_dat@id)) %dopar% {
-#  for (bin_name in as.character(cons_dat@id)){
-    cons_seq <- cons_dat[as.character(cons_dat@id) == bin_name]
-    bin_seq <- msa_dat[grep(bin_name, as.character(msa_dat@id))]
-    
+    bin_seq <- dat_list[[bin_name]]$msa_dat_bin
+    cons_seq <- dat_list[[bin_name]]$cons_dat_bin
     cons_seq <- rep(as.character(cons_seq@sread), length(bin_seq))
 
     tallies_list <- tallyPrimerSeqErrors_cpp(as.character(bin_seq@sread), 
                                              cons_seq, 
                                              as.character(bin_seq@quality@quality))
-    tallies_df <- data.frame(from = character(0),
-                    to = character(0),
-                    qual = character(0),
-                    count = numeric(0),
-                    stringsAsFactors = FALSE)
+
+    tallies_list_of_dfs <- list()
+    inner_loop_counter <- 1
     for (i in names(tallies_list)){
       ci <- intToUtf8(i)
       if (ci == '1') {ci <- 'ins'}
@@ -52,17 +78,16 @@ binSeqErr <- function(all_results, config)
         if (cj == '2') {cj <- 'del'}
         for (k in names(tallies_list[[i]][[j]])){
           ck <- intToUtf8(k)
-          tallies_df <- rbind(tallies_df, 
-                              data.frame(from = ci,
-                                         to = cj,
-                                         qual = ck,
-                                         count = tallies_list[[i]][[j]][k],
-                                         stringsAsFactors = FALSE))      
+          tallies_list_of_dfs[[inner_loop_counter]] <- data.frame(from = ci,
+            to = cj, qual = ck, count = tallies_list[[i]][[j]][k], 
+            stringsAsFactors = FALSE)
+          inner_loop_counter <- inner_loop_counter + 1
         }
       }
     }
+    tallies_df <- data.frame(data.table::rbindlist(tallies_list_of_dfs))
     tallies_df$data_source <- bin_name
-    #all_tallies <- rbind(all_tallies, tallies_df)
+
     tallies_df
   }
   all_tallies <- data.frame(data.table::rbindlist(all_tallies))
