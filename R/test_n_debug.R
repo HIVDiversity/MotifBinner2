@@ -9,7 +9,8 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
                         erase_history = TRUE,
                         verbosity = 3,
                         report_type = c('html'),
-                        ncpu = 4
+                        ncpu = 4,
+                        bins_to_process = Inf
                         )
 {
   if (is.null(fwd_profile_file)){ fwd_profile_file <- profile_file }
@@ -140,7 +141,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
     'n019' =
       list(name = 'alignBins',
         op = 'alignBins',
-        bins_to_process = Inf,
+        bins_to_process = bins_to_process,
         data_source = "n018",
         profile_file = profile_file,
         cache_data = TRUE),
@@ -162,7 +163,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
     'n023' =
       list(name = 'fwd_alignBinsSP',
         op = 'alignBinsSP',
-        bins_to_process = Inf,
+        bins_to_process = bins_to_process,
         data_source = "n018",
         which_pair = "fwd",
         profile_file = fwd_profile_file,
@@ -170,7 +171,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
     'n024' =
       list(name = 'rev_alignBinsSP',
         op = 'alignBinsSP',
-        bins_to_process = Inf,
+        bins_to_process = bins_to_process,
         data_source = "n018",
         which_pair = "rev",
         profile_file = rev_profile_file,
@@ -179,6 +180,11 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
       list(name = 'fwd_buildConsensus',
         op = 'buildConsensus',
         data_source = "n023",
+        cache_data = TRUE),
+    'n026' =
+      list(name = 'rev_buildConsensus',
+        op = 'buildConsensus',
+        data_source = "n024",
         cache_data = TRUE)
     )
 
@@ -264,7 +270,8 @@ store_configs <- function()
               output_dir = "/fridge/data/zhou2015/binned",
               base_for_names = "zhou_2015_v1v3_1761912",
               erase_history = FALSE,
-              ncpu = 2
+              ncpu = 2,
+              bins_to_process = Inf
               )
 }
 
@@ -304,6 +311,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n023') # fwd_alignBinsSP
   all_results <- applyOperation(all_results, config, op_number = 'n024') # rev_alignBinsSP
   all_results <- applyOperation(all_results, config, op_number = 'n025') # fwd_buildConsensus
+  all_results <- applyOperation(all_results, config, op_number = 'n026') # rev_buildConsensus
 
   timing <- list()
   ptm <- proc.time()

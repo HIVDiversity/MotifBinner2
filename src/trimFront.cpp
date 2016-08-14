@@ -629,7 +629,7 @@ Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qua
 }
 
 // [[Rcpp::export]]
-Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat, std::string which_pair)
+Rcpp::List gapQualityTweaker_ol_cpp(CharacterVector reads, NumericMatrix q_mat)
 {
   std::vector<std::string> dotted_reads(reads.size(), "");
   std::vector<std::string> quals(reads.size(), "");
@@ -650,7 +650,13 @@ Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat, std
     while (!last_sizes.empty()){
       last_sizes.pop();
     }
-    if (which_pair == "fwd" || (which_pair == "both" &&  i %2 == 0))
+    // Note that the tracing works VERY DIFFERENTLY
+    // for both vs fwd/rev. For both the ends of the reads
+    // need to be ignored - assigned quality zero. BUT
+    // for fwd/rev, the ends of the reads must vote to
+    // counter act the 'extension effect' caused when some
+    // of the reads have deletions in them.
+    if (i %2 == 0)
     {
       for (int j = 0; j < read_length; ++j)
       {
@@ -729,6 +735,130 @@ Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat, std
         {
           quals[i][j] = 0+33;
           dotted_reads[i][j] = '.';
+        }
+
+//        std::cout << std::endl;
+      }
+    }
+  }
+  Rcpp::List result;
+
+  result = Rcpp::List::create(
+    Rcpp::Named("reads") = dotted_reads,
+    Rcpp::Named("q_mat") = q_mat,
+    Rcpp::Named("quals") = quals
+      );
+  return result;
+}
+
+// [[Rcpp::export]]
+Rcpp::List gapQualityTweaker_non_ol_cpp(CharacterVector reads, NumericMatrix q_mat, 
+    std::string which_pair, NumericVector avg_quals)
+{
+  std::vector<std::string> dotted_reads(reads.size(), "");
+  std::vector<std::string> quals(reads.size(), "");
+
+  std::queue<int> last_sizes;
+  last_sizes.push(0);
+  double current_avg_quality = 0;
+  int read_length;
+  int jj;
+  read_length = reads[1].size();
+  bool read_has_begun;
+  for (int i = 0; i < reads.size(); ++i)
+  {
+    dotted_reads[i] = reads[i];
+    quals[i] = reads[i];
+    read_has_begun = false;
+    current_avg_quality = 0;
+    while (!last_sizes.empty()){
+      last_sizes.pop();
+    }
+    // Note that the tracing works VERY DIFFERENTLY
+    // for both vs fwd/rev. For both the ends of the reads
+    // need to be ignored - assigned quality zero. BUT
+    // for fwd/rev, the ends of the reads must vote to
+    // counter act the 'extension effect' caused when some
+    // of the reads have deletions in them.
+    if (which_pair == "rev")
+    {
+      for (int j = 0; j < read_length; ++j)
+      {
+//          std::cout << j << " (" << jj << "), " << current_avg_quality << ": ";
+        // even number - fwd read
+        jj = read_length - 1 - j;
+        if (jj < 0) {
+          throw std::range_error("fwd read tracing went out of bounds");
+        }
+
+        if (read_has_begun & reads[i][jj] == '-')
+        {
+//          std::cout << " gap: update q_mat: ";
+          q_mat(i,jj) = current_avg_quality;
+          quals[i][jj] = current_avg_quality+33;
+//          std::cout << "q_mat(" << i << ", " << jj << ") = " << current_avg_quality;
+        } else if (read_has_begun & reads[i][jj] != '-')
+        {
+          quals[i][jj] = q_mat(i,jj)+33;
+          last_sizes.push(q_mat(i,jj));
+          current_avg_quality = std::max(0.0,
+              current_avg_quality + last_sizes.back()/5.0 - last_sizes.front()/5.0);
+          last_sizes.pop();
+//            std::cout << " base: " << reads[i][jj] << ", update curr Q ";
+//            std::cout << " new Q: " << q_mat(i,jj) << " " << last_sizes.back() << 
+//                         " old Q: " << last_sizes.front();
+        } else if (reads[i][jj] != '-' & !read_has_begun)
+        {
+//            std::cout << "read begins now ";
+          quals[i][jj] = q_mat(i,jj)+33;
+          read_has_begun = true;
+          for (int k = 0; k < 5; ++k)
+          {
+            last_sizes.push(q_mat(i,jj));
+          }
+          current_avg_quality = q_mat(i,jj);
+        } else
+        {
+          quals[i][jj] = avg_quals[i]+33;
+          dotted_reads[i][jj] = '-';
+        }
+
+//        std::cout << std::endl;
+      } 
+    } else {
+      for (int j = 0; j < read_length; ++j)
+      {
+//        std::cout << j << " " << current_avg_quality << " ";
+        // odd number - rev read
+        if (read_has_begun & reads[i][j] == '-')
+        {
+//          std::cout << " gap detected, updating q_mat ";
+          q_mat(i,j) = current_avg_quality;
+          quals[i][j] = current_avg_quality+33;
+        } else if (read_has_begun & reads[i][j] != '-')
+        {
+          quals[i][j] = q_mat(i,j)+33;
+          last_sizes.push(q_mat(i,j));
+          current_avg_quality = std::max(0.0,
+              current_avg_quality + last_sizes.back()/5.0 - last_sizes.front()/5.0);
+//          std::cout << " base detected, updating curr_qual ";
+//          std::cout << " new qual: " << q_mat(i,j) << " " << last_sizes.back() << 
+//                       " old qual: " << last_sizes.front();
+          last_sizes.pop();
+        } else if (reads[i][j] != '-' & !read_has_begun)
+        {
+//          std::cout << "read begins now ";
+          quals[i][j] = q_mat(i,j)+33;
+          read_has_begun = true;
+          for (int k = 0; k < 5; ++k)
+          {
+            last_sizes.push(q_mat(i,j));
+          }
+          current_avg_quality = q_mat(i,j);
+        } else
+        {
+          quals[i][j] = avg_quals[i]+33;
+          dotted_reads[i][j] = '-';
         }
 
 //        std::cout << std::endl;

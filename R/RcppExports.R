@@ -9,8 +9,12 @@ transfer_gaps_cpp <- function(aligned_read, r_qual, gap_only_cols) {
     .Call('MotifBinner2_transfer_gaps_cpp', PACKAGE = 'MotifBinner2', aligned_read, r_qual, gap_only_cols)
 }
 
-gapQualityTweaker_cpp <- function(reads, q_mat, which_pair) {
-    .Call('MotifBinner2_gapQualityTweaker_cpp', PACKAGE = 'MotifBinner2', reads, q_mat, which_pair)
+gapQualityTweaker_ol_cpp <- function(reads, q_mat) {
+    .Call('MotifBinner2_gapQualityTweaker_ol_cpp', PACKAGE = 'MotifBinner2', reads, q_mat)
+}
+
+gapQualityTweaker_non_ol_cpp <- function(reads, q_mat, which_pair, avg_quals) {
+    .Call('MotifBinner2_gapQualityTweaker_non_ol_cpp', PACKAGE = 'MotifBinner2', reads, q_mat, which_pair, avg_quals)
 }
 
 scoreAlignmentPositions_cpp <- function(reads, q_mat) {

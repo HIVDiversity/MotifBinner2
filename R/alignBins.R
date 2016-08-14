@@ -118,7 +118,7 @@ alignBins_internal <- function(cur_fwd_seqs, cur_rev_seqs, profile_seqs, working
                                       gap_only_cols_cpp_indexing)
   
   qual_mat <- as(FastqQuality(reads_and_qual$quals), 'matrix')
-  tweaked_qual_mat <- gapQualityTweaker_cpp(reads_and_qual$reads, qual_mat, "both")
+  tweaked_qual_mat <- gapQualityTweaker_ol_cpp(reads_and_qual$reads, qual_mat, "both")
 
   aligned_with_qual <-
   ShortReadQ(sread = DNAStringSet(tweaked_qual_mat$reads),
