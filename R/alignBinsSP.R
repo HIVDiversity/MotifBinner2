@@ -2,7 +2,7 @@
 #' @inheritParams applyOperation
 #' @export
 
-alignBins <- function(all_results, config)
+alignBinsSP <- function(all_results, config)
 {
   op_number <- config$current_op_number
   op_args <- config$operation_list[[op_number]]
@@ -12,16 +12,17 @@ alignBins <- function(all_results, config)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   dir.create(file.path(op_dir, 'bins'), showWarnings = FALSE, recursive = TRUE)
   
+  which_pair <- op_args$which_pair
   data_source_indx <- grep(op_args$data_source, names(all_results))
+
   stopifnot(length(data_source_indx) == 1)
   stopifnot(all(sort(names(all_results[[data_source_indx]]$seq_dat)) == c("fwd", "rev")))
-  seq_dat_fwd <- all_results[[data_source_indx]]$seq_dat$fwd
-  seq_dat_rev <- all_results[[data_source_indx]]$seq_dat$rev
-  stopifnot(all(seq_dat_fwd@id == seq_dat_rev@id))
+  stopifnot(which_pair %in% c('fwd', 'rev'))
+  seq_dat <- all_results[[data_source_indx]]$seq_dat[[which_pair]]
 
   bins_to_process <- op_args$bins_to_process
 
-  per_read_metrics <- data.frame(read_name = as.character(seq_dat_fwd@id),
+  per_read_metrics <- data.frame(read_name = as.character(seq_dat@id),
                                  stringsAsFactors = F)
   per_read_metrics$pid <- gsub("^.*_PID:" , "", per_read_metrics$read_name)
   per_read_metrics$clean_pid <- gsub("_" , "", per_read_metrics$pid)
@@ -35,16 +36,15 @@ alignBins <- function(all_results, config)
   } else {
     bins_to_process <- min(length(uniq_pids), bins_to_process)
   }
+  pid <- uniq_pids[1]
   tmp_x <- foreach(pid = uniq_pids[1:bins_to_process], .combine = "c") %dopar% {
-    cur_seqs <- which(per_read_metrics$clean_pid == pid)
-    cur_seq_names <- per_read_metrics$read_name[cur_seqs]
-    stopifnot(all(cur_seq_names == as.character(seq_dat_fwd@id)[cur_seqs]))
-    stopifnot(all(cur_seq_names == as.character(seq_dat_rev@id)[cur_seqs]))
+    cur_seq_indxs <- which(per_read_metrics$clean_pid == pid)
+    cur_seq_names <- per_read_metrics$read_name[cur_seq_indxs]
+    stopifnot(all(cur_seq_names == as.character(seq_dat@id)[cur_seq_indxs]))
 
-    cur_fwd_seqs <- seq_dat_fwd[cur_seqs]
-    cur_rev_seqs <- seq_dat_rev[cur_seqs]
+    cur_seqs <- seq_dat[cur_seq_indxs]
 
-    aligned_with_qual <- alignBins_internal(cur_fwd_seqs, cur_rev_seqs, profile_seqs, op_dir, pid)
+    aligned_with_qual <- alignBinsSP_internal(cur_seqs, profile_seqs, op_dir, pid, which_pair)
     aligned_with_qual
   }
   all_bins_aligned_with_qual <- shortReadQ_forced_append(tmp_x)
@@ -57,7 +57,7 @@ alignBins <- function(all_results, config)
 
   result <- list(trim_steps = trim_steps,
                  metrics = list(per_read_metrics = per_read_metrics))
-  class(result) <- 'alignBins'
+  class(result) <- 'alignBinsSP'
   if (op_args$cache){
     result$seq_dat <- all_bins_aligned_with_qual
   }
@@ -75,17 +75,18 @@ alignBins <- function(all_results, config)
 #' reads does not interfere with the alignment of the rev reads and vice versa.
 #' @export
 
-alignBins_internal <- function(cur_fwd_seqs, cur_rev_seqs, profile_seqs, working_dir, pid)
+alignBinsSP_internal <- function(cur_seqs, profile_seqs, working_dir, pid, which_pair)
 {
-  interleaving_vector <- NULL
-  for (fwd_indx in 1:length(cur_fwd_seqs)){
-    rev_indx <- length(cur_fwd_seqs) + fwd_indx
-    interleaving_vector <- c(interleaving_vector, fwd_indx, rev_indx)
-  }
+  interleaving_vector <- 1:length(cur_seqs)
 
-  interleaved_seqs <- c(cur_fwd_seqs@sread, reverseComplement(cur_rev_seqs@sread))[interleaving_vector]
-  names(interleaved_seqs) <- c(paste(as.character(cur_fwd_seqs@id), 'fwd', sep = '_'),
-                               paste(as.character(cur_fwd_seqs@id), 'rev', sep = '_'))[interleaving_vector]
+  if (which_pair == 'fwd'){
+    interleaved_seqs <- cur_seqs@sread
+  } else if (which_pair == 'rev'){
+    interleaved_seqs <- reverseComplement(cur_seqs@sread)
+  } else {
+    stop('which_pair must be either fwd or rev')
+  }
+  names(interleaved_seqs) <- paste(as.character(cur_seqs@id), which_pair, sep = '_')
   interleaved_seqs <- c(profile_seqs, interleaved_seqs)
   mafft_guide_tree <- data.frame(r1 = 1,
                                  r2 = 2:length(interleaved_seqs),
@@ -105,10 +106,13 @@ alignBins_internal <- function(cur_fwd_seqs, cur_rev_seqs, profile_seqs, working
   stopifnot(file.exists(aligned_file_name))
   aligned_seqs <- readDNAStringSet(aligned_file_name)
   aligned_seqs <- aligned_seqs[!(names(aligned_seqs) %in% names(profile_seqs))]
-  interleaved_quals <- c(cur_fwd_seqs@quality@quality, reverse(cur_rev_seqs@quality@quality))[interleaving_vector]
-  names(interleaved_quals) <- c(paste(as.character(cur_fwd_seqs@id), 'fwd', sep = '_'),
-                                paste(as.character(cur_fwd_seqs@id), 'rev', sep = '_'))[interleaving_vector]
-
+  
+  if (which_pair == 'fwd'){
+    interleaved_quals <- cur_seqs@quality@quality
+  } else {
+    interleaved_quals <- reverse(cur_seqs@quality@quality)
+  } 
+  names(interleaved_quals) <- paste(as.character(cur_seqs@id), which_pair, sep = '_')
   
   gap_only_cols_cpp_indexing <-
   which(consensusMatrix(aligned_seqs)['-',] == length(aligned_seqs)) - 1
@@ -118,7 +122,7 @@ alignBins_internal <- function(cur_fwd_seqs, cur_rev_seqs, profile_seqs, working
                                       gap_only_cols_cpp_indexing)
   
   qual_mat <- as(FastqQuality(reads_and_qual$quals), 'matrix')
-  tweaked_qual_mat <- gapQualityTweaker_cpp(reads_and_qual$reads, qual_mat, "both")
+  tweaked_qual_mat <- gapQualityTweaker_cpp(reads_and_qual$reads, qual_mat, which_pair)
 
   aligned_with_qual <-
   ShortReadQ(sread = DNAStringSet(tweaked_qual_mat$reads),
@@ -127,7 +131,7 @@ alignBins_internal <- function(cur_fwd_seqs, cur_rev_seqs, profile_seqs, working
   return(aligned_with_qual)
 }
 
-saveToDisk.alignBins <- function(result, config, seq_dat)
+saveToDisk.alignBinsSP <- function(result, config, seq_dat)
 {
   kept <- getKept(result, seq_dat)
   trimmed <- getTrimmed(seq_dat = seq_dat, kept_dat = kept)
@@ -147,15 +151,15 @@ saveToDisk.alignBins <- function(result, config, seq_dat)
   return(result)
 }
 
-computeMetrics.alignBins <- function(result, config, seq_dat)
+computeMetrics.alignBinsSP <- function(result, config, seq_dat)
 {
   return(result)
 }
 
-print.alignBins <- function(result, config)
+print.alignBinsSP <- function(result, config)
 {
   cat('\n-------------------')
-  cat('\nOperation: alignBins')
+  cat('\nOperation: alignBinsSP')
   cat('\n-------------------')
   cat('\nKept Sequences:\n')
   print(result$summary[,c('parameter', 'k_seqs', 'k_mean_length', 'k_mean_qual')])

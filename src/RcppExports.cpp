@@ -33,14 +33,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // gapQualityTweaker_cpp
-Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat);
-RcppExport SEXP MotifBinner2_gapQualityTweaker_cpp(SEXP readsSEXP, SEXP q_matSEXP) {
+Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat, std::string which_pair);
+RcppExport SEXP MotifBinner2_gapQualityTweaker_cpp(SEXP readsSEXP, SEXP q_matSEXP, SEXP which_pairSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< CharacterVector >::type reads(readsSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type q_mat(q_matSEXP);
-    __result = Rcpp::wrap(gapQualityTweaker_cpp(reads, q_mat));
+    Rcpp::traits::input_parameter< std::string >::type which_pair(which_pairSEXP);
+    __result = Rcpp::wrap(gapQualityTweaker_cpp(reads, q_mat, which_pair));
     return __result;
 END_RCPP
 }

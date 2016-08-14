@@ -1,7 +1,7 @@
 buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score,
                         rev_file, rev_primer_seq, rev_primer_lens, rev_min_score,
                         fwd_pid_in_which_fragment, rev_pid_in_which_fragment,
-                        profile_file,
+                        profile_file, fwd_profile_file = NULL, rev_profile_file = NULL,
                         pattern_to_chop_from_names = ' [0-9]:N:[0-9]*:[0-9]*$',
                         output_dir = "/fridge/data/MotifBinner2_test",
                         base_for_names = "CAP129_2040_009wpi_C2C3",
@@ -12,6 +12,8 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
                         ncpu = 4
                         )
 {
+  if (is.null(fwd_profile_file)){ fwd_profile_file <- profile_file }
+  if (is.null(rev_profile_file)){ rev_profile_file <- profile_file }
   operation_list = list(
     'n001' = 
       list(name = 'fwd_loadData',
@@ -156,7 +158,28 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
       list(name = 'binSeqErr',
         op = 'binSeqErr',
         data_source = c("bin_msa" = "n019", "cons" = "n020", "primer_err" = "n021"),
-        cache_data = FALSE)
+        cache_data = FALSE),
+    'n023' =
+      list(name = 'fwd_alignBinsSP',
+        op = 'alignBinsSP',
+        bins_to_process = Inf,
+        data_source = "n018",
+        which_pair = "fwd",
+        profile_file = fwd_profile_file,
+        cache_data = TRUE),
+    'n024' =
+      list(name = 'rev_alignBinsSP',
+        op = 'alignBinsSP',
+        bins_to_process = Inf,
+        data_source = "n018",
+        which_pair = "rev",
+        profile_file = rev_profile_file,
+        cache_data = TRUE),
+    'n025' =
+      list(name = 'fwd_buildConsensus',
+        op = 'buildConsensus',
+        data_source = "n023",
+        cache_data = TRUE)
     )
 
   config <- list(operation_list = operation_list,
@@ -235,6 +258,8 @@ store_configs <- function()
               fwd_pid_in_which_fragment = NULL,
               rev_pid_in_which_fragment = 1,
               profile_file = "/fridge/data/zhou2015/NA_aligned.fasta",
+              fwd_profile_file = "/fridge/data/zhou2015/NA_aligned_fwd.fasta",
+              rev_profile_file = "/fridge/data/zhou2015/NA_aligned_rev.fasta",
               pattern_to_chop_from_names = "\\.[12] [0-9]+ length=[0-9].*",
               output_dir = "/fridge/data/zhou2015/binned",
               base_for_names = "zhou_2015_v1v3_1761912",
@@ -276,10 +301,13 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n020') # buildConsensus
   all_results <- applyOperation(all_results, config, op_number = 'n021') # primerSeqErr
   all_results <- applyOperation(all_results, config, op_number = 'n022') # binSeqErr
+  all_results <- applyOperation(all_results, config, op_number = 'n023') # fwd_alignBinsSP
+  all_results <- applyOperation(all_results, config, op_number = 'n024') # rev_alignBinsSP
+  all_results <- applyOperation(all_results, config, op_number = 'n025') # fwd_buildConsensus
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n022'
+  op_number <- 'n023'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)

@@ -38,7 +38,7 @@ buildConsensus <- function(all_results, config)
     x <- scoreAlignmentPositions_cpp(as.character(bin_seqs@sread),
                                    qual_mat)
     z <- list()
-    z[[pid]] <- buildConsensus_cpp(x$score_mat, required_dominance)
+    z[[paste(pid, '_', length(bin_seq_indx), sep = '')]] <- buildConsensus_cpp(x$score_mat, required_dominance)
     z
   }
   con_seqs <- vector(mode = 'character', length=length(tmp_x))

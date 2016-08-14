@@ -73,6 +73,9 @@ applyOperation <- function(all_results, config, op_number = NULL, operation = NU
     }
   }
 
+  print(result$config$op_full_name)
+  print(names(result))
+
   all_results[[result$config$op_full_name]] <- result
   
   return(all_results)

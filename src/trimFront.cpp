@@ -629,7 +629,7 @@ Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qua
 }
 
 // [[Rcpp::export]]
-Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat)
+Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat, std::string which_pair)
 {
   std::vector<std::string> dotted_reads(reads.size(), "");
   std::vector<std::string> quals(reads.size(), "");
@@ -650,7 +650,7 @@ Rcpp::List gapQualityTweaker_cpp(CharacterVector reads, NumericMatrix q_mat)
     while (!last_sizes.empty()){
       last_sizes.pop();
     }
-    if (i %2 == 0)
+    if (which_pair == "fwd" || (which_pair == "both" &&  i %2 == 0))
     {
       for (int j = 0; j < read_length; ++j)
       {
