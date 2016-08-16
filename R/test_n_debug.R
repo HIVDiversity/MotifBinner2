@@ -185,7 +185,14 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
       list(name = 'rev_buildConsensus',
         op = 'buildConsensus',
         data_source = "n024",
-        cache_data = TRUE)
+        cache_data = TRUE),
+    'n027' =
+      list(name = 'binSeqErr_fwd_rev',
+        op = 'binSeqErr',
+        data_source = list("bin_msa" = list("fwd" = "n023", "rev" = "n024"),
+                           "cons" = list("fwd" = "n025", "rev" = "n026"), 
+                           "primer_err" = "n021"),
+        cache_data = FALSE)
     )
 
   config <- list(operation_list = operation_list,
@@ -312,10 +319,11 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n024') # rev_alignBinsSP
   all_results <- applyOperation(all_results, config, op_number = 'n025') # fwd_buildConsensus
   all_results <- applyOperation(all_results, config, op_number = 'n026') # rev_buildConsensus
+  all_results <- applyOperation(all_results, config, op_number = 'n027') # binSeqErr_fwd_rev
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n023'
+  op_number <- 'n027'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)
