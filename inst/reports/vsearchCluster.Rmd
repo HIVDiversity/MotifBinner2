@@ -1,6 +1,6 @@
-## alignBins
+## vsearchCluster
 
-Removes sequences that are either too short or too long.
+Merges overlapping reads using PEAR.
 
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
@@ -11,11 +11,11 @@ library(MotifBinner2)
 
 if (!exists('result'))
 {
-  result <- all_results[[grep('alignBins', names(all_results))[1]]]
+  stop('no result variable')
 }
-if (class(result) != 'alignBins')
+if (class(result) != 'vsearchCluster')
 {
-  result <- all_results[[grep('alignBins', names(all_results))[1]]]
+  stop('class of result variable incorrect')
 }
 ```
 

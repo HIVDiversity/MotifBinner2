@@ -323,7 +323,7 @@ dummy_test_debug <- function()
 
   timing <- list()
   ptm <- proc.time()
-  op_number <- 'n027'
+  op_number <- 'n015'
   config$current_op_number <- op_number
   op <- get(config$operation_list[[op_number]]$op)
   result <- op(all_results, config)

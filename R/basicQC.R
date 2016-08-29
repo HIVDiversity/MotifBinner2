@@ -17,9 +17,17 @@ basicQC <- function(all_results, config)
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
 
+  if (is.null(op_args$max_seqs)){
+    max_seqs <- 500000
+  }
   data_source_indx <- grep(op_args$data_source, names(all_results))
   stopifnot(length(data_source_indx) == 1)
-  seq_dat <- all_results[[data_source_indx]]$seq_dat
+  n_source_seqs <- length(all_results[[data_source_indx]]$seq_dat)
+  if (n_source_seqs <= max_seqs){
+    seq_dat <- all_results[[data_source_indx]]$seq_dat
+  } else {
+    seq_dat <- all_results[[data_source_indx]]$seq_dat[sample(1:n_source_seqs, max_seqs)]
+  }
   
   per_read_metrics <- data.frame('read_exists' = rep(1, length(seq_dat)))
   trim_steps <- list(step1 = list(name = 'read_exists',

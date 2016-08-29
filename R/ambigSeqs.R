@@ -7,6 +7,9 @@ getKept <- function(result, seq_dat=NULL)
   {
     stop('data to be trimmed must be supplied either via the seq_dat argument or as an element named input_dat in the result list')
   }
+  if (is.null(seq_dat)){
+    seq_dat <- result$input_dat
+  }
 
   trim_criteria <- matrix(TRUE, nrow = length(seq_dat), ncol = length(result$trim_steps))
   i <- 0
