@@ -30,7 +30,10 @@ mergePEAR <- function(all_results, config)
              compress=FALSE)
 
   merged_file_name <- file.path(op_dir, paste('merged', '.fastq', sep = ''))
-  system(paste('pear -f ', fwd_file_name, ' -r ', rev_file_name,
+  system(paste('pear', 
+               ' -f ', fwd_file_name, 
+               ' -r ', rev_file_name,
+               ' -j ', config$ncpu,
                ' -o ', merged_file_name, sep = ''))
   merged_dat <- readFastq(paste(merged_file_name, '.assembled.fastq', sep =''))
   discarded_dat <- shortReadQ_forced_append(list(
