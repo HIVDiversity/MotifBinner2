@@ -1042,3 +1042,75 @@ tallyPrimerSeqErrors_cpp(CharacterVector r_sread,
   return tallies;
 }
 
+// [[Rcpp::export]]
+Rcpp::List regionSplit_cpp(CharacterVector mapped_read,
+                           CharacterVector profile,
+                           CharacterVector region_map){
+  if (mapped_read.size() - 1 != profile.size()){
+    throw std::range_error("mapped_read must contain 1 more read than profile");
+  }
+
+  bool positions_match = true;
+  bool gap_only = true;
+  std::string prev_region, curr_region, next_region;
+  std::vector< std::string > c_profile (profile.size(), "");
+  std::string c_region_map = Rcpp::as<std::string>(region_map[0]);
+
+  for (int i = 0; i < profile.size(); ++i)
+  {
+    c_profile[i] = profile[i];
+  }
+  
+  for (int i = 0; i < mapped_read[0].size(); ++i)
+  {
+    positions_match = true;
+    gap_only = true;
+    for (int j = 0; j < c_profile.size(); ++j)
+    {
+      positions_match = positions_match and (mapped_read[j][i] == c_profile[j][i]);
+      gap_only = gap_only and (mapped_read[j][i] == '-');
+    }
+    if ((!positions_match) and (!gap_only)){
+      throw std::range_error("If profile and mapped_read does not match there should be only gaps in the mapped read at that position.");
+    }
+    if (!positions_match){
+      if (i > 0)
+      {
+        prev_region = c_region_map[i-1];
+      } else 
+      {
+        prev_region = c_region_map[i];
+      }
+      if (i < c_region_map.size())
+      {
+        next_region = c_region_map[i];
+      } else
+      {
+        next_region = c_region_map[i-1];
+      }
+      curr_region = std::min(prev_region, next_region);
+      c_region_map.insert(i, curr_region);
+      for (int j = 0; j < c_profile.size(); ++j)
+      {
+        c_profile[j].insert(i, "-");
+      }
+    }
+  }
+
+  if (c_region_map.size() != mapped_read[mapped_read.size()-1].size()){
+    throw std::range_error("after transferring the region to the mapped read, the region and mapped read must be the same size.");
+  }
+  std::map<char, std::string> regions;
+  for (int i = 0; i < c_region_map.size(); ++i)
+  {
+    regions[c_region_map[i]] += mapped_read[mapped_read.size()-1][i];
+  }
+
+  Rcpp::List result;
+
+  result = Rcpp::List::create(
+    Rcpp::Named("regions") = regions
+  );
+  return result;
+}
+
