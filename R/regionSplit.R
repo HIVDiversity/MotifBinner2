@@ -24,7 +24,7 @@ regionSplit <- function(all_results, config)
   dir.create(file.path(op_dir, 'mapped_reads'), showWarnings = FALSE, recursive = TRUE)
   Rcpp::sourceCpp('/home/phillipl/projects/MotifBinner2/code/MotifBinner2/src/trimFront.cpp')
 
-  i <- 1
+  i <- 2
   registerDoMC(cores = config$ncpu)
   split_regions <- foreach (i = 1:length(seq_dat), .combine = bind_rows) %dopar% {
     cur_seq <- seq_dat@sread[i]
@@ -43,8 +43,9 @@ regionSplit <- function(all_results, config)
     attr(char_aligned_seqs, "names") <- NULL
 
     gapped_qual <- transfer_gaps_cpp(char_aligned_seqs[length(char_aligned_seqs)],
-                                     as.character(seq_dat@quality@quality),
-                                     -1)$quals
+                                     as.character(seq_dat@quality@quality[i]),
+                                     -1)
+    gapped_qual <- gapped_qual$quals
 
     tmp_split <- regionSplit_cpp(char_aligned_seqs, char_aln_profile, region_map, gapped_qual)
 
@@ -67,35 +68,28 @@ regionSplit <- function(all_results, config)
     cbind(regions_df, regions_qual_df)
   }
 
-
-
-
-
-
-
-
-
-  
-  per_read_metrics <- data.frame(seq_len = width(seq_dat@sread))
-
-  threshold <- op_args$threshold
-  if (is.null(threshold))
-  {
-    threshold <- 295
+  split_regions
+  region_names <- names(split_regions)[!grepl("^qual_", names(split_regions))]
+  res_seq_dat <- list()
+  for (region_name in region_names){
+    res_seq_dat[[region_name]] <- ShortReadQ(sread = DNAStringSet(split_regions[,region_name]),
+                                             id = BStringSet(paste(as.character(seq_dat@id), 
+                                                                   region_name, sep = '_')),
+                                             quality = BStringSet(split_regions[,paste('qual_', 
+                                                                                       region_name, sep = '')])
+                                             )
   }
-  trim_steps <- list(step1 = list(name = 'seq_len',
-                                  threshold = threshold,
-                                  comparator = `>=`,
-                                  breaks = c(Inf, 300, 297, 295, 290, 280, -Inf)
-                                  )
-                    )
+
+  per_read_metrics <- data.frame('read_exists' = rep(1, length(seq_dat)))
+  trim_steps <- list(step1 = list(name = 'read_exists',
+                                  threshold = 1,
+                                  breaks = c(1)))
 
   result <- list(trim_steps = trim_steps,
                  metrics = list(per_read_metrics = per_read_metrics))
-  kept_dat <- getKept(result, seq_dat=seq_dat)
   class(result) <- 'regionSplit'
   if (op_args$cache){
-    result$seq_dat <- kept_dat
+    result$seq_dat <- res_seq_dat
   }
   result$input_dat <- seq_dat
   result$config <- list(op_number = op_number,
@@ -107,20 +101,11 @@ regionSplit <- function(all_results, config)
 
 saveToDisk.regionSplit <- function(result, config, seq_dat)
 {
-  kept <- getKept(result, seq_dat)
-  trimmed <- getTrimmed(seq_dat = seq_dat, kept_dat = kept)
-
-  if (length(kept) > 0)
+  for (i in names(result$seq_dat))
   {
     tmp_name <- file.path(result$config$op_dir, 
-      paste(config$base_for_names, '_kept_', result$config$op_args$name, '.fastq', sep = ''))
-    writeFastq(kept, tmp_name, compress=F)
-  }
-  if (length(trimmed) > 0)
-  {
-    tmp_name <- file.path(result$config$op_dir, 
-      paste(config$base_for_names, '_trimmed_', result$config$op_args$name, '.fastq', sep = ''))
-    writeFastq(trimmed, tmp_name, compress=F)
+      paste(config$base_for_names, '_kept_', result$config$op_args$name, '_region_', i, '.fastq', sep = ''))
+    writeFastq(result$seq_dat[[i]], tmp_name, compress=F)
   }
   return(result)
 }

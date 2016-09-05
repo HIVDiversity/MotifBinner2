@@ -95,3 +95,17 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// regionSplit_cpp
+Rcpp::List regionSplit_cpp(CharacterVector mapped_read, CharacterVector profile, CharacterVector region_map, CharacterVector mapped_qual);
+RcppExport SEXP MotifBinner2_regionSplit_cpp(SEXP mapped_readSEXP, SEXP profileSEXP, SEXP region_mapSEXP, SEXP mapped_qualSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type mapped_read(mapped_readSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type profile(profileSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type region_map(region_mapSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type mapped_qual(mapped_qualSEXP);
+    __result = Rcpp::wrap(regionSplit_cpp(mapped_read, profile, region_map, mapped_qual));
+    return __result;
+END_RCPP
+}

@@ -29,3 +29,7 @@ tallyPrimerSeqErrors_cpp <- function(r_sread, r_primer, r_qual) {
     .Call('MotifBinner2_tallyPrimerSeqErrors_cpp', PACKAGE = 'MotifBinner2', r_sread, r_primer, r_qual)
 }
 
+regionSplit_cpp <- function(mapped_read, profile, region_map, mapped_qual) {
+    .Call('MotifBinner2_regionSplit_cpp', PACKAGE = 'MotifBinner2', mapped_read, profile, region_map, mapped_qual)
+}
+
