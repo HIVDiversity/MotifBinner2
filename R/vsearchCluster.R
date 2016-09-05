@@ -16,6 +16,8 @@ vsearchCluster <- function(all_results, config)
 
   data_source_indx <- grep(op_args$data_source, names(all_results))
   stopifnot(length(data_source_indx) == 1)
+
+  id <- op_args$id
   
   seq_dat <- all_results[[data_source_indx]]$seq_dat
 
@@ -27,7 +29,7 @@ vsearchCluster <- function(all_results, config)
   lookup_file_name <- file.path(op_dir, 'lookup.tab')
   system(paste('vsearch', 
                ' --cluster_size ', seq_file_name, 
-               ' --id 0.98',
+               ' --id ', id,
                ' --sizeout ',
                ' --uc ', lookup_file_name,
                sep = ''))

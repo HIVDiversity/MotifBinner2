@@ -22,11 +22,16 @@ regionSplit <- function(all_results, config)
   region_map <- readLines(op_args$region_map)
 
   dir.create(file.path(op_dir, 'mapped_reads'), showWarnings = FALSE, recursive = TRUE)
-  Rcpp::sourceCpp('/home/phillipl/projects/MotifBinner2/code/MotifBinner2/src/trimFront.cpp')
 
-  i <- 2
   registerDoMC(cores = config$ncpu)
-  split_regions <- foreach (i = 1:length(seq_dat), .combine = bind_rows) %dopar% {
+  split_regions <- foreach (i = 1:length(seq_dat), .combine = bind_rows) %dopar%
+#  timing <- list()
+#  split_regions <- list()
+#  for (i in 1:100)#length(seq_dat))
+  {
+
+#    ptm <- proc.time()
+    
     cur_seq <- seq_dat@sread[i]
     names(cur_seq) <- seq_dat@id[i]
     
@@ -35,8 +40,14 @@ regionSplit <- function(all_results, config)
                     seq_file_name,
                     width=20000)
     aligned_file_name <- file.path(op_dir, 'mapped_reads', paste('read_', sprintf("%06d",i), '_mapped.fasta', sep = ''))
+#    timing$alignment_prep <- ifelse(is.null(timing$alignment_prep), proc.time() - ptm,
+#                                    timing$alignment_prep + proc.time() - ptm)
+#    ptm <- proc.time()
     system(paste('mafft --quiet --addfragments ', seq_file_name, ' ', op_args$profile,
                  ' > ', aligned_file_name, sep = ''))
+#    timing$alignment <- ifelse(is.null(timing$alignment), proc.time() - ptm,
+#                                    timing$alignment + proc.time() - ptm)
+#    ptm <- proc.time()
     stopifnot(file.exists(aligned_file_name))
     aligned_seqs <- readDNAStringSet(aligned_file_name)
     char_aligned_seqs <- as.character(aligned_seqs)
@@ -47,7 +58,13 @@ regionSplit <- function(all_results, config)
                                      -1)
     gapped_qual <- gapped_qual$quals
 
+#    timing$alignment_proc <- ifelse(is.null(timing$alignment_proc), proc.time() - ptm,
+#                                    timing$alignment_proc + proc.time() - ptm)
+#    ptm <- proc.time()
     tmp_split <- regionSplit_cpp(char_aligned_seqs, char_aln_profile, region_map, gapped_qual)
+#    timing$splitting <- ifelse(is.null(timing$splitting), proc.time() - ptm,
+#                                    timing$splitting + proc.time() - ptm)
+#    ptm <- proc.time()
 
     regions_df <- data.frame(to_delete = 1)
     regions_qual_df <- data.frame(to_delete = 1)
@@ -65,10 +82,12 @@ regionSplit <- function(all_results, config)
     }
     regions_df$to_delete <- NULL
     regions_qual_df$to_delete <- NULL
+#    timing$proc_splits <- ifelse(is.null(timing$proc_splits), proc.time() - ptm,
+#                                    timing$proc_splits + proc.time() - ptm)
+    #split_regions[[i]] <- cbind(regions_df, regions_qual_df)
     cbind(regions_df, regions_qual_df)
   }
 
-  split_regions
   region_names <- names(split_regions)[!grepl("^qual_", names(split_regions))]
   res_seq_dat <- list()
   for (region_name in region_names){
