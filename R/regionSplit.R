@@ -42,20 +42,29 @@ regionSplit <- function(all_results, config)
     char_aligned_seqs <- as.character(aligned_seqs)
     attr(char_aligned_seqs, "names") <- NULL
 
-    regionSplit_cpp
+    gapped_qual <- transfer_gaps_cpp(char_aligned_seqs[length(char_aligned_seqs)],
+                                     as.character(seq_dat@quality@quality),
+                                     -1)$quals
 
-    regions <- regionSplit_cpp(char_aligned_seqs, char_aln_profile, region_map)$regions
+    tmp_split <- regionSplit_cpp(char_aligned_seqs, char_aln_profile, region_map, gapped_qual)
 
     regions_df <- data.frame(to_delete = 1)
-    for (j in names(regions)){
+    regions_qual_df <- data.frame(to_delete = 1)
+    for (j in names(tmp_split$regions)){
       regions_df <-
         cbind(regions_df, 
-              data.frame(tmp = regions[j],
+              data.frame(tmp = tmp_split$regions[j],
                          stringsAsFactors = F))
       names(regions_df)[ncol(regions_df)] <- intToUtf8(j)
+      regions_qual_df <-
+        cbind(regions_qual_df, 
+              data.frame(tmp = tmp_split$regions_qual[j],
+                         stringsAsFactors = F))
+      names(regions_qual_df)[ncol(regions_qual_df)] <- paste("qual_", intToUtf8(j), sep = '')
     }
     regions_df$to_delete <- NULL
-    regions_df
+    regions_qual_df$to_delete <- NULL
+    cbind(regions_df, regions_qual_df)
   }
 
 

@@ -1045,7 +1045,8 @@ tallyPrimerSeqErrors_cpp(CharacterVector r_sread,
 // [[Rcpp::export]]
 Rcpp::List regionSplit_cpp(CharacterVector mapped_read,
                            CharacterVector profile,
-                           CharacterVector region_map){
+                           CharacterVector region_map,
+                           CharacterVector mapped_qual){
   if (mapped_read.size() - 1 != profile.size()){
     throw std::range_error("mapped_read must contain 1 more read than profile");
   }
@@ -1100,16 +1101,22 @@ Rcpp::List regionSplit_cpp(CharacterVector mapped_read,
   if (c_region_map.size() != mapped_read[mapped_read.size()-1].size()){
     throw std::range_error("after transferring the region to the mapped read, the region and mapped read must be the same size.");
   }
+  if (mapped_qual[0].size() != mapped_read[mapped_read.size()-1].size()){
+    throw std::range_error("mapped region and mapped qual must be same size");
+  }
   std::map<char, std::string> regions;
+  std::map<char, std::string> regions_qual;
   for (int i = 0; i < c_region_map.size(); ++i)
   {
     regions[c_region_map[i]] += mapped_read[mapped_read.size()-1][i];
+    regions_qual[c_region_map[i]] += mapped_qual[0][i];
   }
 
   Rcpp::List result;
 
   result = Rcpp::List::create(
-    Rcpp::Named("regions") = regions
+    Rcpp::Named("regions") = regions,
+    Rcpp::Named("regions_qual") = regions_qual
   );
   return result;
 }
