@@ -24,6 +24,7 @@ regionSplit <- function(all_results, config)
   dir.create(file.path(op_dir, 'mapped_reads'), showWarnings = FALSE, recursive = TRUE)
 
   registerDoMC(cores = config$ncpu)
+  i <- 5418
   split_regions <- foreach (i = 1:length(seq_dat), .combine = bind_rows) %dopar%
 #  timing <- list()
 #  split_regions <- list()
@@ -43,12 +44,21 @@ regionSplit <- function(all_results, config)
 #    timing$alignment_prep <- ifelse(is.null(timing$alignment_prep), proc.time() - ptm,
 #                                    timing$alignment_prep + proc.time() - ptm)
 #    ptm <- proc.time()
-    system(paste('mafft --quiet --addfragments ', seq_file_name, ' ', op_args$profile,
-                 ' > ', aligned_file_name, sep = ''))
+    mafft_output <- system(paste('mafft --quiet --addfragments ', seq_file_name, ' ', op_args$profile,
+                 ' > ', aligned_file_name, sep = ''), intern = TRUE)
 #    timing$alignment <- ifelse(is.null(timing$alignment), proc.time() - ptm,
 #                                    timing$alignment + proc.time() - ptm)
 #    ptm <- proc.time()
-    stopifnot(file.exists(aligned_file_name))
+    if (!file.exists(aligned_file_name)){
+      cat(aligned_file_name)
+      dir.create(file.path('/tmp', basename(aligned_file_name)))
+      write(mafft_output, file = file.path('/tmp', basename(aligned_file_name), 'mafft.out'))
+      writeXStringSet(cur_seq,
+                      file = file.path('/tmp', basename(aligned_file_name), 'seq.fasta'),
+                      width=20000)
+
+      stop('mafft alignment failed')
+    }
     aligned_seqs <- readDNAStringSet(aligned_file_name)
     char_aligned_seqs <- as.character(aligned_seqs)
     attr(char_aligned_seqs, "names") <- NULL

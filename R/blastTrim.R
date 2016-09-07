@@ -39,7 +39,6 @@ blastTrim <- function(all_results, config)
   
   per_read_metrics <- read.delim(blast_hits_file_name, header = F,
                                  stringsAsFactors = F)[,c(1,2,3),]
-  file.remove(blast_hits_file_name)
   file.remove(seq_file_name)
   names(per_read_metrics) <- c('query', 'target', 'pident')
   no_hits <- as.character(seq_dat@id)[!(as.character(seq_dat@id) %in% per_read_metrics$query)]
@@ -55,14 +54,18 @@ blastTrim <- function(all_results, config)
 
   if (op_args$action == 'trim_hits') {
     trim_steps <- list(step1 = list(name = 'pident',
-                                    threshold = 0,
+                                    threshold = op_args$threshold,
                                     comparator = `<=`,
-                                    breaks = c(-Inf, 0, Inf)))
+                                    breaks = c(-Inf, op_args$threshold - 5,
+                                               op_args$threshold,
+                                               op_args$threshold + 5, Inf)))
   } else {
     trim_steps <- list(step1 = list(name = 'pident',
-                                    threshold = 80,
+                                    threshold = op_args$threshold,
                                     comparator = `>=`,
-                                    breaks = c(Inf, 80, -Inf)))
+                                    breaks = c(Inf, op_args$threshold + 5,
+                                               op_args$threshold,
+                                               op_args$threshold - 5, -Inf)))
   }
 
   result <- list(trim_steps = trim_steps,

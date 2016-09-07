@@ -1,6 +1,31 @@
 # How does a summary table work?
 # It summarizes the data that was kept was the parameters are relaxed.
 
+excl_inf_max <- function(x)
+{
+  x <- x[x!= Inf]
+  x <- x[x!= -Inf]
+  x <- x[x!= 0]
+  if (length(x) == 0){
+    1
+  } else {
+    max(x)
+  }
+}
+
+excl_inf_min <- function(x)
+{
+  x <- x[x!= Inf]
+  x <- x[x!= -Inf]
+  x <- x[x!= 0]
+  if (length(x) == 0){
+    1
+  } else {
+    min(x)
+  }
+}
+
+
 #' Generates summary table when there is one trim step with one value
 #' @inheritParams saveToDisk
 #' @export
@@ -42,8 +67,20 @@ genSummary_case3 <- function(result, config, seq_dat)
     trim_vec <- !comparator(trim_dat, trim_step$breaks[break_indx])
     kept_seqs <- seq_dat[kept_vec]
     curr_seq_dat <- seq_dat[trim_vec]
-    parameter <- paste(trim_step$name, ' (', trim_step$breaks[break_indx-1], 
-                       ',', trim_step$breaks[break_indx], ']', sep = '')
+    if (excl_inf_max(c(abs(trim_step$breaks[break_indx-1]), abs(trim_step$breaks[break_indx]))) > 10000 |
+        excl_inf_min(c(abs(trim_step$breaks[break_indx-1]), abs(trim_step$breaks[break_indx]))) < 0.01){
+      parameter <- paste(trim_step$name, ' (', 
+                         format(trim_step$breaks[break_indx-1], scientific = T, digits = 4), 
+                         ',', 
+                         format(trim_step$breaks[break_indx], scientific = T, digits = 4), 
+                         ']', sep = '')
+    } else {
+      parameter <- paste(trim_step$name, ' (', 
+                         round(trim_step$breaks[break_indx-1], 3), 
+                         ',', 
+                         round(trim_step$breaks[break_indx], 3), 
+                         ']', sep = '')
+    }
     if (comparator(trim_step$threshold, trim_step$breaks[break_indx]) &
         !(comparator(trim_step$threshold, trim_step$breaks[break_indx-1])))
     {
@@ -63,7 +100,7 @@ genSummary_case3 <- function(result, config, seq_dat)
 #' @inheritParams saveToDisk
 #' @export
 
-genSummary_case4 <- function(result, config, seq_dat, round_digits = 0)
+genSummary_case4 <- function(result, config, seq_dat)
 {
   summary_tab <- NULL
   trim_criteria <- matrix(TRUE, nrow = length(seq_dat), ncol = length(result$trim_steps))
@@ -89,11 +126,20 @@ genSummary_case4 <- function(result, config, seq_dat, round_digits = 0)
       comp_trim_vec <- apply(trim_criteria, 1, all) & trim_vec
       kept_seqs <- seq_dat[comp_kept_vec]
       curr_seq_dat <- seq_dat[comp_trim_vec]
-      parameter <- paste(trim_step$name, ' (', 
-                         round(trim_step$breaks[break_indx-1], round_digits), 
-                         ',', 
-                         round(trim_step$breaks[break_indx], round_digits),
-                         ']', sep = '')
+      if (excl_inf_max(c(abs(trim_step$breaks[break_indx-1]), abs(trim_step$breaks[break_indx]))) > 10000 |
+          excl_inf_min(c(abs(trim_step$breaks[break_indx-1]), abs(trim_step$breaks[break_indx]))) < 0.01){
+        parameter <- paste(trim_step$name, ' (', 
+                           format(trim_step$breaks[break_indx-1], scientific = T, digits = 4), 
+                           ',', 
+                           format(trim_step$breaks[break_indx], scientific = T, digits = 4), 
+                           ']', sep = '')
+      } else {
+        parameter <- paste(trim_step$name, ' (', 
+                           round(trim_step$breaks[break_indx-1], 3), 
+                           ',', 
+                           round(trim_step$breaks[break_indx], 3), 
+                           ']', sep = '')
+      }
       if (comparator(trim_step$threshold, trim_step$breaks[break_indx]) &
           !(comparator(trim_step$threshold, trim_step$breaks[break_indx-1])))
       {

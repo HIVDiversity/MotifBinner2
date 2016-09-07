@@ -35,11 +35,30 @@ vsearchCluster <- function(all_results, config)
                sep = ''))
   
   assignments <- read.delim(lookup_file_name, header = F,
-                            stringsAsFactors = F)[,c(1,2,9,10),]
-  file.remove(lookup_file_name)
-  file.remove(seq_file_name)
+                            stringsAsFactors = F)
+  cluster_sizes <- subset(assignments, 
+                          V1 == 'C',
+                          select = c("V1", "V2", "V3", "V9"))
+  names(cluster_sizes) <- c('type', 'clus_id', 'size', 'centroid')
+  centroid_names <- cluster_sizes[,c('centroid', 'size')]
+  centroid_names$new_name <- paste(centroid_names$centroid, centroid_names$size, sep = '_')
+  centroid_names$size <- NULL
+  assignments <- assignments[,c(1,2,9,10),]
+  
   names(assignments) <- c('type', 'clus_num', 'seq_name', 'assigned_to')
+  assignments <- merge(assignments, centroid_names, 
+                       by.x = 'seq_name', by.y = 'centroid',
+                       all.x = TRUE)
+  assignments$new_name <- ifelse(is.na(assignments$new_name), assignments$seq_name, assignments$new_name)
   per_read_metrics <- subset(assignments, type != 'C')
+
+  seq_dat <- seq_dat[order(as.character(seq_dat@id))]
+  per_read_metrics <- per_read_metrics[order(per_read_metrics$seq_name),]
+  stopifnot(all(as.character(seq_dat@id) == per_read_metrics$seq_name))
+  seq_dat@id <- BStringSet(per_read_metrics$new_name)
+  per_read_metrics$seq_name <- per_read_metrics$new_name
+  per_read_metrics$new_name <- NULL
+
   per_read_metrics$assigned_to[per_read_metrics$type == 'S'] <- 'Centroid'
   per_read_metrics$is_centroid <- ifelse(per_read_metrics$type == 'S', 1, 0)
 #  write.csv(assignments, gsub('.tab','.csv', lookup_file_name),
@@ -59,6 +78,8 @@ vsearchCluster <- function(all_results, config)
                         op_args = op_args,
                         op_full_name = op_full_name,
                         op_dir = op_dir)
+  file.remove(lookup_file_name)
+  file.remove(seq_file_name)
   return(result)
 }
 
