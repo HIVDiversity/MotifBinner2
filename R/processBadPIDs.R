@@ -179,10 +179,10 @@ genSummary_processBadPIDs <- function(result)
 {
   class(result) <- 'processBadPIDs_fwd'
   seq_dat_fwd <- shortReadQ_forced_append(list(result$seq_dat$fwd, result$trim_dat$fwd))
-  summary_tab_fwd <- genSummary_case4(result, NULL, seq_dat_fwd, round_digits = 4)
+  summary_tab_fwd <- genSummary_case4(result, NULL, seq_dat_fwd)
   class(result) <- 'processBadPIDs_rev'
   seq_dat_rev <- shortReadQ_forced_append(list(result$seq_dat$rev, result$trim_dat$rev))
-  summary_tab_rev <- genSummary_case4(result, NULL, seq_dat_rev, round_digits = 4)
+  summary_tab_rev <- genSummary_case4(result, NULL, seq_dat_rev)
   return(rbind(summary_tab_fwd, summary_tab_rev))
 }
 

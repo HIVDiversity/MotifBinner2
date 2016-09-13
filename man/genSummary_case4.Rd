@@ -4,7 +4,7 @@
 \alias{genSummary_case4}
 \title{Generates summary table when there is many trim steps each with many values}
 \usage{
-genSummary_case4(result, config, seq_dat, round_digits = 0)
+genSummary_case4(result, config, seq_dat)
 }
 \arguments{
 \item{result}{The result produced from a specific operation}

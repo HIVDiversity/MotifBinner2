@@ -2,6 +2,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
                         rev_file, rev_primer_seq, rev_primer_lens, rev_min_score,
                         fwd_pid_in_which_fragment, rev_pid_in_which_fragment,
                         profile_file, fwd_profile_file = NULL, rev_profile_file = NULL,
+                        min_read_length = 295,
                         pattern_to_chop_from_names = ' [0-9]:N:[0-9]*:[0-9]*$',
                         output_dir = "/fridge/data/MotifBinner2_test",
                         base_for_names = "CAP129_2040_009wpi_C2C3",
@@ -42,7 +43,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
       list(name = 'fwd_seqLength',
         op = 'seqLength',
         data_source = "n004",
-        threshold = 295,
+        threshold = min_read_length,
         cache_data = TRUE),
     'n006' =
       list(name = 'fwd_qualTrim',
@@ -90,7 +91,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
       list(name = 'rev_seqLength',
         op = 'seqLength',
         data_source = "n011",
-        threshold = 295,
+        threshold = min_read_length,
         cache_data = TRUE),
     'n013' =
       list(name = 'rev_qualTrim',
@@ -98,7 +99,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
         data_source = "n012",
         avg_qual = 20,
         bad_base_threshold = 10,
-        max_bad_bases = 0.05,
+        max_bad_bases = 0.25,
         cache_data = TRUE),
     'n014' =
       list(name = 'rev_trimAffixes',
@@ -259,6 +260,21 @@ store_configs <- function()
               output_dir = "/fridge/data/MotifBinner2_test",
               base_for_names = "CAP256_3100_030wpi_v1v2"
               )
+  config <-  # mol clock
+  buildConfig(fwd_file = "/fridge/data/MotifBinner2_test/raw/CAP239_3090_022wpi_C2C3_R2.fastq",
+              fwd_primer_seq = 'CTCTTTTGACCCAATTCCTATACATTATTG',
+              fwd_primer_lens = 30,
+              fwd_min_score = 25,
+              rev_file = "/fridge/data/MotifBinner2_test/raw/CAP239_3090_022wpi_C2C3_R2.fastq",
+              rev_primer_seq = 'NNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT',
+              rev_primer_lens = c(14, 28),
+              rev_min_score = 37,
+              fwd_pid_in_which_fragment = NULL,
+              rev_pid_in_which_fragment = 2,
+              profile_file = "/fridge/data/MotifBinner2_test/v1v2_profile1.fasta",
+              output_dir = "/fridge/data/MotifBinner2_test",
+              base_for_names = "CAP239_3090_022wpi_c2c3"
+              )
   config <-    ## Zhou et al 2015 env region
   buildConfig(fwd_file = "/fridge/data/zhou2015/data/SRR1761912/SRR1761912_1.fastq",
               fwd_primer_seq = "NNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA",
@@ -278,6 +294,95 @@ store_configs <- function()
               base_for_names = "zhou_2015_v1v3_1761912",
               erase_history = FALSE,
               ncpu = 2,
+              bins_to_process = Inf
+              )
+  config <-    ## Zhou et al 2016 env region
+  buildConfig(fwd_file = "/fridge/data/zhou2016/raw/SRR3221805_1.fastq",
+              fwd_primer_seq = "NNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA",
+              fwd_primer_lens = 34,
+              fwd_min_score = 23,
+              rev_file = "/fridge/data/zhou2016/raw/SRR3221805_2.fastq",
+              rev_primer_seq = "NNNNNNNNNCAGTCCATTTTGCTCTACTAATGTTACAATGTGC",
+              rev_primer_lens = c(9, 34),
+              rev_min_score = 29,
+              fwd_pid_in_which_fragment = NULL,
+              rev_pid_in_which_fragment = 1,
+              min_read_length = 245,
+              profile_file = "/fridge/data/zhou2015/NA_aligned.fasta",
+              fwd_profile_file = "/fridge/data/zhou2015/NA_aligned_fwd.fasta",
+              rev_profile_file = "/fridge/data/zhou2015/NA_aligned_rev.fasta",
+              pattern_to_chop_from_names = "\\.[12] [0-9]+ length=[0-9].*",
+              output_dir = "/fridge/data/zhou2016/binned",
+              base_for_names = "zhou_2016_v1v3_3221805",
+              erase_history = FALSE,
+              ncpu = 4,
+              bins_to_process = Inf
+              )
+  config <-    ## Zhou et al 2016 env region
+  buildConfig(fwd_file = "/fridge/data/zhou2016/raw/SRR3221806_1.fastq",
+              fwd_primer_seq = "NNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA",
+              fwd_primer_lens = 34,
+              fwd_min_score = 23,
+              rev_file = "/fridge/data/zhou2016/raw/SRR3221806_2.fastq",
+              rev_primer_seq = "NNNNNNNNNCAGTCCATTTTGCTCTACTAATGTTACAATGTGC",
+              rev_primer_lens = c(9, 34),
+              rev_min_score = 29,
+              fwd_pid_in_which_fragment = NULL,
+              rev_pid_in_which_fragment = 1,
+              min_read_length = 245,
+              profile_file = "/fridge/data/zhou2015/NA_aligned.fasta",
+              fwd_profile_file = "/fridge/data/zhou2016/profile/SRR3221806_1_profile.fasta",
+              rev_profile_file = "/fridge/data/zhou2016/profile/SRR3221806_2_profile.fasta",
+              pattern_to_chop_from_names = "\\.[12] [0-9]+ length=[0-9].*",
+              output_dir = "/fridge/data/zhou2016/binned",
+              base_for_names = "zhou_2016_v1v3_3221806",
+              erase_history = FALSE,
+              ncpu = 4,
+              bins_to_process = Inf
+              )
+  config <-    ## Zhou et al 2016 env region
+  buildConfig(fwd_file = "/fridge/data/zhou2016/raw/SRR3221818_1.fastq",
+              fwd_primer_seq = "NNNNTTATGGGATCAAAGCCTAAAGCCATGTGTA",
+              fwd_primer_lens = 34,
+              fwd_min_score = 23,
+              rev_file = "/fridge/data/zhou2016/raw/SRR3221818_2.fastq",
+              rev_primer_seq = "NNNNNNNNNCAGTCCATTTTGCTCTACTAATGTTACAATGTGC",
+              rev_primer_lens = c(9, 34),
+              rev_min_score = 29,
+              fwd_pid_in_which_fragment = NULL,
+              rev_pid_in_which_fragment = 1,
+              min_read_length = 245,
+              profile_file = "/fridge/data/zhou2015/NA_aligned.fasta",
+              fwd_profile_file = "/fridge/data/zhou2016/profile/SRR3221818_1_profile.fasta",
+              rev_profile_file = "/fridge/data/zhou2016/profile/SRR3221818_2_profile.fasta",
+              pattern_to_chop_from_names = "\\.[12] [0-9]+ length=[0-9].*",
+              output_dir = "/fridge/data/zhou2016/binned",
+              base_for_names = "zhou_2016_v1v3_3221818",
+              erase_history = FALSE,
+              ncpu = 4,
+              bins_to_process = Inf
+              )
+
+
+  config <-    ## Anthony 2016 env V3-C5 region
+  buildConfig(fwd_file = '/fridge/data/MotifBinner2_test/raw/CAP008_1070_002wpi_V3B_C5A_R1.fastq',
+              fwd_primer_seq = "NNNNNNNNGGACCAGGACAAACATTCTATGC",
+              fwd_primer_lens = 31,
+              fwd_min_score = 27,
+              rev_file = '/fridge/data/MotifBinner2_test/raw/CAP008_1070_002wpi_V3B_C5A_R2.fastq',
+              rev_primer_seq = "NNNNNNNNNNNNNNNGTCCYTCATATYTCCTCCTYCAGG",
+              rev_primer_lens = c(15, 24),
+              rev_min_score = 34,
+              fwd_pid_in_which_fragment = NULL,
+              rev_pid_in_which_fragment = 1,
+              min_read_length = 295,
+              profile_file = "/fridge/data/MotifBinner2_test/profile/CAP008_1070_002wpi_V3B_C5A_R1_profile.fasta",
+              fwd_profile_file = "",
+              rev_profile_file = "",
+              output_dir = "/fridge/data/MotifBinner2_test/binned",
+              base_for_names = "CAP008_1070_002wpi_V3B_C5A",
+              erase_history = FALSE,
+              ncpu = 4,
               bins_to_process = Inf
               )
 }
