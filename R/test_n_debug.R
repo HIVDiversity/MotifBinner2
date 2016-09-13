@@ -425,6 +425,10 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n025') # fwd_buildConsensus
   all_results <- applyOperation(all_results, config, op_number = 'n026') # rev_buildConsensus
   all_results <- applyOperation(all_results, config, op_number = 'n027') # binSeqErr_fwd_rev
+  
+  
+  op_number <- 'n019'
+  config$current_op_number <- op_number
 
   timing <- list()
   ptm <- proc.time()
