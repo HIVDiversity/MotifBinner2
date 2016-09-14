@@ -73,16 +73,20 @@ alignBins <- function(all_results, config)
   return(result)
 }
 
-map_reads_with_mafft <- function(interleaved_seqs, working_dir, pid, profile_file)
+map_reads_with_mafft <- function(interleaved_seqs, working_dir, pid, profile_file, n_profile_seqs)
 {
-  mafft_guide_tree <- data.frame(r1 = 1,
-                                 r2 = 2:length(interleaved_seqs),
-                                 r3 = 0.01,
-                                 r4 = 0.01)
-  gt_file_name <- file.path(working_dir, 'bins', paste(pid, '_guide_tree.txt', sep = ''))
-  write.table(mafft_guide_tree,
-              gt_file_name,
-              col.names = FALSE, row.names = FALSE, sep = '\t')
+#  guide_tree_size <- length(interleaved_seqs)
+#  if (guide_tree_size < n_profile_seqs){
+#    guide_tree_size <- guide_tree_size + n_profile_seqs
+#  }
+#  mafft_guide_tree <- data.frame(r1 = 1,
+#                                 r2 = 2:guide_tree_size,
+#                                 r3 = 0.01,
+#                                 r4 = 0.01)
+#  gt_file_name <- file.path(working_dir, 'bins', paste(pid, '_guide_tree.txt', sep = ''))
+#  write.table(mafft_guide_tree,
+#              gt_file_name,
+#              col.names = FALSE, row.names = FALSE, sep = '\t')
   interleaved_file_name <- file.path(working_dir, 'bins', paste(pid, '_interleaved', '.fasta', sep = ''))
   writeXStringSet(interleaved_seqs,
                   interleaved_file_name,
@@ -92,7 +96,11 @@ map_reads_with_mafft <- function(interleaved_seqs, working_dir, pid, profile_fil
     system(paste('mafft --quiet --ep 0.2 --retree 1 --treein ', gt_file_name, ' ', interleaved_file_name, 
                  ' > ', aligned_file_name, sep = ''))
   } else if (file.exists(profile_file)){
-    system(paste('mafft --quiet --ep 0.2 --retree 1 --treein ', gt_file_name, 
+#    system(paste('mafft --quiet --ep 0.2 --retree 1 --treein ', gt_file_name, 
+#                 ' --addfragments ', interleaved_file_name, 
+#                 ' ', profile_file,
+#                 ' > ', aligned_file_name, sep = ''))
+    system(paste('mafft --quiet --ep 0.2 ', 
                  ' --addfragments ', interleaved_file_name, 
                  ' ', profile_file,
                  ' > ', aligned_file_name, sep = ''))
@@ -101,7 +109,6 @@ map_reads_with_mafft <- function(interleaved_seqs, working_dir, pid, profile_fil
   }
   stopifnot(file.exists(aligned_file_name))
   aligned_seqs <- readDNAStringSet(aligned_file_name)
-  aligned_seqs <- aligned_seqs[(names(aligned_seqs) %in% names(interleaved_seqs))]
   aligned_seqs
 }
 
@@ -114,6 +121,8 @@ map_reads_with_mafft <- function(interleaved_seqs, working_dir, pid, profile_fil
 #alignBins_internal <- function(cur_fwd_seqs, cur_rev_seqs, profile_seqs, working_dir, pid)
 alignBins_internal <- function(cur_fwd_seqs, cur_rev_seqs, profile_file, working_dir, pid)
 {
+  profile_seqs <- readDNAStringSet(profile_file)
+  n_profile_seqs <- length(profile_seqs)
   interleaving_vector <- NULL
   for (fwd_indx in 1:length(cur_fwd_seqs)){
     rev_indx <- length(cur_fwd_seqs) + fwd_indx
@@ -125,15 +134,14 @@ alignBins_internal <- function(cur_fwd_seqs, cur_rev_seqs, profile_file, working
                                paste(as.character(cur_fwd_seqs@id), 'rev', sep = '_'))[interleaving_vector]
 #  interleaved_seqs <- c(profile_seqs, interleaved_seqs)
 
-  aligned_seqs <- map_reads_with_mafft(interleaved_seqs, working_dir, pid, profile_file)
+  aligned_seqs <- map_reads_with_mafft(interleaved_seqs, working_dir, pid, profile_file, n_profile_seqs)
   if (length(aligned_seqs) < length(interleaved_seqs)){
     warning (paste('PID ', pid, ' mapping FAILED'))
     file.create(file.path(working_dir, 'bins', paste('zzz_', pid, '_mapping_failed.txt', sep = '')))
-    profile_seqs <- readDNAStringSet(profile_file)
-    interleaved_seqs <- c(profile_seqs,
-                          interleaved_seqs)
-    aligned_seqs <- map_reads_with_mafft(interleaved_seqs, working_dir, pid, profile_file = NULL)
+    aligned_seqs <- map_reads_with_mafft(c(profile_seqs, interleaved_seqs), working_dir, 
+                                         pid, profile_file = NULL, n_profile_seqs)
   }
+  aligned_seqs <- aligned_seqs[(names(aligned_seqs) %in% names(interleaved_seqs))]
 
 #  aligned_seqs <- aligned_seqs[!(names(aligned_seqs) %in% names(profile_seqs))]
   interleaved_quals <- c(cur_fwd_seqs@quality@quality, reverse(cur_rev_seqs@quality@quality))[interleaving_vector]

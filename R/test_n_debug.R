@@ -382,7 +382,7 @@ store_configs <- function()
               output_dir = "/fridge/data/MotifBinner2_test/binned",
               base_for_names = "CAP008_1070_002wpi_V3B_C5A",
               erase_history = FALSE,
-              ncpu = 4,
+              ncpu = 6,
               bins_to_process = Inf
               )
 }
@@ -425,6 +425,8 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n025') # fwd_buildConsensus
   all_results <- applyOperation(all_results, config, op_number = 'n026') # rev_buildConsensus
   all_results <- applyOperation(all_results, config, op_number = 'n027') # binSeqErr_fwd_rev
+
+  load('/fridge/data/MotifBinner2_test/binned/CAP008_1070_002wpi_V3B_C5A/CAP008_1070_002wpi_V3B_C5A.Rdata')
   
   
   op_number <- 'n019'
