@@ -21,6 +21,7 @@ if (class(result) != 'binSeqErr')
 {
   result <- all_results[[grep('binSeqErr', names(all_results))[1]]]
 }
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 ```
 
 ```{r, include=F}
@@ -54,7 +55,7 @@ p1 <- ggplot(plot_dat, aes(x = rates)) +
 fig.cap1 <- 'Distributions of error parameters for indels and substitution in the bins. Reference error rates in primer regions shown as vertical blue lines.'
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
 print(p1)
 ```
 

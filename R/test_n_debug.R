@@ -140,60 +140,94 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
         data_source = "n017",
         cache_data = TRUE),
     'n019' =
-      list(name = 'alignBins',
-        op = 'alignBins',
-        bins_to_process = bins_to_process,
+      list(name = 'mergePEAR',
+        op = 'mergePEAR',
         data_source = "n018",
-        profile_file = profile_file,
         cache_data = TRUE),
     'n020' =
-      list(name = 'buildConsensus',
-        op = 'buildConsensus',
+      list(name = 'merge_qualTrim',
+        op = 'qualTrim',
         data_source = "n019",
+        avg_qual = 20,
+        bad_base_threshold = 10,
+        max_bad_bases = 0.05,
         cache_data = TRUE),
     'n021' =
-      list(name = 'primerSeqErr',
-        op = 'primerSeqErr',
-        data_source = c("fwd" = "n007", "rev" = "n014"),
-        cache_data = FALSE),
+      list(name = 'binSizeCheck',
+        op = 'binSizeCheck',
+        data_source = "n020",
+        min_bin_size = 3,
+        cache_data = TRUE),
     'n022' =
-      list(name = 'binSeqErr',
-        op = 'binSeqErr',
-        data_source = c("bin_msa" = "n019", "cons" = "n020", "primer_err" = "n021"),
-        cache_data = FALSE),
+      list(name = 'alignBinsMSA',
+        op = 'alignBinsMSA',
+        bins_to_process = bins_to_process,
+        data_source = "n021",
+        cache_data = TRUE),
     'n023' =
-      list(name = 'fwd_alignBinsSP',
-        op = 'alignBinsSP',
-        bins_to_process = bins_to_process,
-        data_source = "n018",
-        which_pair = "fwd",
-        profile_file = fwd_profile_file,
-        cache_data = TRUE),
-    'n024' =
-      list(name = 'rev_alignBinsSP',
-        op = 'alignBinsSP',
-        bins_to_process = bins_to_process,
-        data_source = "n018",
-        which_pair = "rev",
-        profile_file = rev_profile_file,
-        cache_data = TRUE),
-    'n025' =
-      list(name = 'fwd_buildConsensus',
+      list(name = 'buildConsensus',
         op = 'buildConsensus',
-        data_source = "n023",
-        cache_data = TRUE),
-    'n026' =
-      list(name = 'rev_buildConsensus',
-        op = 'buildConsensus',
-        data_source = "n024",
-        cache_data = TRUE),
-    'n027' =
-      list(name = 'binSeqErr_fwd_rev',
-        op = 'binSeqErr',
-        data_source = list("bin_msa" = list("fwd" = "n023", "rev" = "n024"),
-                           "cons" = list("fwd" = "n025", "rev" = "n026"), 
-                           "primer_err" = "n021"),
-        cache_data = FALSE)
+        data_source = "n022",
+        cache_data = TRUE)
+    
+    
+#    'n019' =
+#      list(name = 'alignBins',
+#        op = 'alignBins',
+#        bins_to_process = bins_to_process,
+#        data_source = "n018",
+#        profile_file = profile_file,
+#        cache_data = TRUE),
+#    'n020' =
+#      list(name = 'buildConsensus',
+#        op = 'buildConsensus',
+#        data_source = "n019",
+#        cache_data = TRUE),
+#    'n021' =
+#      list(name = 'primerSeqErr',
+#        op = 'primerSeqErr',
+#        data_source = c("fwd" = "n007", "rev" = "n014"),
+#        cache_data = FALSE),
+#    'n022' =
+#      list(name = 'binSeqErr',
+#        op = 'binSeqErr',
+#        data_source = c("bin_msa" = "n019", "cons" = "n020", "primer_err" = "n021"),
+#        cache_data = FALSE),
+#    'n023' =
+#      list(name = 'fwd_alignBinsSP',
+#        op = 'alignBinsSP',
+#        bins_to_process = bins_to_process,
+#        data_source = "n018",
+#        which_pair = "fwd",
+#        profile_file = fwd_profile_file,
+#        cache_data = TRUE),
+#    'n024' =
+#      list(name = 'rev_alignBinsSP',
+#        op = 'alignBinsSP',
+#        bins_to_process = bins_to_process,
+#        data_source = "n018",
+#        which_pair = "rev",
+#        profile_file = rev_profile_file,
+#        cache_data = TRUE),
+#    'n025' =
+#      list(name = 'fwd_buildConsensus',
+#        op = 'buildConsensus',
+#        data_source = "n023",
+#        cache_data = TRUE),
+#    'n026' =
+#      list(name = 'rev_buildConsensus',
+#        op = 'buildConsensus',
+#        data_source = "n024",
+#        cache_data = TRUE),
+#    'n027' =
+#      list(name = 'binSeqErr_fwd_rev',
+#        op = 'binSeqErr',
+#        data_source = list("bin_msa_fwd" = "n023", 
+#                           "bin_msa_rev" = "n024",
+#                           "cons_fwd" = "n025", 
+#                           "cons_rev" = "n026", 
+#                           "primer_err" = "n021"),
+#        cache_data = FALSE)
     )
 
   config <- list(operation_list = operation_list,
@@ -243,7 +277,8 @@ store_configs <- function()
               rev_pid_in_which_fragment = 1,
               profile_file = "/fridge/data/MotifBinner2_test/c2c3_mol_clock_profile_1.fasta",
               output_dir = "/fridge/data/MotifBinner2_test",
-              base_for_names = "CAP129_2040_009wpi_C2C3"
+              base_for_names = "CAP129_2040_009wpi_C2C3",
+              erase_history = FALSE
               )
   config <-
   buildConfig(fwd_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
@@ -416,6 +451,19 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n016') # revExtractPIDs
   all_results <- applyOperation(all_results, config, op_number = 'n017') # matchPairs
   all_results <- applyOperation(all_results, config, op_number = 'n018') # processBadPIDs
+  all_results <- applyOperation(all_results, config, op_number = 'n019') # merge
+  all_results <- applyOperation(all_results, config, op_number = 'n020') # qualTrim
+  all_results <- applyOperation(all_results, config, op_number = 'n021') # binSizeCheck
+  all_results <- applyOperation(all_results, config, op_number = 'n022') # alignBinsMSA
+  all_results <- applyOperation(all_results, config, op_number = 'n023') # buildConsensus
+
+  genReport(all_results, config)
+  op_number <- 'n021'
+  config$current_op_number <- op_number
+
+
+  result <- all_results
+
   all_results <- applyOperation(all_results, config, op_number = 'n019') # alignBins
   all_results <- applyOperation(all_results, config, op_number = 'n020') # buildConsensus
   all_results <- applyOperation(all_results, config, op_number = 'n021') # primerSeqErr
@@ -429,7 +477,7 @@ dummy_test_debug <- function()
   load('/fridge/data/MotifBinner2_test/binned/CAP008_1070_002wpi_V3B_C5A/CAP008_1070_002wpi_V3B_C5A.Rdata')
   
   
-  op_number <- 'n019'
+  op_number <- 'n021'
   config$current_op_number <- op_number
 
   timing <- list()

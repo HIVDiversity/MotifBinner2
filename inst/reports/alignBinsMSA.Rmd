@@ -1,0 +1,31 @@
+## alignBinsMSA
+
+aligns a set of reads (should be merged reads) using default mafft settings
+
+```{r}
+custom_chunk_name <- 'booogie'
+```
+
+```{r custom_chunk_name, include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('alignBinsMSA', names(all_results))[1]]]
+}
+if (class(result) != 'alignBinsMSA')
+{
+  result <- all_results[[grep('alignBinsMSA', names(all_results))[1]]]
+}
+```
+
+```{r, results='asis'}
+kable_summary(result$summary)
+
+timingTable(result)
+```
+

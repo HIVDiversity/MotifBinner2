@@ -17,6 +17,7 @@ if (class(result) != 'qualTrim')
 {
   result <- all_results[[grep('qualTrim', names(all_results))[1]]]
 }
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 ```
 
 ```{r}
@@ -25,7 +26,7 @@ per_read_metrics <- result$metrics$per_read_metrics
 fig.cap1 <- "Histograms of the average qualities and percentage of bad bases in the reads"
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
 options(scipen=99)
 
 ticks <- 10^(0:12)

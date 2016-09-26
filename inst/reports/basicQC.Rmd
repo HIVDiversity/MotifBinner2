@@ -1,8 +1,3 @@
-## basicQC
-
-Adapted from FastQC: 
-Andrews S. (2010). FastQC: a quality control tool for high throughput sequence data. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc
-
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
@@ -18,7 +13,16 @@ if (class(result) != 'basicQC')
 {
   result <- all_results[[grep('basicQC', names(all_results))[1]]]
 }
+
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 ```
+
+# `r result$config$op_full_name`
+
+Basic Quality Control reports on the raw reads from the sequencing run.
+
+Inspired by FastQC: 
+Andrews S. (2010). FastQC: a quality control tool for high throughput sequence data. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc
 
 ```{r}
 seq_df <- result$metrics$seq_df
@@ -26,13 +30,13 @@ zone_qual <- result$metrics$zone_qual
 tile_qual <- result$metrics$tile_qual
 pos_qual <- result$metrics$pos_qual
 
-fig.cap1 <- "Histograms of read lengths and average qualities"
-fig.cap2 <- "Read length and quality by position on slide"
-fig.cap3 <- "Average sequence quality by tile and cycle"
-fig.cap4 <- "Distribution of sequence qualities by cycle"
+fig.cap1 <- "Figure: Histograms of read lengths and average qualities."
+fig.cap2 <- "Figure: Read length and quality by position on slide."
+fig.cap3 <- "Figure: Average sequence quality by tile and cycle."
+fig.cap4 <- "Figure: Distribution of sequence qualities by cycle. For plotting reasons, cycles are grouped into bins of size two. This means that y-axis is double the range it would be if each cycle was plotted independently. Also, cycles 300 and 301 (250 and 251) are grouped together and since the max length is 300 (250), the final bar is expected to be half the height of the bar immediately preceeding it."
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
 options(scipen=99)
 read_width_breaks <- c(-Inf,(0:22)*15, Inf)
 qual_breaks <- (0:21)*2
@@ -49,7 +53,7 @@ ggplot(seq_df, aes(x=qual)) +
 grid.arrange(p1, p2, ncol=2)
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2, fig.path=figure_path}
 p3 <-
 ggplot(zone_qual,
        aes(x=xcat, y=ycat, fill=n_seq)) + 
@@ -67,26 +71,37 @@ ggplot(zone_qual,
 grid.arrange(p3, p4, ncol=2)
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap3}
+```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap3, fig.path=figure_path}
 
 print(
-  ggplot(data.frame(tile_qual), aes(cycle, tile_indx)) +
-  geom_tile(aes(fill=avg_qual))
+  ggplot(data.frame(tile_qual), aes(cycle, as.factor(tile_indx))) +
+  geom_tile(aes(fill=avg_qual)) +
+  xlab("Sequencing Cycle - nucleotide position in the raw reads") +
+  ylab("Tile - Region on the slide")+
+  scale_fill_continuous(guide = guide_legend("Avg. Q\nScore"))
 )
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap4}
+```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap4, fig.path=figure_path}
 print(
   ggplot(na.omit(pos_qual), aes(x = cycle_cat, fill = as.factor(qual))) +
-    geom_bar(aes(y=count), width=2, stat = 'identity') 
+         geom_bar(aes(y=count), width=2, stat = 'identity') +
+         xlab("Sequencing Cycle - nucleotide position in the raw reads") +
+         ylab("Number of Reads (x2)") +
+         scale_fill_discrete(guide = guide_legend(title = "Q Score"))
 )
 ```
+
 ```{r, results='asis'}
-cat('\n\n---\n\n')
+summary_tab <- result$summary
+cat("\n\nTable: Basic statistics of the QC'd sequences.\n\n")
+kept_tab <- summary_tab[,grep('k_', names(summary_tab))]
+names(kept_tab) <- gsub('k_', '', names(kept_tab))
+print(kable(kept_tab))
+
+timingTable(result)
 ```
 
 ```{r, results='asis'}
-kable_summary(result$summary)
-
-timingTable(result)
+cat('\n\n---\n\n')
 ```

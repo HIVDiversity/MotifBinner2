@@ -18,6 +18,7 @@ if (class(result) != 'trimAffixes')
 {
   result <- all_results[[grep('trimAffixes', names(all_results))[1]]]
 }
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 ```
 
 ```{r, include=F}
@@ -26,7 +27,7 @@ fig.cap1 <- 'Histograms of the number of missing bases / superflous bases at the
 fig.cap2 <- 'Histograms of the alignment score between the primer and the sequences'
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
 options(scipen=99)
 aln_stats <- result$metrics$per_read_metrics
 ticks <- 10^(0:12)
@@ -63,7 +64,7 @@ grid.arrange(p1, p2, ncol=2)
 cat('\n\n')
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2, fig.path=figure_path}
 print(p3)
 ```
 

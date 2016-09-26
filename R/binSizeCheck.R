@@ -1,8 +1,8 @@
-#' Removes perimer-dimer sequences (based on sequence length)
+#' Removes sequences shorter than a given cutoff
 #' @inheritParams applyOperation
 #' @export
 
-primerDimer <- function(all_results, config)
+binSizeCheck <- function(all_results, config)
 {
   op_number <- config$current_op_number
   op_args <- config$operation_list[[op_number]]
@@ -15,24 +15,36 @@ primerDimer <- function(all_results, config)
   stopifnot(length(data_source_indx) == 1)
   seq_dat <- all_results[[data_source_indx]]$seq_dat
   
-  per_read_metrics <- data.frame(seq_len = width(seq_dat@sread))
+  per_read_metrics <- data.frame(seq_name = as.character(seq_dat@id),
+                                 stringsAsFactors = F)
+  per_read_metrics$pid <- gsub('^.*PID:([ACGT]*)_([ACGT]*).*$', '\\1\\2', per_read_metrics$seq_name)
 
-  threshold <- op_args$threshold
-  if (is.null(threshold))
+  n_per_pid <- data.frame(table(per_read_metrics$pid))
+  n_per_pid$Var1 <- as.character(n_per_pid$Var1)
+  names(n_per_pid) <- c('pid', 'seq_left')
+
+  per_read_metrics <- merge(per_read_metrics, n_per_pid,
+                            all.x=TRUE, by.x = 'pid',
+                            by.y = 'pid')
+  seq_dat <- seq_dat[order(as.character(seq_dat@id))]
+  per_read_metrics <- per_read_metrics[order(per_read_metrics$seq_name),]
+
+  min_bin_size <- op_args$min_bin_size
+  if (is.null(min_bin_size))
   {
-    threshold <- 80
+    min_bin_size <- 3
   }
-  trim_steps <- list(step1 = list(name = 'seq_len',
-                                  threshold = threshold,
+  trim_steps <- list(step1 = list(name = 'seq_left',
+                                  threshold = min_bin_size,
                                   comparator = `>=`,
-                                  breaks = c(Inf, 295, 100, 80, 50, 30, -Inf)
+                                  breaks = c(Inf, min_bin_size+c(1,0,-1), -Inf)
                                   )
                     )
 
   result <- list(trim_steps = trim_steps,
                  metrics = list(per_read_metrics = per_read_metrics))
   kept_dat <- getKept(result, seq_dat=seq_dat)
-  class(result) <- 'primerDimer'
+  class(result) <- 'binSizeCheck'
   if (op_args$cache){
     result$seq_dat <- kept_dat
   }
@@ -44,7 +56,7 @@ primerDimer <- function(all_results, config)
   return(result)
 }
 
-saveToDisk.primerDimer <- function(result, config, seq_dat)
+saveToDisk.binSizeCheck <- function(result, config, seq_dat)
 {
   kept <- getKept(result, seq_dat)
   trimmed <- getTrimmed(seq_dat = seq_dat, kept_dat = kept)
@@ -64,19 +76,15 @@ saveToDisk.primerDimer <- function(result, config, seq_dat)
   return(result)
 }
 
-computeMetrics.primerDimer <- function(result, config, seq_dat)
+computeMetrics.binSizeCheck <- function(result, config, seq_dat)
 {
-  kept <- getKept(result, seq_dat)
-  trimmed <- getTrimmed(seq_dat = seq_dat, kept_dat = kept)
-  consMat <- consensusMatrix(trimmed@sread)
-  result$metrics$consMat <- consMat[c(1:4,15),]
   return(result)
 }
 
-print.primerDimer <- function(result, config)
+print.binSizeCheck <- function(result, config)
 {
   cat('\n-------------------')
-  cat('\nOperation: primerDimer')
+  cat('\nOperation: binSizeCheck')
   cat('\n-------------------')
   cat('\nKept Sequences:\n')
   print(result$summary[,c('parameter', 'k_seqs', 'k_mean_length', 'k_mean_qual')])
@@ -85,10 +93,3 @@ print.primerDimer <- function(result, config)
   print(result$summary[,c('parameter', 't_seqs', 't_mean_length', 't_mean_qual')])
   invisible(result)
 }
-
-
-#  result <- operation_function(all_results, config)
-#  result <- saveToDisk(result, config)
-#  result <- genReport(result, config)
-#  result <- genSummary(result, config)
-#  result <- print(result, config)

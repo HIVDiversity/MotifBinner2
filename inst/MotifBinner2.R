@@ -243,6 +243,8 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
               ncpu = ncpu))
 }
 
+print(opt)
+
 config <-
 buildConfig(fwd_file = opt$fwd_file,
             fwd_primer_seq = opt$fwd_primer_seq,
@@ -263,6 +265,8 @@ buildConfig(fwd_file = opt$fwd_file,
             output_dir = opt$output_dir,
             base_for_names = opt$base_for_names,
             ncpu = opt$ncpu)
+
+print(config)
 
 unlink(file.path(config$output_dir, config$base_for_names), recursive=T)
 all_results <- list()

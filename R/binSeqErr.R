@@ -12,12 +12,20 @@ binSeqErr <- function(all_results, config)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   
   stopifnot(length(op_args$data_source) == 3)
-  stopifnot(all(names(op_args$data_source) %in% c("bin_msa", "cons", "primer_err"))) # must have fwd and/or rev primers
+  stopifnot(all(names(op_args$data_source) %in% c("bin_msa_fwd", "bin_msa_rev",
+                                                  "cons_fwd", "cons_rev", "primer_err"))) # must have fwd and/or rev primers
   stopifnot(!op_args$cache) #makes no sense to cache this...
 
   ref_err_indx <- grep(op_args$data_source[['primer_err']], names(all_results))
   ref_err_dat <- all_results[[ref_err_indx]]$metrics$error_parameters$all
 
+  # need rewrite to handle restriction on data_source specification
+  # from bins_msa = list(fwd = ...)
+  # to bins_msa_fwd = ...
+  # no lists of lists allowed
+  # the length based conditions below must change to check
+  #  for the presence of _fwd / _rev suffixes
+  stop('fix stuff that broke backwards compatibility')
   if (length(op_args$data_source[['bin_msa']]) == 1){
     stopifnot(length(op_args$data_source[['cons']]) == 1)
     msa_indx <- grep(op_args$data_source[['bin_msa']], names(all_results))

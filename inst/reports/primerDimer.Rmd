@@ -1,6 +1,6 @@
 ## primerDimer
 
-Removes primerDimer sequences. Just based on the length of the sequence.
+Removes primer dimer sequences. Detection of primer dimer sequences are only based on sequence length. It would be neat to build some logic that detects which interactions between the primers caused the primer-dimers - but that is waaaay down on the todo list.
 
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
@@ -17,10 +17,33 @@ if (class(result) != 'primerDimer')
 {
   result <- all_results[[grep('primerDimer', names(all_results))[1]]]
 }
+fig.cap1 <- 'Figure: The composition per cycle of the short sequences.'
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 ```
 
-The following datasets must be scanned for primer-dimer:
-`r names(result$kept)`
+```{r, include = FALSE}
+cm <- data.frame(result$metrics$consMat)
+cm <- cbind(data.frame(base = row.names(cm)), cm)
+row.names(cm) <- NULL
+
+cm <- melt(data.frame(cm))
+cm$variable <- as.numeric(gsub('X','', cm$variable))
+cm$base <- factor(cm$base, levels = c("A", "C", "G", "T", "N"))
+
+col_palette <- c("#5ADC5A", "#6464FA", "#5A5A5A", "#F58282", "#AE00FE")
+col_palette <- c(A = "#5ADC5A", C = "#6464FA", G = "#5A5A5A", T = "#F58282", N = "#AE00FE")
+
+```
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
+print(
+ggplot(cm, aes(x=variable, fill = base)) +
+  geom_bar(aes(y=value), stat = 'identity') +
+  scale_fill_manual(values = col_palette, guide = guide_legend(title = "Base")) +
+  xlab("Sequencing Cycle - nucleotide position in the raw reads") +
+  ylab("Number of Reads")
+)
+```
 
 ```{r, results='asis'}
 kable_summary(result$summary)

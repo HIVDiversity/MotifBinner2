@@ -69,9 +69,9 @@ ambigSeqs <- function(all_results, config)
   {
     threshold <- 0.02
   }
-  trim_steps <- list(step1 = list(name = 'perc_ambig',
+  trim_steps <- list(step1 = list(name = 'prop_ambig',
                                   threshold = threshold,
-                                  breaks = c(-Inf, 0, 0.01, 0.02, 0.1, 0.5, 1)
+                                  breaks = c(-Inf, threshold+c(-0.02, -0.01, 0, 0.01), 1)
                                   )
                     )
 
@@ -101,8 +101,8 @@ ambigSeqs_internal <- function(seq_dat)
   ambigCols <- !(gsub('^c','', names(counts)) %in% c('A','C','G','T','-'))
   counts$seq_len <- width(seq_dat@sread)
   counts$ambig <- apply(counts[,ambigCols], 1, sum)
-  counts$perc_ambig <- counts$ambig/counts$seq_len
-  per_read_metrics <- counts[,c('seq_len', 'ambig', 'perc_ambig')]
+  counts$prop_ambig <- counts$ambig/counts$seq_len
+  per_read_metrics <- counts[,c('seq_len', 'ambig', 'prop_ambig')]
   return(per_read_metrics)
 }
 

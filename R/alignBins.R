@@ -93,14 +93,14 @@ map_reads_with_mafft <- function(interleaved_seqs, working_dir, pid, profile_fil
                   width=20000)
   aligned_file_name <- file.path(working_dir, 'bins', paste(pid, '_aligned', '.fasta', sep = ''))
   if (is.null(profile_file)){
-    system(paste('mafft --quiet --ep 0.2 --retree 1 --treein ', gt_file_name, ' ', interleaved_file_name, 
+    system(paste('mafft --quiet --op 2.5 --ep 0.4 --retree 1 --treein ', gt_file_name, ' ', interleaved_file_name, 
                  ' > ', aligned_file_name, sep = ''))
   } else if (file.exists(profile_file)){
 #    system(paste('mafft --quiet --ep 0.2 --retree 1 --treein ', gt_file_name, 
 #                 ' --addfragments ', interleaved_file_name, 
 #                 ' ', profile_file,
 #                 ' > ', aligned_file_name, sep = ''))
-    system(paste('mafft --quiet --ep 0.2 ', 
+    system(paste('mafft --quiet --op 2.5 --ep 0.4 ', 
                  ' --addfragments ', interleaved_file_name, 
                  ' ', profile_file,
                  ' > ', aligned_file_name, sep = ''))
