@@ -35,12 +35,12 @@ qualTrim <- function(all_results, config)
   trim_steps <- list(step1 = list(name = 'avg_qual',
                                   threshold = avg_qual_threshold,
                                   comparator = `>=`,
-                                  breaks = c(Inf, 30, 22, 21, 20, 19, 10, -Inf)
+                                  breaks = c(Inf, avg_qual_threshold+c(5,1,0,-5), -Inf)
                                   ),
                      step2 = list(name = 'perc_bad',
                                   threshold = max_bad_bases,
                                   comparator = `<=`,
-                                  breaks = c(-Inf, 0, 0.02, 0.04, 0.05, 0.06, 0.08, 0.1, 0.2, Inf)
+                                  breaks = c(-Inf, max_bad_bases+c(-0.02, -0.01, 0, 0.01), Inf)
                                   )
                     )
 

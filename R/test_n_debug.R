@@ -17,8 +17,12 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
   if (is.null(fwd_profile_file)){ fwd_profile_file <- profile_file }
   if (is.null(rev_profile_file)){ rev_profile_file <- profile_file }
   
-  if (fwd_pid_in_which_fragment == "NULL"){fwd_pid_in_which_fragment <- NULL}
-  if (rev_pid_in_which_fragment == "NULL"){rev_pid_in_which_fragment <- NULL}
+  if (!is.null(fwd_pid_in_which_fragment)){
+    if (fwd_pid_in_which_fragment == "NULL"){fwd_pid_in_which_fragment <- NULL}
+  }
+  if (!is.null(fwd_pid_in_which_fragment)){
+    if (rev_pid_in_which_fragment == "NULL"){rev_pid_in_which_fragment <- NULL}
+  }
   operation_list = list(
     'n001' = 
       list(name = 'fwd_loadData',
@@ -400,7 +404,6 @@ store_configs <- function()
               ncpu = 4,
               bins_to_process = Inf
               )
-
 
   config <-    ## Anthony 2016 env V3-C5 region
   buildConfig(fwd_file = '/fridge/data/MotifBinner2_test/raw/CAP008_1070_002wpi_V3B_C5A_R1.fastq',
