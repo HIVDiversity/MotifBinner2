@@ -52,3 +52,7 @@ kable_summary(result$summary)
 timingTable(result)
 ```
 
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
+```

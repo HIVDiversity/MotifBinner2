@@ -28,18 +28,12 @@ trimAffixes <- function(all_results, config)
 
   trim_steps <- list(step1 = list(name = 'read_front_gaps',
                                   threshold = op_args$front_gaps_allowed,
-                                  breaks = c(-Inf, 0, 1, 2, 5, Inf)
+                                  breaks = c(-Inf, 0, 1, 2, Inf)
                                   ),
                      step2 = list(name = 'score',
                                   threshold = min_score,
                                   comparator = `>=`,
-                                  breaks = rev(c(-Inf, 0, round(0.5*nchar(primer_seq),0),
-                                             round(0.75*nchar(primer_seq),0),
-                                             nchar(primer_seq)-3,
-                                             nchar(primer_seq)-2,
-                                             nchar(primer_seq)-1,
-                                             nchar(primer_seq)-0,
-                                             Inf))
+                                  breaks = c(Inf, min_score+c(2,1,0,-1), -Inf)
                                   )
                     )
   result <- list(trim_steps = trim_steps,                                                           

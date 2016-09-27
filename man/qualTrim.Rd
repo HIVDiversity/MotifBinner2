@@ -2,7 +2,7 @@
 % Please edit documentation in R/qualTrim.R
 \name{qualTrim}
 \alias{qualTrim}
-\title{Removes sequences shorter than a given cutoff}
+\title{Removes sequences that does not match specified quality}
 \usage{
 qualTrim(all_results, config)
 }
@@ -12,6 +12,6 @@ qualTrim(all_results, config)
 \item{config}{A list of configuration options}
 }
 \description{
-Removes sequences shorter than a given cutoff
+Removes sequences that does not match specified quality
 }
 

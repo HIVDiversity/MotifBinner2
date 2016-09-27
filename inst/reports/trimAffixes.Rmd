@@ -1,8 +1,3 @@
-## trimAffixes
-
-Trims sequences' prefixes or suffixes so that they all start / end with the
-same bases
-
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
@@ -20,6 +15,15 @@ if (class(result) != 'trimAffixes')
 }
 figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 ```
+
+# `r result$config$op_full_name`
+
+Trims the prefix (the primers) of the reads away and stored the trimmed bits so that the primers can later be extracted.
+
+The primer is `r result$config$op_args$primer_seq` which is `r nchar(result$config$op_args$primer_seq)` in length and contains `r nchar(gsub('[^ACGT]', '', result$config$op_args$primer_seq))` non-ACGT characters. The required matching score is `r result$config$op_args$min_score`.
+
+A note about the alignment score computation:
+Matches to ambiguous letters also count 1, so each N in the primer guarentees a score of 1 for that base.
 
 ```{r, include=F}
 print(result$config$op_args$primer_seq)
@@ -56,7 +60,8 @@ ggplot(aln_stats, aes(x=score)) +
   geom_bar(stat='count', colour = 'black') + 
   scale_y_continuous(trans="log1p", breaks = ticks) +
   ylab('Number of reads') +
-  xlab('Score of Alignment to Primer')
+  xlab('Score of Alignment to Primer') +
+  geom_vline(xintercept = result$config$op_args$min_score, col = 'red')
 
 grid.arrange(p1, p2, ncol=2)
 ```
@@ -68,10 +73,12 @@ cat('\n\n')
 print(p3)
 ```
 
-
 ```{r, results='asis'}
 kable_summary(result$summary)
 
 timingTable(result)
 ```
 
+```{r, results='asis'}
+cat('\n\n---\n\n')
+```

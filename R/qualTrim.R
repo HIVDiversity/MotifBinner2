@@ -1,4 +1,4 @@
-#' Removes sequences shorter than a given cutoff
+#' Removes sequences that does not match specified quality
 #' @inheritParams applyOperation
 #' @export
 
