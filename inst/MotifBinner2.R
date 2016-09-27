@@ -51,13 +51,13 @@ make_option("--min_read_length",
                          "It is recommended to set a strict value for Illumina machines - ",
                          "consider expected read length - 5.",
                          sep = "")),
-make_option("--profile_file",
-            help = paste("The file containing the profile to use for mapping the reads in the ", 
-                         "bins. Specifiy this option if you want both FWD and REV reads to be ",
-                         "mapped to the same profile. Always manually inspect some of the ",
-                         "aligned bins if you have no or small overlaps or if you are sequencing ",
-                         "a highly variable sample - like variable loops in ENV",
-                         sep = "")),
+#make_option("--profile_file",
+#            help = paste("The file containing the profile to use for mapping the reads in the ", 
+#                         "bins. Specifiy this option if you want both FWD and REV reads to be ",
+#                         "mapped to the same profile. Always manually inspect some of the ",
+#                         "aligned bins if you have no or small overlaps or if you are sequencing ",
+#                         "a highly variable sample - like variable loops in ENV",
+#                         sep = "")),
 make_option("--output_dir",
             help = paste("Path to the folder where the results are to be stored. ",
                          "Note that a subfolder will be made in this directory",
@@ -73,8 +73,18 @@ make_option("--ncpu",
 opt <- parse_args(OptionParser(option_list = option_list,
   description = "Bin Illumina reads produced with Primer ID approach",
   epilogue = "Example Call:
-./MotifBinner2.R --fwd_file=/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq --fwd_primer_seq=TATGGGAYSAAAGYCTMAARCCATGTG --fwd_primer_lens=27 --fwd_primer_min_score=22 --rev_file=/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq --rev_primer_seq=CACACGCTCAGNNNNNNNNNATTCCATGTGTACATTGTACTGTRCTG --rev_primer_lens=11,9,27 --rev_primer_min_score=42 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=2 --profile_file=/fridge/data/MotifBinner2_test/v1v2_profile1.fasta --output_dir=/fridge/data/MotifBinner2_test --base_for_names=CAP256_3100_030wpi_v1v2 --ncpu=6
-  "))
+./MotifBinner2.R --fwd_file=/fridge/data/MotifBinner2_test/raw/CAP129_2040_009wpi_C2C3_R1.fastq --fwd_primer_seq=CTCTTTTGACCCAATTCCTATACATTATTG --fwd_primer_lens=30 --fwd_primer_min_score=26 --rev_file=/fridge/data/MotifBinner2_test/raw/CAP129_2040_009wpi_C2C3_R2.fastq --rev_primer_seq=NNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT --rev_primer_lens=14,28 --rev_primer_min_score=36 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=1 --output_dir=/fridge/data/MotifBinner2_test --base_for_names=CAP129_2040_009wpi_C2C3 --ncpu=6 "))
+
+#######################
+# old commands examples
+#######################
+# CAP256
+
+#./MotifBinner2.R --fwd_file=/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq --fwd_primer_seq=TATGGGAYSAAAGYCTMAARCCATGTG --fwd_primer_lens=27 --fwd_primer_min_score=22 --rev_file=/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq --rev_primer_seq=CACACGCTCAGNNNNNNNNNATTCCATGTGTACATTGTACTGTRCTG --rev_primer_lens=11,9,27 --rev_primer_min_score=42 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=2 --output_dir=/fridge/data/MotifBinner2_test --base_for_names=CAP256_3100_030wpi_v1v2 --ncpu=6
+
+
+# still used profiles
+# ./MotifBinner2.R --fwd_file=/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq --fwd_primer_seq=TATGGGAYSAAAGYCTMAARCCATGTG --fwd_primer_lens=27 --fwd_primer_min_score=22 --rev_file=/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq --rev_primer_seq=CACACGCTCAGNNNNNNNNNATTCCATGTGTACATTGTACTGTRCTG --rev_primer_lens=11,9,27 --rev_primer_min_score=42 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=2 --profile_file=/fridge/data/MotifBinner2_test/v1v2_profile1.fasta --output_dir=/fridge/data/MotifBinner2_test --base_for_names=CAP256_3100_030wpi_v1v2 --ncpu=6
 
 suppressPackageStartupMessages(library(MotifBinner2))
 
@@ -87,15 +97,15 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
                         output_dir = "/fridge/data/MotifBinner2_test",
                         base_for_names = "CAP129_2040_009wpi_C2C3",
                         intermediate_reports = TRUE,
-                        erase_history = TRUE,
+                        erase_history = FALSE,
                         verbosity = 3,
                         report_type = c('html'),
                         ncpu = 4,
                         bins_to_process = Inf
                         )
 {
-  if (fwd_pid_in_which_fragment == "NULL") {fwd_pid_in_which_fragment <- NULL}
-  if (rev_pid_in_which_fragment == "NULL") {rev_pid_in_which_fragment <- NULL}
+  if (fwd_pid_in_which_fragment == "NULL"){fwd_pid_in_which_fragment <- NULL}
+  if (rev_pid_in_which_fragment == "NULL"){rev_pid_in_which_fragment <- NULL}
   operation_list = list(
     'n001' = 
       list(name = 'fwd_loadData',
@@ -220,16 +230,34 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
         data_source = "n017",
         cache_data = TRUE),
     'n019' =
-      list(name = 'alignBins',
-        op = 'alignBins',
-        bins_to_process = bins_to_process,
+      list(name = 'mergePEAR',
+        op = 'mergePEAR',
         data_source = "n018",
-        profile_file = profile_file,
         cache_data = TRUE),
     'n020' =
+      list(name = 'merge_qualTrim',
+        op = 'qualTrim',
+        data_source = "n019",
+        avg_qual = 20,
+        bad_base_threshold = 10,
+        max_bad_bases = 0.05,
+        cache_data = TRUE),
+    'n021' =
+      list(name = 'binSizeCheck',
+        op = 'binSizeCheck',
+        data_source = "n020",
+        min_bin_size = 3,
+        cache_data = TRUE),
+    'n022' =
+      list(name = 'alignBinsMSA',
+        op = 'alignBinsMSA',
+        bins_to_process = bins_to_process,
+        data_source = "n021",
+        cache_data = TRUE),
+    'n023' =
       list(name = 'buildConsensus',
         op = 'buildConsensus',
-        data_source = "n019",
+        data_source = "n022",
         cache_data = TRUE)
     )
 
@@ -260,7 +288,6 @@ buildConfig(fwd_file = opt$fwd_file,
             rev_pid_in_which_fragment = ifelse(opt$rev_pid_in_which_fragment == "NULL", 
                                                "NULL", 
                                                as.numeric(opt$rev_pid_in_which_fragment)),
-            profile_file = opt$profile_file,
             min_read_length = as.numeric(opt$min_read_length),
             output_dir = opt$output_dir,
             base_for_names = opt$base_for_names,
@@ -290,8 +317,13 @@ all_results <- applyOperation(all_results, config, op_number = 'n015') # fwdExtr
 all_results <- applyOperation(all_results, config, op_number = 'n016') # revExtractPIDs
 all_results <- applyOperation(all_results, config, op_number = 'n017') # matchPairs
 all_results <- applyOperation(all_results, config, op_number = 'n018') # processBadPIDs
-all_results <- applyOperation(all_results, config, op_number = 'n019') # alignBins
-all_results <- applyOperation(all_results, config, op_number = 'n020') # buildConsensus
+all_results <- applyOperation(all_results, config, op_number = 'n019') # merge
+all_results <- applyOperation(all_results, config, op_number = 'n020') # qualTrim
+all_results <- applyOperation(all_results, config, op_number = 'n021') # binSizeCheck
+all_results <- applyOperation(all_results, config, op_number = 'n022') # alignBinsMSA
+all_results <- applyOperation(all_results, config, op_number = 'n023') # buildConsensus
+
+genReport(all_results, config)
 
 save.image(file.path(opt$output_dir, 
                      opt$base_for_names, 

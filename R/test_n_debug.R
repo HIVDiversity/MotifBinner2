@@ -16,6 +16,9 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
 {
   if (is.null(fwd_profile_file)){ fwd_profile_file <- profile_file }
   if (is.null(rev_profile_file)){ rev_profile_file <- profile_file }
+  
+  if (fwd_pid_in_which_fragment == "NULL"){fwd_pid_in_which_fragment <- NULL}
+  if (rev_pid_in_which_fragment == "NULL"){rev_pid_in_which_fragment <- NULL}
   operation_list = list(
     'n001' = 
       list(name = 'fwd_loadData',
