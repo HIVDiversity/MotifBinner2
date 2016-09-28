@@ -464,7 +464,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n023') # buildConsensus
 
   genReport(all_results, config)
-  op_number <- 'n021'
+  op_number <- 'n015'
   config$current_op_number <- op_number
 
 

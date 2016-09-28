@@ -61,7 +61,7 @@ ggplot(aln_stats, aes(x=score)) +
   scale_y_continuous(trans="log1p", breaks = ticks) +
   ylab('Number of reads') +
   xlab('Score of Alignment to Primer') +
-  geom_vline(xintercept = result$config$op_args$min_score, col = 'red')
+  geom_vline(xintercept = result$config$op_args$min_score-0.5, col = 'red')
 
 grid.arrange(p1, p2, ncol=2)
 ```

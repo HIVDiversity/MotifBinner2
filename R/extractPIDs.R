@@ -1,4 +1,4 @@
-#' Removes sequences shorter than a given cutoff
+#' Extracts the PIDs after affixes were trimmed and add then to the sequence names
 #' @inheritParams applyOperation
 #' @export
 
@@ -26,6 +26,7 @@ extractPIDs <- function(all_results, config)
     per_read_metrics <- pid_holding_metrics[,'id',drop=F]
     per_read_metrics$total_pid_gaps <- 0
     per_read_metrics$read <- ''
+    per_read_metrics$bin_size <- NA_real_
     trim_breaks <- c(-Inf, 0, Inf)
   } else {
     per_read_metrics <- pid_holding_metrics[,c('id', 
@@ -37,10 +38,21 @@ extractPIDs <- function(all_results, config)
       )]
     names(per_read_metrics) <- gsub('_fragment_[0-9]$', '', names(per_read_metrics))
     per_read_metrics$total_pid_gaps <- per_read_metrics$read_gaps + per_read_metrics$prefix_gaps
-    trim_breaks <- c(-Inf, 0:3, Inf)
+    pid_counts <- data.frame(read = names(table(per_read_metrics$read)),
+                             bin_size = as.numeric(table(per_read_metrics$read)),
+                             stringsAsFactors = FALSE)
+    row.names(pid_counts) <- NULL
+    per_read_metrics <- merge(per_read_metrics,
+                              pid_counts,
+                              all.x = TRUE,
+                              by.x='read', by.y='read')
+    trim_breaks <- c(-Inf, 0, 1, Inf)
   }
+  
+  # match ordering of seq_dat and per_read_metrics:
   seq_ids <- as.character(seq_dat@id)
   per_read_metrics <- per_read_metrics[match(seq_ids, per_read_metrics$id),]
+
   seq_ids <- gsub(pattern_to_chop_from_names, '', seq_ids)
   per_read_metrics$id <- seq_ids
   seq_ids <- paste(seq_ids, '_PID:', per_read_metrics$read, sep = '')

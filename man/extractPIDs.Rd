@@ -2,7 +2,7 @@
 % Please edit documentation in R/extractPIDs.R
 \name{extractPIDs}
 \alias{extractPIDs}
-\title{Removes sequences shorter than a given cutoff}
+\title{Extracts the PIDs after affixes were trimmed and add then to the sequence names}
 \usage{
 extractPIDs(all_results, config)
 }
@@ -12,6 +12,6 @@ extractPIDs(all_results, config)
 \item{config}{A list of configuration options}
 }
 \description{
-Removes sequences shorter than a given cutoff
+Extracts the PIDs after affixes were trimmed and add then to the sequence names
 }
 

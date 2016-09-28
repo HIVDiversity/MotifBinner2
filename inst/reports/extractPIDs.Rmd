@@ -1,8 +1,3 @@
-## extractPIDs
-
-Processes the primers that were trimmed to retrieve the PIDs and prepare the
-sequence names for matching pairs.
-
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
@@ -18,9 +13,31 @@ if (class(result) != 'extractPIDs')
 {
   stop('result class incorrect')
 }
+fig.cap1 <- "Figure: Number of bins by bin size. The y axis counts the number of bins of the size given on the x-axis. Note the log scale on the y-axis."
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 ```
 
-Nothing here yet
+# `r result$config$op_full_name`
+
+Processes the primers that were trimmed to retrieve the PIDs and prepare the
+sequence names for matching the forward and reverse reads.
+
+```{r, results='asis', include=is.null(result$config$op_args$pid_in_which_fragment)}
+cat('\n\nThere are no PIDs in these reads.\n\n')
+```
+
+```{r, result = 'asis', include=!is.null(result$config$op_args$pid_in_which_fragment),dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
+unique_pids <- unique(result$metrics$per_read_metrics[,c('read', 'bin_size')])
+
+logplot <- data.frame(bin_size = as.numeric(names(table(unique_pids$bin_size))),
+                      num_bins = as.numeric(table(unique_pids$bin_size)))
+print(ggplot(logplot, aes(x = bin_size, y = num_bins)) + 
+      geom_point() + 
+      scale_y_log10() + 
+      labs(x = 'Bin Size',
+           y = 'Number of Bins')
+      )
+```
 
 ```{r, results='asis'}
 kable_summary(result$summary)
@@ -28,3 +45,6 @@ kable_summary(result$summary)
 timingTable(result)
 ```
 
+```{r, results='asis'}
+cat('\n\n---\n\n')
+```
