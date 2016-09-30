@@ -80,6 +80,7 @@ paste('<script src="', rmarkdown_templates_folder, '/bootstrap-3.3.5/shim/respon
     "--output ", paste(config$base_for_names, '_full_report.html', sep = ''), " ",
 #    "--output ", file.path(config$output_dir, config$base_for_names, paste(config$base_for_names, '_full_report.html', sep = '')),
     "--smart --email-obfuscation none --self-contained --standalone --section-divs ",
+    "--toc ",
     "--variable 'theme:bootstrap' ",
     "--include-in-header header_extra_stuff.html ", 
     "--template ", rmarkdown_templates_folder, '/default.html ', 

@@ -42,7 +42,8 @@ processBadPIDs <- function(all_results, config)
     if (!bin_metrics$big_enough[i]){
       dist_to_bigs <- stringdist(bin_metrics$pid[i], big_enough_pids, 'hamming', nthread=config$ncpu)
       bin_metrics$dist_to_big[i] <- min(dist_to_bigs)
-      if (min(dist_to_bigs) <= 2){
+      #if (min(dist_to_bigs) <= 2){
+      if (min(dist_to_bigs) < Inf){
         can_pids <- big_enough_pids[which(dist_to_bigs == min(dist_to_bigs))]
         can_pids_size <- bin_metrics$raw_size[match(can_pids, bin_metrics$pid)]
         biggest_can_id <- which(can_pids_size == max(can_pids_size))
@@ -66,7 +67,8 @@ processBadPIDs <- function(all_results, config)
 ### compute prob that content from parent
   for (i in 1:nrow(bin_metrics)){
     if (!bin_metrics$big_enough[i]){
-      if (bin_metrics$parent_pid[i] == ""){
+      #if (bin_metrics$parent_pid[i] == ""){
+      if (bin_metrics$dist_to_big[i] > 2){
         off_spring_prob <- 0
       } else {
         success_prob <- ((seq_err/3)^bin_metrics$dist_to_big[i])*(no_seq_err^(pid_len - bin_metrics$dist_to_big[i]))
@@ -95,17 +97,20 @@ processBadPIDs <- function(all_results, config)
   trim_steps <- list(step1 = list(name = 'off_spring_prob',
                                   threshold = offspring_prob_cutoff,
                                   comparator = `<=`,
-                                  breaks = c(-Inf, offspring_prob_cutoff*c(0.01, 0.1, 1, 10, 100), Inf)
+                                  breaks = c(-Inf, offspring_prob_cutoff*c(0.1, 1, 10), Inf)
                                   ),
                      step2 = list(name = 'raw_size',
                                   threshold = min_bin_size,
                                   comparator = `>`,
-                                  breaks = c(Inf, min_bin_size + 3:-3, -Inf)
+                                  breaks = c(Inf, min_bin_size + c(1,0,-1), -Inf)
                                   )
                     )
 
   result <- list(trim_steps = trim_steps,
-                 metrics = list(per_read_metrics = per_read_metrics))
+                 metrics = list(per_read_metrics = per_read_metrics,
+                                bin_metrics = bin_metrics,
+                                consensus_cutoff = cc,
+                                offspring_prob_cutoff = offspring_prob_cutoff))
   
   kept_dat <- list('fwd' = seq_dat_fwd[per_read_metrics$true_bin],
                    'rev' = seq_dat_rev[per_read_metrics$true_bin])
@@ -183,11 +188,12 @@ genSummary_processBadPIDs <- function(result)
   if (all(sort(names(result$seq_dat)) == c("fwd", "rev"))){
     class(result) <- 'processBadPIDs_fwd'
     seq_dat_fwd <- shortReadQ_forced_append(list(result$seq_dat$fwd, result$trim_dat$fwd))
-    summary_tab_fwd <- genSummary_case4(result, NULL, seq_dat_fwd)
-    class(result) <- 'processBadPIDs_rev'
-    seq_dat_rev <- shortReadQ_forced_append(list(result$seq_dat$rev, result$trim_dat$rev))
-    summary_tab_rev <- genSummary_case4(result, NULL, seq_dat_rev)
-    return(rbind(summary_tab_fwd, summary_tab_rev))
+    return(genSummary_case4(result, NULL, seq_dat_fwd))
+#    summary_tab_fwd <- genSummary_case4(result, NULL, seq_dat_fwd)
+#    class(result) <- 'processBadPIDs_rev'
+#    seq_dat_rev <- shortReadQ_forced_append(list(result$seq_dat$rev, result$trim_dat$rev))
+#    summary_tab_rev <- genSummary_case4(result, NULL, seq_dat_rev)
+#    return(rbind(summary_tab_fwd, summary_tab_rev))
   } else {
     seq_dat_all <- shortReadQ_forced_append(list(result$seq_dat, result$trim_dat))
     genSummary_case4(result, NULL, seq_dat)

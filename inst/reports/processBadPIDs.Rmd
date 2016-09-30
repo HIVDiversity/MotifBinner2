@@ -1,7 +1,3 @@
-## processBadPIDs
-
-Removes sequences that are either too short or too long.
-
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
@@ -17,6 +13,125 @@ if (class(result) != 'processBadPIDs')
 {
   result <- all_results[[grep('processBadPIDs', names(all_results))[1]]]
 }
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
+fig.cap1 <- "Figure: Distance from big bins by size of smaller bin."
+fig.cap1_1 <- "Figure: Distribution of big bins by size."
+fig.cap2 <- "Figure: Probability of small bins resulting from sequencing errors in the PIDs of larger bins."
+```
+
+# `r result$config$op_full_name`
+
+Divides all bins into one of two categories: Small bins and Big bins based on the consensus cutoff concept described in Zhou et al 2015. A computation is performed to determine the likelihood that more than a certain percentage of the contents of a small bin is the result of sequencing errors in a bigger bin. If it is more likely that the contents resulted from sequencing errors in a larger bin's PID than it is for the bin to naturally exist (i.e. it's PID to have been sampled from the pool of available PIDs) then the bin is discarded. If it is unlikely that the prespecified percentage of the bin is the result of sequencing error in the PIDs of a larger bin, then the bin is kept provided that it is larger than a certain minimum size.
+
+The consensus cutoff computed for this dataset is `r result$metrics$consensus_cutoff`. For the purposes of flagging bins as potential offspring bins, this number was doubles, since the subsequent calculations to flag a bin as offspring is more accurate. Bins smaller than double the consensus cutoff are referred to as small bins while bins larger than double the consensus cutoff are referred to as large bins.
+
+*NOTE!! If your largest bin is very large, the scaling in the graphs below may not be appropriate - contact the package maintainer for further information.*
+
+```{r, eval = FALSE}
+result <- all_results$n018_processBadPIDs
+result$metrics$consensus_cutoff
+
+names(result$metrics$bin_metrics)
+names(result$metrics)
+```
+
+```{r, include=FALSE}
+small_bins <- subset(result$metrics$bin_metrics, !big_enough)
+small_bins$off_spring_prob[small_bins$off_spring_prob == 0] <- 0.0000000001
+small_bins[small_bins$dist_to_big >= 4,'dist_to_big'] <- '>3'
+small_bins$cat_parent_size <- cut(small_bins$parent_size, 5)
+small_bins$raw_size_trunc <- small_bins$raw_size
+small_bins[small_bins$raw_size_trunc >= 4,'raw_size_trunc'] <- '>3'
+
+big_bins <- subset(result$metrics$bin_metrics, big_enough)
+big_bin_size_breaks <-
+as.numeric(strsplit(
+gsub('\\([0-9\\.]*,',',', 
+gsub('^\\(', '', 
+gsub(']', '', 
+     paste(levels(small_bins$cat_parent_size), collapse='')
+))),
+            ',')[[1]])
+big_bin_size_breaks[1] <- min(big_bins$raw_size)
+big_bin_size_breaks[length(big_bin_size_breaks)] <- max(big_bins$raw_size)
+
+
+small_bins$cat_parent_size <- cut(small_bins$parent_size, big_bin_size_breaks)
+big_bins$cat_raw_size <- cut(big_bins$raw_size, big_bin_size_breaks)
+
+small_bin_size_labs <- 
+data.frame(value = c('1', '2', '3', '>3'),
+           raw_size_lab = c('Small Bin Size = 1',
+                        'Small Bin Size = 2',
+                        'Small Bin Size = 3',
+                        'Small Bin Size > 3'),
+           stringsAsFactors = FALSE)
+small_bins <- merge(small_bins, small_bin_size_labs, all.x = T, 
+                    by.x = 'raw_size_trunc', by.y = 'value')
+
+small_bins_trans <-
+  small_bins %>%
+  group_by(raw_size_lab, dist_to_big, cat_parent_size) %>%
+  summarize(count = n())
+small_bins_trans <- data.frame(small_bins_trans)
+
+p1 <-
+ggplot(small_bins_trans, aes(y = count, x=dist_to_big, fill = cat_parent_size)) +
+  geom_bar(stat='identity') +
+  facet_wrap(~ raw_size_lab, scales = 'free_y') +
+  ylab('Number of Small Bins') +
+  xlab("Distance to Nearest Big Bin") +
+  scale_fill_discrete(guide = guide_legend('Parent\nBin Size'))
+
+big_bins <- subset(result$metrics$bin_metrics, big_enough)
+
+big_bin_size_breaks <-
+as.numeric(strsplit(
+gsub('\\([0-9\\.]*,',',', 
+gsub('^\\(', '', 
+gsub(']', '', 
+     paste(levels(small_bins$cat_parent_size), collapse='')
+))),
+            ',')[[1]])
+big_bin_size_breaks[1] <- min(big_bins$raw_size)
+big_bin_size_breaks[length(big_bin_size_breaks)] <- max(big_bins$raw_size)
+
+big_bins$cat_raw_size <- cut(big_bins$raw_size, big_bin_size_breaks)
+
+p1_1 <- 
+ggplot(subset(big_bins, !is.na(big_bins$cat_raw_size)), 
+       aes(x=cat_raw_size, fill = cat_raw_size)) +
+  geom_bar() +
+  xlab("Size of Big Bin") +
+  ylab("Number of Big Bins") +
+  scale_fill_discrete(guide = guide_legend("Big Bin Size"))
+
+p2 <- 
+ggplot(subset(small_bins, dist_to_big <= 2), 
+       aes(y = off_spring_prob, x = parent_size, col = as.factor(raw_size))) +
+  geom_point() +
+  scale_y_log10() +
+  facet_wrap( ~ dist_to_big) +
+  geom_hline(yintercept = result$metrics$offspring_prob_cutoff) +
+  ylab("Probability of being offspring") +
+  xlab("Size of closest parent bin") +
+  scale_color_discrete("Size of\nSmall\nBin")
+```
+
+```{r, dpi=300, fig.width=7, fig.height=7, fig.cap=fig.cap1, fig.path=figure_path}
+print(p1)
+```
+
+As the size of the small bins increases, the probability of the same sequencing error in the PID of a large bin yielding that exact same offspring pid decreases. That means that in the previous graph, the distance to the nearest big bin will decrease as the size of the offspring bin increases. Also, since the sampling space of potential PIDs is so large, it is unlikely to sample two PIDs that are within 1 or 2 distance from each other. This means that as the small bins get larger, the likelihood that they are the result of a truly sampled PID, which just amplified poorly increases. Hence it is expected that as the small bin size increases, then proportion of bins of that size that are more than 2 distance from the nearest big bin will increase. Obviously this interpretation is affected by the length of the PID, the number of PIDs sampled and overall sampling depth. Hence if the previous graph does not follow this interpretation, those things must be looked at first.
+
+Note also, that as the size of the small bins increases, then the size of the bins that are close to there bins should increase. This is logical because larger parent bins result in larger offspring bins. This interacts with the distibution of the size of potential parent (a.k.a big) bins shown in the next figure.
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1_1, fig.path=figure_path}
+print(p1_1)
+```
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2, fig.path=figure_path}
+print(p2)
 ```
 
 ```{r, results='asis'}
@@ -24,4 +139,3 @@ kable_summary(result$summary)
 
 timingTable(result)
 ```
-
