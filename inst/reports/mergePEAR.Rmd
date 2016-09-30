@@ -1,7 +1,3 @@
-## mergePEAR
-
-Merges overlapping reads using PEAR.
-
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
@@ -19,9 +15,17 @@ if (class(result) != 'mergePEAR')
 }
 ```
 
+# `r result$config$op_full_name`
+
+Merges overlapping reads using PEAR.
+
 ```{r, results='asis'}
 kable_summary(result$summary)
 
 timingTable(result)
 ```
 
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
+```

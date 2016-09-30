@@ -16,7 +16,7 @@ if (class(result) != 'processBadPIDs')
 figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 fig.cap1 <- "Figure: Distance from big bins by size of smaller bin."
 fig.cap1_1 <- "Figure: Distribution of big bins by size."
-fig.cap2 <- "Figure: Probability of small bins resulting from sequencing errors in the PIDs of larger bins."
+fig.cap2 <- "Figure: Probability of small bins resulting from sequencing errors in the PIDs of larger bins. Note that the probability computation is based on a proportion of the size of the small bin (30% by default). Thus the probability only changes if the size of the bin increased enough for that proportion to increase by one. Hence bins of size 1, 2, and 3 are on the same probability curve; likewise bins of size 4, 5 and 6 and so forth."
 ```
 
 # `r result$config$op_full_name`
@@ -138,4 +138,8 @@ print(p2)
 kable_summary(result$summary)
 
 timingTable(result)
+```
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
 ```
