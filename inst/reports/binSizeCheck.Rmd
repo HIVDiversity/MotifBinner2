@@ -1,7 +1,3 @@
-## binSizeCheck
-
-Removes sequences that are either too short or too long.
-
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
@@ -19,12 +15,17 @@ if (class(result) != 'binSizeCheck')
 }
 ```
 
-The following datasets must be scanned for short or long sequences:
-`r names(result$kept)`
+# `r result$config$op_full_name`
+
+Check that the bins still satisfy the minimum bin size restrictions. Merging and trimming after the bad PIDs were processed might result in bins that are too small to align and pull a consensus from. This operation removes them.
 
 ```{r, results='asis'}
 kable_summary(result$summary)
 
 timingTable(result)
+```
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
 ```
 
