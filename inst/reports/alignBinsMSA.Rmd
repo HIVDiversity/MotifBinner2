@@ -1,12 +1,4 @@
-## alignBinsMSA
-
-aligns a set of reads (should be merged reads) using default mafft settings
-
-```{r}
-custom_chunk_name <- 'booogie'
-```
-
-```{r custom_chunk_name, include=FALSE}
+```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
 opts_chunk$set(fig.pos = 'H')
@@ -23,9 +15,17 @@ if (class(result) != 'alignBinsMSA')
 }
 ```
 
+# `r result$config$op_full_name`
+
+Aligns a set of reads (should be merged reads) using default mafft settings.
+
 ```{r, results='asis'}
 kable_summary(result$summary)
 
 timingTable(result)
+```
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
 ```
 

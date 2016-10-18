@@ -14,6 +14,7 @@ if (class(result) != 'processBadPIDs')
   result <- all_results[[grep('processBadPIDs', names(all_results))[1]]]
 }
 figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
+fig.cap0 <- "Figure: Number of bins by bin size. The y axis counts the number of bins of the size given on the x-axis. Note the log scale on the y-axis. The vertical red line indicates the consensus cutoff. Note that a few additional QC checks were performed since the previous version of this figure (in the extactPID steps), so slight deviations are expected."
 fig.cap1 <- "Figure: Distance from big bins by size of smaller bin."
 fig.cap1_1 <- "Figure: Distribution of big bins by size."
 fig.cap2 <- "Figure: Probability of small bins resulting from sequencing errors in the PIDs of larger bins. Note that the probability computation is based on a proportion of the size of the small bin (30% by default). Thus the probability only changes if the size of the bin increased enough for that proportion to increase by one. Hence bins of size 1, 2, and 3 are on the same probability curve; likewise bins of size 4, 5 and 6 and so forth."
@@ -30,12 +31,24 @@ The consensus cutoff computed for this dataset is `r result$metrics$consensus_cu
 ```{r, eval = FALSE}
 result <- all_results$n018_processBadPIDs
 result$metrics$consensus_cutoff
+names(result)
 
 names(result$metrics$bin_metrics)
 names(result$metrics)
 ```
 
 ```{r, include=FALSE}
+logplot <- data.frame(bin_size = as.numeric(names(table(result$metrics$bin_metrics$raw_size))),
+                      num_bins = as.numeric(table(result$metrics$bin_metrics$raw_size)))
+p0 <- ggplot(logplot, aes(x = bin_size, y = num_bins)) + 
+  geom_point() + 
+  scale_y_log10() + 
+  labs(x = 'Bin Size',
+       y = 'Number of Bins') +
+  geom_vline(xintercept = result$metrics$consensus_cutoff, col = 'red')
+
+
+
 small_bins <- subset(result$metrics$bin_metrics, !big_enough)
 small_bins$off_spring_prob[small_bins$off_spring_prob == 0] <- 0.0000000001
 small_bins[small_bins$dist_to_big >= 4,'dist_to_big'] <- '>3'
@@ -68,6 +81,7 @@ data.frame(value = c('1', '2', '3', '>3'),
            stringsAsFactors = FALSE)
 small_bins <- merge(small_bins, small_bin_size_labs, all.x = T, 
                     by.x = 'raw_size_trunc', by.y = 'value')
+small_bins$dist_to_big_lab <- paste('Distance between PIDs = ', small_bins$dist_to_big, sep = '')
 
 small_bins_trans <-
   small_bins %>%
@@ -111,11 +125,15 @@ ggplot(subset(small_bins, dist_to_big <= 2),
        aes(y = off_spring_prob, x = parent_size, col = as.factor(raw_size))) +
   geom_point() +
   scale_y_log10() +
-  facet_wrap( ~ dist_to_big) +
+  facet_wrap( ~ dist_to_big_lab) +
   geom_hline(yintercept = result$metrics$offspring_prob_cutoff) +
   ylab("Probability of being offspring") +
   xlab("Size of closest parent bin") +
   scale_color_discrete("Size of\nSmall\nBin")
+```
+
+```{r, dpi=300, fig.width=7, fig.height=7, fig.cap=fig.cap0, fig.path=figure_path}
+print(p0)
 ```
 
 ```{r, dpi=300, fig.width=7, fig.height=7, fig.cap=fig.cap1, fig.path=figure_path}

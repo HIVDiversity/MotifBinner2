@@ -1,10 +1,9 @@
-## binSeqErr
+# `r result$config$op_full_name`
 
-computes the sequencing error rates based on the assumption that the bins are
-non-chimeric and 0% pcr recombination.
+Computes the sequencing error rates based on the assumption that each PID was only attached to a single unique input template and 0% pcr recombination occurred.
 
-By comparing this to the error rates in the primer region you can then get an
-idea of the actual chimerism / pcr recombination rates.
+By comparing these to the error rates in the primer region (and to the published rates for you sequencing platform) you can then get an
+idea of the actual PID collision and/or PCR recombination rates.
 
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
@@ -29,28 +28,46 @@ ref_sub_rate <- result$metrics$ref_err_dat$subs_rate
 ref_ins_rate <- result$metrics$ref_err_dat$ins_rate
 ref_del_rate <- result$metrics$ref_err_dat$del_rate
 
-ref_rates <- data.frame(param = c('del', 'ins', 'sub'),
+ref_rates <- data.frame(param = c('Deletion', 'Insertion', 'Substitution'),
                         rates = c(ref_del_rate,
                                   ref_ins_rate,
                                   ref_sub_rate),
                         stringsAsFactors = F)
 
 err_dat <- result$metrics$error_parameters
+perc_over_10 <- data.frame(
+  param = c('Deletion', 'Insertion', 'Substitution'),
+  n = paste(
+        c(sum(err_dat$del_rate > 0.1), 
+          sum(err_dat$ins_rate > 0.1), 
+          sum(err_dat$sub_rate > 0.1)),
+        ' bin(s) [',
+        round(100*(c(sum(err_dat$del_rate > 0.1), 
+                     sum(err_dat$ins_rate > 0.1), 
+                     sum(err_dat$sub_rate > 0.1))/length(err_dat$sub_rate)),3),
+            '%] has rate > 0.1', sep = '')
+  )
+
 plot_dat <- rbind(
   data.frame(bin = err_dat$bin,
-             param = 'del',
+             param = 'Deletion',
              rates = err_dat$del_rate),
   data.frame(bin = err_dat$bin,
-             param = 'ins',
+             param = 'Insertion',
              rates = err_dat$ins_rate),
   data.frame(bin = err_dat$bin,
-             param = 'sub',
+             param = 'Substitution',
              rates = err_dat$sub_rate))
 p1 <- ggplot(plot_dat, aes(x = rates)) + 
+        xlim(0, 0.1) +
         geom_density() + 
-        facet_grid(param ~ .) +
+        facet_grid(param ~ ., scales = 'free_y') +
         geom_vline(aes(xintercept=rates), ref_rates, color = 'darkblue') +
-        expand_limits(x=0)
+        xlab('Error Rate') +
+        ylab('Density') +
+        geom_text(data = perc_over_10, 
+                  aes(label = n, x = Inf, y = Inf,
+                      hjust = 1.05, vjust = 2))
 
 fig.cap1 <- 'Distributions of error parameters for indels and substitution in the bins. Reference error rates in primer regions shown as vertical blue lines.'
 ```
@@ -63,5 +80,9 @@ print(p1)
 kable_summary(result$summary)
 
 timingTable(result)
+```
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
 ```
 

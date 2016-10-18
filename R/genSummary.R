@@ -178,7 +178,9 @@ genSummary <- function(result, config, seq_dat)
     summary_tab <- genSummary_matchPairs(result)
   } else if (class(result) == 'processBadPIDs') {
     summary_tab <- genSummary_processBadPIDs(result)
-  } else { 
+  } else if (class(result) == 'dataTracing') {
+    summary_tab <- NULL
+  } else {
 ## So if a specialized genSummary is not needed:
   ## CASE 1: 1 trim_step + single_value
     if (length(result$trim_steps) == 1 & length(result$trim_steps[[1]]$breaks) == 1)

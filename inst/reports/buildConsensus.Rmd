@@ -1,7 +1,3 @@
-## buildConsensus
-
-Removes sequences that are either too short or too long.
-
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
@@ -19,8 +15,9 @@ if (class(result) != 'buildConsensus')
 }
 ```
 
-The following datasets must be scanned for short or long sequences:
-`r names(result$kept)`
+# `r result$config$op_full_name`
+
+Builds consensuses from aligned bins. Gaps still need to be removed.
 
 ```{r, results='asis'}
 kable_summary(result$summary)
@@ -28,3 +25,6 @@ kable_summary(result$summary)
 timingTable(result)
 ```
 
+```{r, results='asis'}
+cat('\n\n---\n\n')
+```

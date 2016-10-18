@@ -12,8 +12,9 @@ binSeqErr <- function(all_results, config)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   
   stopifnot(length(op_args$data_source) == 3)
-  stopifnot(all(names(op_args$data_source) %in% c("bin_msa_fwd", "bin_msa_rev",
-                                                  "cons_fwd", "cons_rev", "primer_err"))) # must have fwd and/or rev primers
+  stopifnot(all(names(op_args$data_source) %in% c("bin_msa_fwd", "bin_msa_rev", "bin_msa_merged",
+                                                  "cons_fwd", "cons_rev", "cons_merged",
+                                                  "primer_err"))) # must have fwd and/or rev primers
   stopifnot(!op_args$cache) #makes no sense to cache this...
 
   ref_err_indx <- grep(op_args$data_source[['primer_err']], names(all_results))
@@ -25,17 +26,25 @@ binSeqErr <- function(all_results, config)
   # no lists of lists allowed
   # the length based conditions below must change to check
   #  for the presence of _fwd / _rev suffixes
-  stop('fix stuff that broke backwards compatibility')
-  if (length(op_args$data_source[['bin_msa']]) == 1){
-    stopifnot(length(op_args$data_source[['cons']]) == 1)
-    msa_indx <- grep(op_args$data_source[['bin_msa']], names(all_results))
-    cons_indx <- grep(op_args$data_source[['cons']], names(all_results))
+
+  # Case 1 - merged
+  if ("bin_msa_merged" %in% names(op_args$data_source))
+  {
+    stopifnot("cons_merged" %in% names(op_args$data_source))
+    msa_indx <- grep(op_args$data_source[['bin_msa_merged']], names(all_results))
+    cons_indx <- grep(op_args$data_source[['cons_merged']], names(all_results))
 
     msa_dat <- all_results[[msa_indx]]$seq_dat
     cons_dat <- all_results[[cons_indx]]$seq_dat
 
-    all_tallies <- binSeqErr_internal(msa_dat, cons_dat)
-  } else {
+    all_tallies <- binSeqErr_internal(msa_dat = msa_dat, cons_dat = cons_dat)
+  }
+
+  # Case 2 - non-merged
+  if ("bin_msa_fwd" %in% names(op_args$data_source))
+  {
+    stop('binSeqErr needs to be updated to handle non overlapping reads')
+    # this is the old code
     all_tallies <- NULL
     all_msa_dat <- list()
     for (data_source_name in names(op_args$data_source[['bin_msa']]))
@@ -50,7 +59,7 @@ binSeqErr <- function(all_results, config)
       cons_dat <- all_results[[cons_indx]]$seq_dat
       all_msa_dat[[data_source_name]] <- msa_dat
 
-      new_tallies <- binSeqErr_internal(cons_dat, msa_dat)
+      new_tallies <- binSeqErr_internal(cons_dat = cons_dat, msa_dat = msa_dat)
     }
     all_tallies <- rbind(all_tallies, new_tallies)
     msa_dat <- shortReadQ_forced_append(all_msa_dat)

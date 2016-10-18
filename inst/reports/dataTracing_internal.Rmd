@@ -1,0 +1,34 @@
+
+```{r, include=F}
+fig.cap1 <- 'Figure: Number of reads remaining after various operations.'
+
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
+#, fig.path=figure_path
+```
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1}
+current_chain <- subset(chain_stats, chain == chain_name)
+current_chain <- current_chain[order(current_chain$link_n),]
+current_chain$link_name <- with(current_chain, factor(link_name, levels = rev(link_name)))
+p1 <- ggplot(current_chain,
+             aes(x = link_name,
+                 y = link_output,
+                 fill = link_name)) +
+  ylim(0, 1.2*max(current_chain$link_output)) +
+  xlab(NULL) +
+  ylab("Output from operation") +
+  geom_bar(stat = 'identity') +
+  geom_text(aes(x = link_name, y = Inf, label = link_output, hjust = 1.025, vjust = 0.5)) +
+  coord_flip() +
+  scale_fill_discrete(guide = FALSE) +
+  ggtitle(chain_name)
+```
+
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
+print(p1)
+```
+
+```{r, results='asis'}
+cat('\n\n')
+```
+

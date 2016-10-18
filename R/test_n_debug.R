@@ -175,9 +175,32 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
       list(name = 'buildConsensus',
         op = 'buildConsensus',
         data_source = "n022",
-        cache_data = TRUE)
-    
-    
+        cache_data = TRUE),
+    'n024' =
+      list(name = 'primerSeqErr',
+        op = 'primerSeqErr',
+        data_source = c("fwd" = "n007", "rev" = "n014"),
+        cache_data = FALSE),
+    'n025' =
+      list(name = 'binSeqErr',
+        op = 'binSeqErr',
+        data_source = c("bin_msa_merged" = "n022", "cons_merged" = "n023", "primer_err" = "n024"),
+        cache_data = FALSE),
+    'n100' =
+      list(name = 'dataTracing',
+        op = 'dataTracing',
+        data_source = c(
+          "fwdReads.1" = "n001", "fwdReads.2" = "n003", "fwdReads.3" = "n004",
+          "fwdReads.4" = "n005", "fwdReads.5" = "n006", "fwdReads.6" = "n007",
+
+          "revReads.1" = "n008", "revReads.2" = "n010", "revReads.3" = "n011",
+          "revReads.4" = "n012", "revReads.5" = "n013", "revReads.6" = "n014",
+
+          "mergeReads.1" = "n017", "mergeReads.2" = "n018", "mergeReads.3" = "n019",
+          "mergeReads.4" = "n020", "mergeReads.5" = "n021", "mergeReads.6" = "n022",
+          "mergeReads.7" = "n023"),
+      cache_data = FALSE)
+
 #    'n019' =
 #      list(name = 'alignBins',
 #        op = 'alignBins',
@@ -291,11 +314,11 @@ store_configs <- function()
   buildConfig(fwd_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq",
               fwd_primer_seq = 'TATGGGAYSAAAGYCTMAARCCATGTG',
               fwd_primer_lens = 27,
-              fwd_min_score = 18,
+              fwd_min_score = 22,
               rev_file = "/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq",
               rev_primer_seq = 'CACACGCTCAGNNNNNNNNNATTCCATGTGTACATTGTACTGTRCTG',
               rev_primer_lens = c(11, 9, 27),
-              rev_min_score = 30,
+              rev_min_score = 40,
               fwd_pid_in_which_fragment = NULL,
               rev_pid_in_which_fragment = 2,
               profile_file = "/fridge/data/MotifBinner2_test/v1v2_profile1.fasta",
@@ -303,19 +326,52 @@ store_configs <- function()
               base_for_names = "CAP256_3100_030wpi_v1v2"
               )
   config <-  # mol clock
-  buildConfig(fwd_file = "/fridge/data/MotifBinner2_test/raw/CAP239_3090_022wpi_C2C3_R2.fastq",
-              fwd_primer_seq = 'CTCTTTTGACCCAATTCCTATACATTATTG',
-              fwd_primer_lens = 30,
-              fwd_min_score = 25,
-              rev_file = "/fridge/data/MotifBinner2_test/raw/CAP239_3090_022wpi_C2C3_R2.fastq",
-              rev_primer_seq = 'NNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT',
-              rev_primer_lens = c(14, 28),
+  buildConfig(fwd_file = "/fridge/data/MotifBinner2_test/raw/CAP129_3100_028wpi_C2C3_R1.fastq",
+              fwd_primer_seq = 'NNNNNNNCTCTTTTGACCCAATTCCTATACATTATTG',
+              fwd_primer_lens = 37,
+              fwd_min_score = 32,
+              rev_file = "/fridge/data/MotifBinner2_test/raw/CAP129_3100_028wpi_C2C3_R2.fastq",
+              rev_primer_seq = 'NNNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT',
+              rev_primer_lens = c(15, 28),
               rev_min_score = 37,
               fwd_pid_in_which_fragment = NULL,
-              rev_pid_in_which_fragment = 2,
+              rev_pid_in_which_fragment = 1,
               profile_file = "/fridge/data/MotifBinner2_test/v1v2_profile1.fasta",
               output_dir = "/fridge/data/MotifBinner2_test",
-              base_for_names = "CAP239_3090_022wpi_c2c3"
+              base_for_names = "CAP129_3100_028wpi_c2c3",
+              erase_history = FALSE
+              )
+  config <-  # mol clock
+  buildConfig(fwd_file = "/fridge/data/MotifBinner2_test/raw/CAP008_2050_010wpi_C2C3_R1.fastq",
+              fwd_primer_seq = 'NNNNNNNCTCTTTTGACCCAATTCCTATACATTATTG',
+              fwd_primer_lens = 37,
+              fwd_min_score = 32,
+              rev_file = "/fridge/data/MotifBinner2_test/raw/CAP008_2050_010wpi_C2C3_R2.fastq",
+              rev_primer_seq = 'NNNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT',
+              rev_primer_lens = c(15, 28),
+              rev_min_score = 37,
+              fwd_pid_in_which_fragment = NULL,
+              rev_pid_in_which_fragment = 1,
+              profile_file = "/fridge/data/MotifBinner2_test/v1v2_profile1.fasta",
+              output_dir = "/fridge/data/MotifBinner2_test",
+              base_for_names = "CAP008_2050_010wpi_c2c3",
+              erase_history = FALSE
+              )
+  config <-  # mol clock
+  buildConfig(fwd_file = "/fridge/data/MotifBinner2_test/raw/CAP239_3090_022wpi_C2C3_R1.fastq",
+              fwd_primer_seq = 'NNNNNNNCTCTTTTGACCCAATTCCTATACATTATTG',
+              fwd_primer_lens = 37,
+              fwd_min_score = 32,
+              rev_file = "/fridge/data/MotifBinner2_test/raw/CAP239_3090_022wpi_C2C3_R2.fastq",
+              rev_primer_seq = 'NNNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT',
+              rev_primer_lens = c(15, 28),
+              rev_min_score = 37,
+              fwd_pid_in_which_fragment = NULL,
+              rev_pid_in_which_fragment = 1,
+              profile_file = "/fridge/data/MotifBinner2_test/v1v2_profile1.fasta",
+              output_dir = "/fridge/data/MotifBinner2_test",
+              base_for_names = "CAP239_3090_022wpi_c2c3",
+              erase_history = FALSE
               )
   config <-    ## Zhou et al 2015 env region
   buildConfig(fwd_file = "/fridge/data/zhou2015/data/SRR1761912/SRR1761912_1.fastq",
@@ -426,10 +482,34 @@ store_configs <- function()
               ncpu = 6,
               bins_to_process = Inf
               )
+
+
+  config <-    ## Anthony 2016 PCR recomb experiments
+  buildConfig(fwd_file = "/fridge/data/colins_clone_pcr_recomb_data/raw/ddPCR_Pool_4_long_R1.fastq",
+              fwd_primer_seq = "NNNNNNNGCTGGTTATGCGATTCTAAAGTG",
+              fwd_primer_lens = 30,
+              fwd_min_score = 25,
+              fwd_pid_in_which_fragment = NULL,
+              rev_file = "/fridge/data/colins_clone_pcr_recomb_data/raw/ddPCR_Pool_4_long_R2.fastq",
+              rev_primer_seq = "NNNNNNNNNNNNNNNTGTGTTGTAAYTTCTAGRTC",
+              rev_primer_lens = c(15,20),
+              rev_min_score = 30,
+              rev_pid_in_which_fragment = 1,
+              min_read_length = 295,
+              output_dir = "/fridge/data/colins_clone_pcr_recomb_data",
+              base_for_names ="ddPCR_pool_4_long",
+              ncpu = 6,
+              fwd_profile_file = "",
+              rev_profile_file = "",
+              erase_history = FALSE,
+              bins_to_process = Inf
+             )
+
 }
 
 dummy_test_debug <- function()
 {
+  options(error=NULL)
   getwd()
   library(devtools)
   setwd('~/projects/MotifBinner2/code/MotifBinner2')
@@ -462,11 +542,14 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n021') # binSizeCheck
   all_results <- applyOperation(all_results, config, op_number = 'n022') # alignBinsMSA
   all_results <- applyOperation(all_results, config, op_number = 'n023') # buildConsensus
+  all_results <- applyOperation(all_results, config, op_number = 'n024') # primerSeqErr
+  all_results <- applyOperation(all_results, config, op_number = 'n025') # binSeqErr
+  
+  all_results <- applyOperation(all_results, config, op_number = 'n100') # dataTracing
 
   genReport(all_results, config)
-  op_number <- 'n015'
+  op_number <- 'n100'
   config$current_op_number <- op_number
-
 
   result <- all_results
 

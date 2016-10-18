@@ -1,0 +1,39 @@
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('dataTracing', names(all_results))[1]]]
+}
+if (class(result) != 'dataTracing')
+{
+  result <- all_results[[grep('dataTracing', names(all_results))[1]]]
+}
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
+```
+# Data Tracing Report
+
+Where did all the sequences go?
+
+```{r include=F}
+chain_stats <- result$metrics$chain_stats
+chain_names <- unique(chain_stats$chain)
+
+out <- NULL
+for (chain_name in chain_names){
+  out <- c(out, knit_child('dataTracing_internal.Rmd'))
+}
+```
+
+```{r, results='asis'}
+cat(paste(out, collapse = '\n'))
+cat('\n\n')
+```
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
+```

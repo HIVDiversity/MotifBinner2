@@ -19,6 +19,7 @@ primerSeqErr <- function(all_results, config)
 
   all_tallies <- NULL
   seq_dat <- NULL
+  data_source_name <- names(op_args$data_source)[1]
   for (data_source_name in names(op_args$data_source)){
     data_source_indx <- grep(op_args$data_source[data_source_name], names(all_results))
     stopifnot(length(data_source_indx) == 1)
@@ -33,10 +34,15 @@ primerSeqErr <- function(all_results, config)
     reads <- NULL
     primers <- NULL
     quals <- NULL
+    primer_design_length <- 0
     for (i in 1:n_fragments){
-      reads <- paste(reads, dat[,paste('read_fragment_', i, sep = '')], sep = '')
-      primers <- paste(primers, dat[,paste('prefix_fragment_', i, sep = '')], sep = '')
-      quals <- paste(quals, dat[,paste('read_qual_fragment_', i, sep = '')], sep = '')
+      primer_design_length <- primer_design_length + nchar(dat[1,paste('read_qual_fragment_', i, sep = '')])
+    }
+    good_enough_matches <- dat$score >= trunc(0.8*primer_design_length)
+    for (i in 1:n_fragments){
+      reads <- paste(reads, dat[good_enough_matches,paste('read_fragment_', i, sep = '')], sep = '')
+      primers <- paste(primers, dat[good_enough_matches,paste('prefix_fragment_', i, sep = '')], sep = '')
+      quals <- paste(quals, dat[good_enough_matches,paste('read_qual_fragment_', i, sep = '')], sep = '')
     }
 #    stopifnot(all(sapply(reads, nchar) == sapply(primers, nchar)))
 #    stopifnot(all(sapply(reads, nchar) == sapply(quals, nchar)))

@@ -1,9 +1,9 @@
 ### primerSeqErr report for `r data_source_name`
 
 ```{r, include=F}
-fig.cap1 <- 'Substitution error rate by quality score'
+fig.cap1 <- 'Figure: Substitution error rate by quality score'
 
-figure_path <- paste('figure_', result$config$op_full_name, '_', data_source_name, '/', sep = '')
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 #, fig.path=figure_path
 ```
 
@@ -24,12 +24,15 @@ ggplot(subs_by_qual, aes(x=num_qual, y = rate)) +
   xlab('Quality Score')
 ```
 
-**Substitution Rate: `r round(subs_rate,5)`**
+**Substitution Rate: `r round(subs_rate,5)`** - Benchmark: 1 in 100 = 0.01
 
-**Deletion Rate: `r round(del_rate,5)`**
+**Deletion Rate: `r round(del_rate,5)`** - Benchmark: 1 in 50 000 = 0.00002
 
-**Insertion Rate: `r round(ins_rate,5)`**
+**Insertion Rate: `r round(ins_rate,5)`** - Benchmark: 1 in 20 000 = 0.00005
 
+More more detail on the benchmarks refer to an article named: "Insight into biases and sequencing errors for amplicon sequencing with the Illumina MiSeq platform" in Nucleic acids research in 2015 by Schirmer et al.
+
+Note: The insertion and deletion rates are consistently 10 times higher than the benchmark - this is probably an issue with the alignment step rather than an accurate signal for increased indels. Fixing this is on the todo list.
 
 ```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
 kable(rate_mat)

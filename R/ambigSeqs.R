@@ -1,3 +1,33 @@
+#' Generates a vector of T/F indicating which sequences were kept or trimmed.
+#' @export
+
+genKeptVector <- function(result)
+{
+  trim_criteria <- matrix(TRUE, nrow = nrow(result$metrics$per_read_metrics), ncol = length(result$trim_steps))
+  i <- 0
+  for (trim_step in result$trim_steps)
+  {
+    i <- i+1
+    trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
+#    stopifnot(length(trim_dat) == length(seq_dat))
+    if (length(trim_step$breaks) == 1)
+    {
+      stopifnot(all(trim_dat == trim_step$threshold))
+#      kept <- seq_dat
+#      trimmed <- seq_dat[0]
+    } else {
+      if ('comparator' %in% names(trim_step))
+      {
+        comparator = trim_step$comparator
+      } else {
+        comparator = `<=`
+      }
+      trim_criteria[,i] <- comparator(trim_dat, trim_step$threshold)
+    }
+  }
+  return(apply(trim_criteria, 1, all))
+}
+
 #' Get the data kept after a trimming step
 #' @export
 
@@ -10,30 +40,10 @@ getKept <- function(result, seq_dat=NULL)
   if (is.null(seq_dat)){
     seq_dat <- result$input_dat
   }
+  stopifnot(length(seq_dat) == nrow(result$metrics$per_read_metrics))
+  kept_vector <- genKeptVector(result)
 
-  trim_criteria <- matrix(TRUE, nrow = length(seq_dat), ncol = length(result$trim_steps))
-  i <- 0
-  for (trim_step in result$trim_steps)
-  {
-    i <- i+1
-    trim_dat <- result$metrics$per_read_metrics[,trim_step$name,drop=T]
-    stopifnot(length(trim_dat) == length(seq_dat))
-    if (length(trim_step$breaks) == 1)
-    {
-      stopifnot(all(trim_dat == trim_step$threshold))
-      kept <- seq_dat
-      trimmed <- seq_dat[0]
-    } else {
-      if ('comparator' %in% names(trim_step))
-      {
-        comparator = trim_step$comparator
-      } else {
-        comparator = `<=`
-      }
-      trim_criteria[,i] <- comparator(trim_dat, trim_step$threshold)
-    }
-  }
-  seq_dat <- seq_dat[apply(trim_criteria, 1, all)]
+  seq_dat <- seq_dat[kept_vector]
   return(seq_dat)
 }
 
