@@ -505,6 +505,23 @@ store_configs <- function()
               bins_to_process = Inf
              )
 
+  config <-  # mol clock 2
+  buildConfig(fwd_file = "/fridge/data/molecular_clock2/raw/HVTN503_159451817_1012_C2C3_R1.fastq",
+              fwd_primer_seq = 'NNNNNNNCTCTTTTGACCCAATTCCTATACATTATTG',
+              fwd_primer_lens = 37,
+              fwd_min_score = 32,
+              rev_file = "/fridge/data/molecular_clock2/raw/HVTN503_159451817_1012_C2C3_R2.fastq",
+              rev_primer_seq = 'NNNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT',
+              rev_primer_lens = c(15, 28),
+              rev_min_score = 37,
+              fwd_pid_in_which_fragment = NULL,
+              rev_pid_in_which_fragment = 1,
+              profile_file = "",
+              output_dir = "/fridge/data/MotifBinner2_test",
+              base_for_names = "HVTN503_159451817_1012_C2C3",
+              erase_history = FALSE
+              )
+
 }
 
 dummy_test_debug <- function()
@@ -548,7 +565,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n100') # dataTracing
 
   genReport(all_results, config)
-  op_number <- 'n100'
+  op_number <- 'n004'
   config$current_op_number <- op_number
 
   result <- all_results

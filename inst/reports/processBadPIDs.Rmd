@@ -132,11 +132,11 @@ ggplot(subset(small_bins, dist_to_big <= 2),
   scale_color_discrete("Size of\nSmall\nBin")
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=7, fig.cap=fig.cap0, fig.path=figure_path}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap0, fig.path=figure_path}
 print(p0)
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=7, fig.cap=fig.cap1, fig.path=figure_path}
+```{r, dpi=300, fig.width=7, fig.height=6, fig.cap=fig.cap1, fig.path=figure_path}
 print(p1)
 ```
 
@@ -144,7 +144,7 @@ As the size of the small bins increases, the probability of the same sequencing 
 
 Note also, that as the size of the small bins increases, then the size of the bins that are close to there bins should increase. This is logical because larger parent bins result in larger offspring bins. This interacts with the distibution of the size of potential parent (a.k.a big) bins shown in the next figure.
 
-```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1_1, fig.path=figure_path}
+```{r, dpi=300, fig.width=7, fig.height=3, fig.cap=fig.cap1_1, fig.path=figure_path}
 print(p1_1)
 ```
 
@@ -161,3 +161,4 @@ timingTable(result)
 ```{r, results='asis'}
 cat('\n\n---\n\n')
 ```
+

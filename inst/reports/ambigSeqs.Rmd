@@ -34,14 +34,16 @@ ggplot(ambig_counts, aes(x=ambig, fill=seq_len)) +
   geom_histogram(bins=30) + 
   scale_y_continuous(trans="log1p", breaks = ticks) +
   ylab('Number of reads') +
-  xlab('Number of ambiguous bases')
+  xlab('Number of ambiguous bases') +
+  scale_fill_continuous(guide = FALSE)
 
 p2 <-
 ggplot(ambig_counts, aes(x=100*prop_ambig, fill=seq_len)) +
   geom_histogram(bins=30) + 
   scale_y_continuous(trans="log1p", breaks = ticks) +
   ylab('Number of reads') +
-  xlab('Percentage of ambiguous bases')
+  xlab('Percentage of ambiguous bases') +
+  scale_fill_continuous(guide = FALSE)
 
 grid.arrange(p1, p2, ncol=2)
 ```

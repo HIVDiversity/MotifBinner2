@@ -73,13 +73,15 @@ make_option("--ncpu",
 opt <- parse_args(OptionParser(option_list = option_list,
   description = "Bin Illumina reads produced with Primer ID approach",
   epilogue = "Example Call:
-./MotifBinner2.R --fwd_file=/fridge/data/MotifBinner2_test/raw/CAP129_2040_009wpi_C2C3_R1.fastq --fwd_primer_seq=CTCTTTTGACCCAATTCCTATACATTATTG --fwd_primer_lens=30 --fwd_primer_min_score=26 --rev_file=/fridge/data/MotifBinner2_test/raw/CAP129_2040_009wpi_C2C3_R2.fastq --rev_primer_seq=NNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT --rev_primer_lens=14,28 --rev_primer_min_score=36 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=1 --output_dir=/fridge/data/MotifBinner2_test --base_for_names=CAP129_2040_009wpi_C2C3 --ncpu=6 "))
+./MotifBinner2.R --fwd_file=/fridge/data/molecular_clock2/raw/HVTN503_159451817_1012_C2C3_R1.fastq --fwd_primer_seq=NNNNNNNCTCTTTTGACCCAATTCCTATACATTATTG --fwd_primer_lens=37 --fwd_primer_min_score=32 --rev_file=/fridge/data/molecular_clock2/raw/HVTN503_159451817_1012_C2C3_R2.fastq --rev_primer_seq=NNNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT --rev_primer_lens=15,28 --rev_primer_min_score=37 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=1 --output_dir=/fridge/data/molecular_clock2/pipeline1 --base_for_names=HVTN503_159451817_1012_C2C3 --ncpu=6 "))
 
 #######################
 # old commands examples
 #######################
-# CAP256
+# ?unknown
+#./MotifBinner2.R --fwd_file=/fridge/data/MotifBinner2_test/raw/CAP129_2040_009wpi_C2C3_R1.fastq --fwd_primer_seq=CTCTTTTGACCCAATTCCTATACATTATTG --fwd_primer_lens=30 --fwd_primer_min_score=26 --rev_file=/fridge/data/MotifBinner2_test/raw/CAP129_2040_009wpi_C2C3_R2.fastq --rev_primer_seq=NNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT --rev_primer_lens=14,28 --rev_primer_min_score=36 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=1 --output_dir=/fridge/data/MotifBinner2_test --base_for_names=CAP129_2040_009wpi_C2C3 --ncpu=6 "))
 
+# CAP256
 #./MotifBinner2.R --fwd_file=/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R1.fastq --fwd_primer_seq=TATGGGAYSAAAGYCTMAARCCATGTG --fwd_primer_lens=27 --fwd_primer_min_score=22 --rev_file=/fridge/data/MotifBinner2_test/raw/CAP256_3100_030wpi_v1v2_R2.fastq --rev_primer_seq=CACACGCTCAGNNNNNNNNNATTCCATGTGTACATTGTACTGTRCTG --rev_primer_lens=11,9,27 --rev_primer_min_score=42 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=2 --output_dir=/fridge/data/MotifBinner2_test --base_for_names=CAP256_3100_030wpi_v1v2 --ncpu=6
 
 
@@ -141,7 +143,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
         data_source = "n005",
         avg_qual = 20,
         bad_base_threshold = 10,
-        max_bad_bases = 0.05,
+        max_bad_bases = 0.15,
         cache_data = TRUE),
     'n007' =
       list(name = 'fwd_trimAffixes',
@@ -189,7 +191,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
         data_source = "n012",
         avg_qual = 20,
         bad_base_threshold = 10,
-        max_bad_bases = 0.25,
+        max_bad_bases = 0.15,
         cache_data = TRUE),
     'n014' =
       list(name = 'rev_trimAffixes',
@@ -258,8 +260,32 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
       list(name = 'buildConsensus',
         op = 'buildConsensus',
         data_source = "n022",
-        cache_data = TRUE)
-    )
+        cache_data = TRUE),
+    'n024' =
+      list(name = 'primerSeqErr',
+        op = 'primerSeqErr',
+        data_source = c("fwd" = "n007", "rev" = "n014"),
+        cache_data = FALSE),
+    'n025' =
+      list(name = 'binSeqErr',
+        op = 'binSeqErr',
+        data_source = c("bin_msa_merged" = "n022", "cons_merged" = "n023", "primer_err" = "n024"),
+        cache_data = FALSE),
+    'n100' =
+      list(name = 'dataTracing',
+        op = 'dataTracing',
+        data_source = c(
+          "fwdReads.1" = "n001", "fwdReads.2" = "n003", "fwdReads.3" = "n004",
+          "fwdReads.4" = "n005", "fwdReads.5" = "n006", "fwdReads.6" = "n007",
+
+          "revReads.1" = "n008", "revReads.2" = "n010", "revReads.3" = "n011",
+          "revReads.4" = "n012", "revReads.5" = "n013", "revReads.6" = "n014",
+
+          "mergeReads.1" = "n017", "mergeReads.2" = "n018", "mergeReads.3" = "n019",
+          "mergeReads.4" = "n020", "mergeReads.5" = "n021", "mergeReads.6" = "n022",
+          "mergeReads.7" = "n023"),
+      cache_data = FALSE)
+  )
 
   return(list(operation_list = operation_list,
               output_dir = output_dir,
@@ -322,8 +348,12 @@ all_results <- applyOperation(all_results, config, op_number = 'n020') # qualTri
 all_results <- applyOperation(all_results, config, op_number = 'n021') # binSizeCheck
 all_results <- applyOperation(all_results, config, op_number = 'n022') # alignBinsMSA
 all_results <- applyOperation(all_results, config, op_number = 'n023') # buildConsensus
+all_results <- applyOperation(all_results, config, op_number = 'n024') # primerSeqErr
+all_results <- applyOperation(all_results, config, op_number = 'n025') # binSeqErr
 
-genReport(all_results, config)
+all_results <- applyOperation(all_results, config, op_number = 'n100') # dataTracing
+
+x <- genReport(all_results, config)
 
 save.image(file.path(opt$output_dir, 
                      opt$base_for_names, 

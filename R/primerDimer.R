@@ -68,7 +68,11 @@ computeMetrics.primerDimer <- function(result, config, seq_dat)
 {
   kept <- getKept(result, seq_dat)
   trimmed <- getTrimmed(seq_dat = seq_dat, kept_dat = kept)
-  consMat <- consensusMatrix(trimmed@sread)
+  if (length(trimmed) < 5){
+    consMat <- NULL
+  } else {
+    consMat <- consensusMatrix(trimmed@sread)
+  }
   result$metrics$consMat <- consMat[c(1:4,15),]
   return(result)
 }

@@ -23,26 +23,33 @@ Removes primer dimer sequences. Detection of primer dimer sequences are only bas
 
 
 ```{r, include = FALSE}
-cm <- data.frame(result$metrics$consMat)
-cm <- cbind(data.frame(base = row.names(cm)), cm)
-row.names(cm) <- NULL
+cm <- result$metrics$consMat
+if (is.null(cm)){
+  p1 <- "Not enough primerDimers to make plots"
+} else {
+  cm <- data.frame(cm)
+  cm <- cbind(data.frame(base = row.names(cm)), cm)
+  row.names(cm) <- NULL
+  
+  cm <- melt(data.frame(cm))
+  cm$variable <- as.numeric(gsub('X','', cm$variable))
+  cm$base <- factor(cm$base, levels = c("A", "C", "G", "T", "N"))
+  
+  col_palette <- c("#5ADC5A", "#6464FA", "#5A5A5A", "#F58282", "#AE00FE")
+  col_palette <- c(A = "#5ADC5A", C = "#6464FA", G = "#5A5A5A", T = "#F58282", N = "#AE00FE")
 
-cm <- melt(data.frame(cm))
-cm$variable <- as.numeric(gsub('X','', cm$variable))
-cm$base <- factor(cm$base, levels = c("A", "C", "G", "T", "N"))
-
-col_palette <- c("#5ADC5A", "#6464FA", "#5A5A5A", "#F58282", "#AE00FE")
-col_palette <- c(A = "#5ADC5A", C = "#6464FA", G = "#5A5A5A", T = "#F58282", N = "#AE00FE")
-
+  p1 <-
+    ggplot(cm, aes(x=variable, fill = base)) +
+      geom_bar(aes(y=value), stat = 'identity') +
+      scale_fill_manual(values = col_palette, guide = guide_legend(title = "Base")) +
+      xlab("Sequencing Cycle - nucleotide position in the raw reads") +
+      ylab("Number of Reads")
+}
 ```
 
 ```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
 print(
-ggplot(cm, aes(x=variable, fill = base)) +
-  geom_bar(aes(y=value), stat = 'identity') +
-  scale_fill_manual(values = col_palette, guide = guide_legend(title = "Base")) +
-  xlab("Sequencing Cycle - nucleotide position in the raw reads") +
-  ylab("Number of Reads")
+  p1
 )
 ```
 
