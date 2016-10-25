@@ -186,6 +186,12 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
         op = 'binSeqErr',
         data_source = c("bin_msa_merged" = "n022", "cons_merged" = "n023", "primer_err" = "n024"),
         cache_data = FALSE),
+    'n026' = 
+      list(name = 'removeGaps',
+        op = 'removeGaps',
+        data_source = "n025",
+        cache_data = TRUE
+           ),
     'n100' =
       list(name = 'dataTracing',
         op = 'dataTracing',
@@ -200,6 +206,7 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
           "mergeReads.4" = "n020", "mergeReads.5" = "n021", "mergeReads.6" = "n022",
           "mergeReads.7" = "n023"),
       cache_data = FALSE)
+    )
 
 #    'n019' =
 #      list(name = 'alignBins',
@@ -258,7 +265,6 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
 #                           "cons_rev" = "n026", 
 #                           "primer_err" = "n021"),
 #        cache_data = FALSE)
-    )
 
   config <- list(operation_list = operation_list,
                  output_dir = output_dir,
@@ -561,6 +567,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n023') # buildConsensus
   all_results <- applyOperation(all_results, config, op_number = 'n024') # primerSeqErr
   all_results <- applyOperation(all_results, config, op_number = 'n025') # binSeqErr
+  all_results <- applyOperation(all_results, config, op_number = 'n026') # removeGaps
   
   all_results <- applyOperation(all_results, config, op_number = 'n100') # dataTracing
 

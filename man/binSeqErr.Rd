@@ -2,7 +2,7 @@
 % Please edit documentation in R/binSeqErr.R
 \name{binSeqErr}
 \alias{binSeqErr}
-\title{Removes sequences shorter than a given cutoff}
+\title{Computes the sequencing parameters for each bin}
 \usage{
 binSeqErr(all_results, config)
 }
@@ -12,6 +12,6 @@ binSeqErr(all_results, config)
 \item{config}{A list of configuration options}
 }
 \description{
-Removes sequences shorter than a given cutoff
+Computes the sequencing parameters for each bin
 }
 

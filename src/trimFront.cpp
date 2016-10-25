@@ -1012,6 +1012,23 @@ Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance
   return result;
 }
 
+/*! \brief Tallies (mis)matches between sequences.
+ *
+ *  It counts the total number of all transitions between the set of sequences
+ *  and a given target sequence. It counts the number of time an A stayed an A,
+ *  or became a C and so forth. Furthermore, it also tallies these (mis)matches
+ *  based on quality score. If there was an insertion in the sequences, it is
+ *  labeled as a transition from '2' to '2' and if there was a deletion in the
+ *  sequece relative to the target, then it is labeled as a transition from '1'
+ *  to '1'.
+ *
+ *  \param r_sread The set of reads to compare to the target (r_primer).
+ *  \param r_primer The target sequence to compare the set of reads to.
+ *  \param r_qual The qualities of the set of sequences.
+ *  \return A list of lists of lists indicating the (mis)matches, the quality
+ *    at which it occurred and the count of the number of such instances.
+*/
+
 // [[Rcpp::export]]
 std::map<char, std::map<char, std::map<char, int> > >
 tallyPrimerSeqErrors_cpp(CharacterVector r_sread,
@@ -1019,14 +1036,14 @@ tallyPrimerSeqErrors_cpp(CharacterVector r_sread,
                          CharacterVector r_qual){
   std::map<char, std::map<char, std::map<char, int> > > tallies;
   int qual_offset;
-  for (int i = 0; i != r_sread.size(); ++i)
+  for (int i = 0; i != r_sread.size(); ++i) //loop over number of reads
   {
     if (r_sread[i].size() != r_primer[i].size() ||
         r_sread[i].size() != r_qual[i].size()){
       throw std::range_error("read, quality and primer must be equal length");
     }
     qual_offset = 0;
-    for (int j = 0; j != r_sread[i].size(); ++j)
+    for (int j = 0; j != r_sread[i].size(); ++j) //loop over positions
     {
       if (r_sread[i][j] == '-'){
         tallies['1']['1']['!']++;

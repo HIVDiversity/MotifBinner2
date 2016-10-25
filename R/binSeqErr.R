@@ -1,4 +1,4 @@
-#' Removes sequences shorter than a given cutoff
+#' Computes the sequencing parameters for each bin
 #' @inheritParams applyOperation
 #' @export
 
@@ -19,13 +19,6 @@ binSeqErr <- function(all_results, config)
 
   ref_err_indx <- grep(op_args$data_source[['primer_err']], names(all_results))
   ref_err_dat <- all_results[[ref_err_indx]]$metrics$error_parameters$all
-
-  # need rewrite to handle restriction on data_source specification
-  # from bins_msa = list(fwd = ...)
-  # to bins_msa_fwd = ...
-  # no lists of lists allowed
-  # the length based conditions below must change to check
-  #  for the presence of _fwd / _rev suffixes
 
   # Case 1 - merged
   if ("bin_msa_merged" %in% names(op_args$data_source))
@@ -87,7 +80,14 @@ binSeqErr <- function(all_results, config)
   return(result)
 }
 
-binSeqErr_internal <- function(cons_dat, msa_dat)
+#' Group consensus sequences and their read together
+#'
+#' Constructs a list with a single element for each bin. This element is a list
+#' that contains the consensus sequence as well as the aligned reads of the
+#' bins.
+#' @inheritParams binSeqErr_internal
+
+group_cons_bins <- function(cons_dat, msa_dat)
 {
   cons_pids <- gsub('_[^ACGTacgt]*$', '', as.character(cons_dat@id))
   cons_dat <- cons_dat[order(cons_pids)]
@@ -97,6 +97,7 @@ binSeqErr_internal <- function(cons_dat, msa_dat)
   msa_pids <- sort(msa_pids)
   stopifnot(all(msa_pids %in% cons_pids))
 
+  # construct a list of all the consensus sequences and their associated bins
   dat_list <- list()
   cons_pids_i <- 1
   current_msa_indxs <- NULL
@@ -106,7 +107,6 @@ binSeqErr_internal <- function(cons_dat, msa_dat)
       # save the current pid's sequences
       dat_list[[cons_pids[cons_pids_i]]] <- list(cons_dat_bin = cons_dat[cons_pids_i],
                                                 msa_dat_bin = msa_dat[current_msa_indxs])
-
       # move/reset indexes to next pids
       cons_pids_i <- cons_pids_i + 1
       stopifnot(msa_pids[msa_pids_i] == cons_pids[cons_pids_i])
@@ -118,11 +118,59 @@ binSeqErr_internal <- function(cons_dat, msa_dat)
   # remember to save the last element in the dat_list!!!
   dat_list[[cons_pids[cons_pids_i]]] <- list(cons_dat_bin = cons_dat[cons_pids_i],
                                             msa_dat_bin = msa_dat[current_msa_indxs])
+  return(dat_list)
+}
+
+#' Reformats the tallies produced by tallyPrimerSeqError_cpp
+#'
+#' @param tallies_list The tallies list produced by tallyPrimerSeqErrors_cpp
+#' @return A data.frame with the tallies of the sequencing parameters
+
+reformat_tallies <- function(tallies_list)
+{
+  tallies_list_of_dfs <- list()
+  inner_loop_counter <- 1
+  for (i in names(tallies_list)){
+    ci <- intToUtf8(i)
+    if (ci == '1') {ci <- 'ins'}
+    if (ci == '2') {ci <- 'del'}
+    for (j in names(tallies_list[[i]])){
+      cj <- intToUtf8(j)
+      if (cj == '1') {cj <- 'ins'}
+      if (cj == '2') {cj <- 'del'}
+      for (k in names(tallies_list[[i]][[j]])){
+        ck <- intToUtf8(k)
+        tallies_list_of_dfs[[inner_loop_counter]] <- data.frame(from = ci,
+          to = cj, qual = ck, count = tallies_list[[i]][[j]][k], 
+          stringsAsFactors = FALSE)
+        inner_loop_counter <- inner_loop_counter + 1
+      }
+    }
+  }
+  return(data.frame(data.table::rbindlist(tallies_list_of_dfs)))
+}
+
+#' Computes the sequencing error rate for each bin
+#'
+#' Under the assumption that there was zero PCR recombination and no PID
+#' collisions, the only source of heterogeneity in the bins are sequencing
+#' errors. Thus a comparison between each read in a bin and the bin's consensus
+#' sequence can be taken as an indication of the sequencing error rates.
+#'
+#' A full characterization of the errors is returned that tallies each match
+#' and mismatch and the quality at which they happened.
+#'
+#' @param cons_dat The consensus sequences. Their names must start with the PID
+#'   followed by an underscore and then anything.
+#' @param msa_dat The reads with sequences of each bin aligned. The sequence
+#'   name must contain PID:_ followed by the PID somewhere in the name.
+
+binSeqErr_internal <- function(cons_dat, msa_dat)
+{
+  dat_list <- group_cons_bins_internal(cons_dat = cons_dat, msa_dat = msa_dat)
 
   all_tallies <- NULL
-  bin_name <- cons_pids[1]
-  bin_name <- cons_pids[610]
-  all_tallies <- foreach(bin_name = cons_pids) %dopar% {
+  all_tallies <- foreach(bin_name = names(dat_list)) %dopar% {
     bin_seq <- dat_list[[bin_name]]$msa_dat_bin
     cons_seq <- dat_list[[bin_name]]$cons_dat_bin
     cons_seq <- rep(as.character(cons_seq@sread), length(bin_seq))
@@ -131,26 +179,7 @@ binSeqErr_internal <- function(cons_dat, msa_dat)
                                              cons_seq, 
                                              as.character(bin_seq@quality@quality))
 
-    tallies_list_of_dfs <- list()
-    inner_loop_counter <- 1
-    for (i in names(tallies_list)){
-      ci <- intToUtf8(i)
-      if (ci == '1') {ci <- 'ins'}
-      if (ci == '2') {ci <- 'del'}
-      for (j in names(tallies_list[[i]])){
-        cj <- intToUtf8(j)
-        if (cj == '1') {cj <- 'ins'}
-        if (cj == '2') {cj <- 'del'}
-        for (k in names(tallies_list[[i]][[j]])){
-          ck <- intToUtf8(k)
-          tallies_list_of_dfs[[inner_loop_counter]] <- data.frame(from = ci,
-            to = cj, qual = ck, count = tallies_list[[i]][[j]][k], 
-            stringsAsFactors = FALSE)
-          inner_loop_counter <- inner_loop_counter + 1
-        }
-      }
-    }
-    tallies_df <- data.frame(data.table::rbindlist(tallies_list_of_dfs))
+    tallies_df <- reformat_tallies(tallies_list)
     tallies_df$data_source <- bin_name
 
     tallies_df
@@ -219,10 +248,3 @@ print.binSeqErr <- function(result, config)
   print(result$summary[,c('parameter', 't_seqs', 't_mean_length', 't_mean_qual')])
   invisible(result)
 }
-
-
-#  result <- operation_function(all_results, config)
-#  result <- saveToDisk(result, config)
-#  result <- genReport(result, config)
-#  result <- genSummary(result, config)
-#  result <- print(result, config)
