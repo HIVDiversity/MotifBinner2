@@ -17,7 +17,37 @@ if (class(result) != 'buildConsensus')
 
 # `r result$config$op_full_name`
 
-Builds consensuses from aligned bins. Gaps still need to be removed.
+Builds consensuses from aligned bins. Gaps still need to be removed - they result from insertions in the reads in the bin and can be removed.
+
+A letter was called as an N if either:
+
+1) The score of the highest scoring letter was not at least 5% higher than the score of the second highest scoring letter,
+
+2) The score of the highest scoring letter minus the scores of all the other letters did not exceed 35.
+
+In total `r length(result$seq_dat)` consensus sequences were produced.
+
+Of those sequences, `r sum(result$metrics$per_read_metrics$n_Ns > 0)` contained at least one N and `r sum(result$metrics$per_read_metrics$n_gaps > 0)` contained at least one gap.
+
+```{r, results = 'asis'}
+n_Ns <- sort(result$metrics$per_read_metrics$n_Ns, dec = T)
+n_gaps <- sort(result$metrics$per_read_metrics$n_gaps, dec = T)
+
+stats_tab <- rbind(
+data.frame(metric = c('Total sequences with zero', 'Total sequences with one', 'Total sequences with two', 
+                      'Total sequences with three', 'Total sequences with four', 'Total sequences with five or more'),
+           Ns     = as.character(c(sum(n_Ns == 0),              sum(n_Ns == 1),             sum(n_Ns == 2),   
+                      sum(n_Ns == 3),               sum(n_Ns == 4), sum(n_Ns >= 5))),
+           Gaps   = as.character(c(sum(n_gaps == 0),            sum(n_gaps == 1),           sum(n_gaps == 2), 
+                      sum(n_gaps == 3),             sum(n_gaps == 4), sum(n_gaps >= 5))))
+,
+data.frame(metric = c('', 'Highest number in single sequence', '2nd Highest number in single sequence', '3rd Highest number in single sequence'),
+           Ns     = c('', n_Ns[1],                             n_Ns[2],                                 n_Ns[3]),
+           Gaps   = c('', n_gaps[1],                           n_gaps[2],                               n_gaps[3]))
+)
+cat('\n\nTable: Stats about the number of sequences with gaps and Ns as well as the sequences with highest numbers of gaps and Ns.\n\n')
+kable(stats_tab)
+```
 
 ```{r, results='asis'}
 kable_summary(result$summary)

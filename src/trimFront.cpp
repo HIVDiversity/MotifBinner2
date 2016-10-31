@@ -986,7 +986,7 @@ Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance
         ++number_of_options;
       }
     }
-    position_score = 2*position_max - position_total;
+    position_score = position_max - (position_total - position_max);
     if (number_of_options == 0){
       throw std::range_error("no options tallied for position");
     } else if (number_of_options > 1){
