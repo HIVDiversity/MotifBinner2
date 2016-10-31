@@ -1,0 +1,34 @@
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('extractData', names(all_results))[1]]]
+}
+if (class(result) != 'extractData')
+{
+  result <- all_results[[grep('extractData', names(all_results))[1]]]
+}
+```
+
+# `r result$config$op_full_name`
+
+`r length(result$seq_dat)` reads were sucessfully extracted from the specified data source.
+
+```{r, results='asis'}
+summary_tab <- result$summary
+cat('\n\nTable: Basic statistics of the loaded sequences.\n\n')
+kept_tab <- summary_tab[,grep('k_', names(summary_tab))]
+names(kept_tab) <- gsub('k_', '', names(kept_tab))
+print(kable(kept_tab))
+
+timingTable(result)
+```
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
+```

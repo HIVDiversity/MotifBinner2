@@ -193,6 +193,12 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
         char_to_remove = "-",
         cache_data = TRUE
            ),
+    'n040' =
+      list(name = 'fwd_extractReads',
+        op = 'extractData',
+        data_source = "n018",
+        extract_levels = c("seq_dat", "fwd"),
+        cache_data = TRUE),
     'n100' =
       list(name = 'dataTracing',
         op = 'dataTracing',
@@ -569,6 +575,8 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n024') # primerSeqErr
   all_results <- applyOperation(all_results, config, op_number = 'n025') # binSeqErr
   all_results <- applyOperation(all_results, config, op_number = 'n026') # removeGaps
+  
+  all_results <- applyOperation(all_results, config, op_number = 'n040') # fwd_extractData
   
   all_results <- applyOperation(all_results, config, op_number = 'n100') # dataTracing
 
