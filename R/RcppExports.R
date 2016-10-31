@@ -21,8 +21,8 @@ scoreAlignmentPositions_cpp <- function(reads, q_mat) {
     .Call('MotifBinner2_scoreAlignmentPositions_cpp', PACKAGE = 'MotifBinner2', reads, q_mat)
 }
 
-buildConsensus_cpp <- function(score_mat, required_dominance) {
-    .Call('MotifBinner2_buildConsensus_cpp', PACKAGE = 'MotifBinner2', score_mat, required_dominance)
+buildConsensus_cpp <- function(score_mat, required_dominance, minimum_score) {
+    .Call('MotifBinner2_buildConsensus_cpp', PACKAGE = 'MotifBinner2', score_mat, required_dominance, minimum_score)
 }
 
 tallyPrimerSeqErrors_cpp <- function(r_sread, r_primer, r_qual) {
@@ -31,5 +31,9 @@ tallyPrimerSeqErrors_cpp <- function(r_sread, r_primer, r_qual) {
 
 regionSplit_cpp <- function(mapped_read, profile, region_map, mapped_qual) {
     .Call('MotifBinner2_regionSplit_cpp', PACKAGE = 'MotifBinner2', mapped_read, profile, region_map, mapped_qual)
+}
+
+removeChars_cpp <- function(r_sread, r_qual, char_to_strip) {
+    .Call('MotifBinner2_removeChars_cpp', PACKAGE = 'MotifBinner2', r_sread, r_qual, char_to_strip)
 }
 

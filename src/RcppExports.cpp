@@ -71,14 +71,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // buildConsensus_cpp
-Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance);
-RcppExport SEXP MotifBinner2_buildConsensus_cpp(SEXP score_matSEXP, SEXP required_dominanceSEXP) {
+Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance, double minimum_score);
+RcppExport SEXP MotifBinner2_buildConsensus_cpp(SEXP score_matSEXP, SEXP required_dominanceSEXP, SEXP minimum_scoreSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type score_mat(score_matSEXP);
     Rcpp::traits::input_parameter< double >::type required_dominance(required_dominanceSEXP);
-    rcpp_result_gen = Rcpp::wrap(buildConsensus_cpp(score_mat, required_dominance));
+    Rcpp::traits::input_parameter< double >::type minimum_score(minimum_scoreSEXP);
+    rcpp_result_gen = Rcpp::wrap(buildConsensus_cpp(score_mat, required_dominance, minimum_score));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -106,6 +107,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< CharacterVector >::type region_map(region_mapSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type mapped_qual(mapped_qualSEXP);
     rcpp_result_gen = Rcpp::wrap(regionSplit_cpp(mapped_read, profile, region_map, mapped_qual));
+    return rcpp_result_gen;
+END_RCPP
+}
+// removeChars_cpp
+Rcpp::List removeChars_cpp(CharacterVector r_sread, CharacterVector r_qual, std::string char_to_strip);
+RcppExport SEXP MotifBinner2_removeChars_cpp(SEXP r_sreadSEXP, SEXP r_qualSEXP, SEXP char_to_stripSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type r_sread(r_sreadSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type r_qual(r_qualSEXP);
+    Rcpp::traits::input_parameter< std::string >::type char_to_strip(char_to_stripSEXP);
+    rcpp_result_gen = Rcpp::wrap(removeChars_cpp(r_sread, r_qual, char_to_strip));
     return rcpp_result_gen;
 END_RCPP
 }

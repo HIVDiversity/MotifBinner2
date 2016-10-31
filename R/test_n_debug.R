@@ -188,8 +188,9 @@ buildConfig <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score
         cache_data = FALSE),
     'n026' = 
       list(name = 'removeGaps',
-        op = 'removeGaps',
-        data_source = "n025",
+        op = 'removeChars',
+        data_source = "n023",
+        char_to_remove = "-",
         cache_data = TRUE
            ),
     'n100' =
@@ -572,7 +573,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n100') # dataTracing
 
   genReport(all_results, config)
-  op_number <- 'n004'
+  op_number <- 'n026'
   config$current_op_number <- op_number
 
   result <- all_results

@@ -16,6 +16,7 @@ buildConsensus <- function(all_results, config)
   seq_dat <- all_results[[data_source_indx]]$seq_dat
 
   required_dominance <- .05
+  minimum_score <- 35
   
   per_read_metrics <- data.frame(read_name = as.character(seq_dat@id),
                                  stringsAsFactors = F)
@@ -26,6 +27,7 @@ buildConsensus <- function(all_results, config)
   all_consensuses <- NULL
   pid <- unique(per_read_metrics$clean_pid)[1]
   uniq_pids <- unique(per_read_metrics$clean_pid)
+  registerDoMC(cores = config$ncpu)
   tmp_x <- foreach(pid = uniq_pids, .combine = "c") %dopar% {
 #  for (pid in unique(per_read_metrics$clean_pid)){
     bin_seq_indx <- which(per_read_metrics$clean_pid == pid)
@@ -38,7 +40,7 @@ buildConsensus <- function(all_results, config)
     x <- scoreAlignmentPositions_cpp(as.character(bin_seqs@sread),
                                    qual_mat)
     z <- list()
-    z[[paste(pid, '_', length(bin_seq_indx), sep = '')]] <- buildConsensus_cpp(x$score_mat, required_dominance)
+    z[[paste(pid, '_', length(bin_seq_indx), sep = '')]] <- buildConsensus_cpp(x$score_mat, required_dominance, minimum_score)
     z
   }
   con_seqs <- vector(mode = 'character', length=length(tmp_x))

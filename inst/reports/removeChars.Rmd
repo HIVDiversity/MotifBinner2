@@ -1,0 +1,37 @@
+```{r include=FALSE}
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(warning=FALSE)
+opts_chunk$set(fig.pos = 'H')
+
+library(MotifBinner2)
+
+if (!exists('result'))
+{
+  result <- all_results[[grep('removeChars', names(all_results))[1]]]
+}
+if (class(result) != 'removeChars')
+{
+  result <- all_results[[grep('removeChars', names(all_results))[1]]]
+}
+```
+# `r result$config$op_full_name`
+
+Removes characters from the sequences.
+
+Characters to remove: `r result$config$op_args$char_to_remove`
+
+`r sum(result$metrics$per_read_metrics$n_gaps > 0)` of the sequences contained this character.
+
+On average `r mean(result$metrics$per_read_metrics$n_gaps[result$metrics$per_read_metrics$n_gaps > 0])` of the character were removed from a sequence if the sequenced contained at least one of the character.
+
+In total `r sum(result$metrics$per_read_metrics$n_gaps[result$metrics$per_read_metrics$n_gaps > 0])` of the character were removed.
+
+```{r, results='asis'}
+kable_summary(result$summary)
+
+timingTable(result)
+```
+
+```{r, results='asis'}
+cat('\n\n---\n\n')
+```

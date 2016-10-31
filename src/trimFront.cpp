@@ -930,7 +930,7 @@ Rcpp::List scoreAlignmentPositions_cpp(CharacterVector reads, NumericMatrix q_ma
 }
 
 // [[Rcpp::export]]
-Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance)
+Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance, double minimum_score)
 {
   double position_max;
   double position_total;
@@ -939,6 +939,9 @@ Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance
   int number_of_options;
   std::string consensus (score_mat.ncol(), '.');
   std::vector<int> consensus_score (score_mat.ncol(), 0);
+  int position_score = 0;
+  int n_Ns = 0;
+  int n_gaps = 0;
 
   std::map<char, int> int_to_char_lookup = 
   {
@@ -983,31 +986,37 @@ Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance
         ++number_of_options;
       }
     }
+    position_score = 2*position_max - position_total;
     if (number_of_options == 0){
       throw std::range_error("no options tallied for position");
     } else if (number_of_options > 1){
-//      std::cout << j << " N many options" << std::endl;
       consensus[j] = 'N';
       consensus_score[j] = 0;
+      n_Ns += 1;
     } else if (consensus_int >= 15){
-//      std::cout << j << " -" << std::endl;
       consensus[j] = '-';
       consensus_score[j] = 0;
+      n_gaps += 1;
     } else if (consensus_int >= 4){
-//      std::cout << j << " N ambig consent" << std::endl;
       consensus[j] = 'N';
       consensus_score[j] = 0;
+      n_Ns += 1;
+    } else if (position_score < minimum_score){
+      consensus[j] = 'N';
+      consensus_score[j] = 0;
+      n_Ns += 1;
     } else {
-//      std::cout << j << " real letter" << consensus_int << " " << int_to_char_lookup[consensus_int] << std::endl;
       consensus[j] = int_to_char_lookup[consensus_int];
-      consensus_score[j] = 2*position_max - position_total;
+      consensus_score[j] = position_score;
     }
   }
   Rcpp::List result;
 
   result = Rcpp::List::create(
     Rcpp::Named("consensus") = consensus,
-    Rcpp::Named("consensus_score") = consensus_score
+    Rcpp::Named("consensus_score") = consensus_score,
+    Rcpp::Named("n_Ns") = n_Ns,
+    Rcpp::Named("n_gaps") = n_gaps
       );
   return result;
 }
@@ -1134,6 +1143,48 @@ Rcpp::List regionSplit_cpp(CharacterVector mapped_read,
   result = Rcpp::List::create(
     Rcpp::Named("regions") = regions,
     Rcpp::Named("regions_qual") = regions_qual
+  );
+  return result;
+}
+
+// [[Rcpp::export]]
+Rcpp::List removeChars_cpp(CharacterVector r_sread,
+                           CharacterVector r_qual,
+                           std::string char_to_strip){
+  std::string c_let;
+  std::vector< std::string > sread;
+  std::vector< std::string > qual;
+  std::vector< int > n_chars;
+  std::string t_quals;
+  t_quals = "";
+
+  for (int i = 0; i < r_sread.size(); ++i) //loop over reads
+  {
+    sread.push_back("");
+    qual.push_back("");
+    n_chars.push_back(0);
+
+    for (int j = 0; j < r_sread[i].size(); ++j) //loop over positions
+    {
+      c_let = r_sread[i][j];
+      if (c_let == char_to_strip)
+      {
+        n_chars[i] += 1;
+        t_quals += r_qual[i][j];
+      } else {
+        sread[i] += c_let;
+        qual[i] += r_qual[i][j];
+      }
+    }
+  }
+
+  Rcpp::List result;
+
+  result = Rcpp::List::create(
+    Rcpp::Named("sread") = sread,
+    Rcpp::Named("qual") = qual,
+    Rcpp::Named("n_chars") = n_chars,
+    Rcpp::Named("t_quals") = t_quals
   );
   return result;
 }
