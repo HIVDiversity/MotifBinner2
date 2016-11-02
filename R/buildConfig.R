@@ -705,6 +705,13 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
         op = 'primerSeqErr',
         data_source = c("fwd" = "n007", "rev" = "n014"),
         cache_data = FALSE),
+    'n031' =
+      list(name = 'binSeqErr',
+        op = 'binSeqErr',
+        data_source = c("bin_msa_fwd" = "n020", "bin_msa_rev" = "n024",
+                        "cons_fwd" = "n021", "cons_rev" = "n025",
+                        "primer_err" = "n030"),
+        cache_data = FALSE),
 
     # todo binSeqErr for non-overlapping reads
 

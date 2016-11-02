@@ -11,7 +11,6 @@ binSeqErr <- function(all_results, config)
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   
-  stopifnot(length(op_args$data_source) == 3)
   stopifnot(all(names(op_args$data_source) %in% c("bin_msa_fwd", "bin_msa_rev", "bin_msa_merged",
                                                   "cons_fwd", "cons_rev", "cons_merged",
                                                   "primer_err"))) # must have fwd and/or rev primers
@@ -36,27 +35,34 @@ binSeqErr <- function(all_results, config)
   # Case 2 - non-merged
   if ("bin_msa_fwd" %in% names(op_args$data_source))
   {
-    stop('binSeqErr needs to be updated to handle non overlapping reads')
-    # this is the old code
-    all_tallies <- NULL
-    all_msa_dat <- list()
-    for (data_source_name in names(op_args$data_source[['bin_msa']]))
-    {
-      stopifnot(data_source_name %in% names(op_args$data_source[['cons']]))
-      msa_indx <- grep(op_args$data_source[['bin_msa']][data_source_name], 
-                       names(all_results))
-      cons_indx <- grep(op_args$data_source[['cons']][data_source_name], 
-                        names(all_results))
+    stopifnot(all(c("bin_msa_fwd", "bin_msa_rev", "cons_fwd", "cons_rev", "primer_err") %in% names(op_args$data_source)))
+    
+    msa_indx <- grep(op_args$data_source[['bin_msa_fwd']], names(all_results))
+    cons_indx <- grep(op_args$data_source[['cons_fwd']], names(all_results))
 
-      msa_dat <- all_results[[msa_indx]]$seq_dat
-      cons_dat <- all_results[[cons_indx]]$seq_dat
-      all_msa_dat[[data_source_name]] <- msa_dat
+    msa_dat_fwd <- all_results[[msa_indx]]$seq_dat
+    cons_dat_fwd <- all_results[[cons_indx]]$seq_dat
 
-      new_tallies <- binSeqErr_internal(cons_dat = cons_dat, msa_dat = msa_dat)
-    }
-    all_tallies <- rbind(all_tallies, new_tallies)
-    msa_dat <- shortReadQ_forced_append(all_msa_dat)
-    rm(all_msa_dat)
+    all_tallies_fwd <- binSeqErr_internal(msa_dat = msa_dat_fwd, cons_dat = cons_dat_fwd)
+    
+    msa_indx <- grep(op_args$data_source[['bin_msa_rev']], names(all_results))
+    cons_indx <- grep(op_args$data_source[['cons_rev']], names(all_results))
+
+    msa_dat_rev <- all_results[[msa_indx]]$seq_dat
+    cons_dat_rev <- all_results[[cons_indx]]$seq_dat
+
+    all_tallies_rev <- binSeqErr_internal(msa_dat = msa_dat_rev, cons_dat = cons_dat_rev)
+
+    all_tallies <- merge(all_tallies_fwd, all_tallies_rev, 
+                         all.x = TRUE, all.y = TRUE,
+                         by = c("from", "to", "qual", "data_source"))
+    all_tallies$count.x[is.na(all_tallies$count.x)] <- 0
+    all_tallies$count.y[is.na(all_tallies$count.y)] <- 0
+    all_tallies$count <- all_tallies$count.x + all_tallies$count.y
+    all_tallies$count.x <- NULL
+    all_tallies$count.y <- NULL
+    msa_dat <- shortReadQ_forced_append(list('fwd' = msa_dat_fwd,
+                                             'rev' = msa_dat_rev))
   }
 
   per_read_metrics <- data.frame('read_exists' = rep(1, length(msa_dat)))
@@ -87,7 +93,7 @@ binSeqErr <- function(all_results, config)
 #' bins.
 #' @inheritParams binSeqErr_internal
 
-group_cons_bins <- function(cons_dat, msa_dat)
+group_cons_bins_internal <- function(cons_dat, msa_dat)
 {
   cons_pids <- gsub('_[^ACGTacgt]*$', '', as.character(cons_dat@id))
   cons_dat <- cons_dat[order(cons_pids)]

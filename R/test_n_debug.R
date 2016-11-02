@@ -23,7 +23,8 @@ store_configs <- function()
 #              base_for_names = 
 #              )
   config <-
-  buildConfig_nol_test(fwd_file = "/fridge/data/MotifBinner2_test/raw/CAP129_2040_009wpi_C2C3_R1.fastq",
+  buildConfig(overlap = FALSE,
+              fwd_file = "/fridge/data/MotifBinner2_test/raw/CAP129_2040_009wpi_C2C3_R1.fastq",
               fwd_primer_seq = 'CTCTTTTGACCCAATTCCTATACATTATTG',
               fwd_primer_lens = 30,
               fwd_min_score = 20,
@@ -31,9 +32,8 @@ store_configs <- function()
               rev_primer_seq = 'NNNNNNNNNNNNNNTGCAATAGAAAAATTCTCCTCTACAATT',
               rev_primer_lens = c(14, 28),
               rev_min_score = 28,
-              fwd_pid_in_which_fragment = NULL,
+              fwd_pid_in_which_fragment = "NULL",
               rev_pid_in_which_fragment = 1,
-              profile_file = "/fridge/data/MotifBinner2_test/c2c3_mol_clock_profile_1.fasta",
               output_dir = "/fridge/data/MotifBinner2_test",
               base_for_names = "CAP129_2040_009wpi_C2C3",
               erase_history = FALSE
@@ -267,7 +267,6 @@ store_configs <- function()
               base_for_names = "HVTN503_159451817_1012_C2C3",
               erase_history = FALSE
               )
-
 }
 
 dummy_test_debug <- function()
@@ -310,11 +309,12 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n026') #
   
   all_results <- applyOperation(all_results, config, op_number = 'n030') # primerSeqErr
+  all_results <- applyOperation(all_results, config, op_number = 'n031') # binSeqErr
   
   all_results <- applyOperation(all_results, config, op_number = 'n100') # dataTracing
 
   genReport(all_results, config)
-  op_number <- 'n022'
+  op_number <- 'n031'
   config$current_op_number <- op_number
 
   result <- all_results
