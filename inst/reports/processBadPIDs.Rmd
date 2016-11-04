@@ -15,8 +15,7 @@ if (class(result) != 'processBadPIDs')
 }
 figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 fig.cap0 <- "Figure: Number of bins by bin size. The y axis counts the number of bins of the size given on the x-axis. Note the log scale on the y-axis. The vertical red line indicates the consensus cutoff. Note that a few additional QC checks were performed since the previous version of this figure (in the extactPID steps), so slight deviations are expected."
-fig.cap1 <- "Figure: Distance from big bins by size of smaller bin."
-fig.cap1_1 <- "Figure: Distribution of big bins by size."
+fig.cap1 <- "Figure: Distance from big bins by size of smaller bin. Parent bin sizes were chosen such that each interval contains 25% of all large bins."
 fig.cap2 <- "Figure: Probability of small bins resulting from sequencing errors in the PIDs of larger bins. Note that the probability computation is based on a proportion of the size of the small bin (30% by default). Thus the probability only changes if the size of the bin increased enough for that proportion to increase by one. Hence bins of size 1, 2, and 3 are on the same probability curve; likewise bins of size 4, 5 and 6 and so forth."
 ```
 
@@ -56,25 +55,26 @@ p0 <- ggplot(logplot, aes(x = bin_size, y = num_bins)) +
 small_bins <- subset(result$metrics$bin_metrics, !big_enough)
 small_bins$off_spring_prob[small_bins$off_spring_prob == 0] <- 0.0000000001
 small_bins[small_bins$dist_to_big >= 4,'dist_to_big'] <- '>3'
-small_bins$cat_parent_size <- cut(small_bins$parent_size, 5)
 small_bins$raw_size_trunc <- small_bins$raw_size
 small_bins[small_bins$raw_size_trunc >= 4,'raw_size_trunc'] <- '>3'
 
 big_bins <- subset(result$metrics$bin_metrics, big_enough)
-big_bin_size_breaks <-
-as.numeric(strsplit(
-gsub('\\([0-9\\.]*,',',', 
-gsub('^\\(', '', 
-gsub(']', '', 
-     paste(levels(small_bins$cat_parent_size), collapse='')
-))),
-            ',')[[1]])
-big_bin_size_breaks[1] <- min(big_bins$raw_size)
-big_bin_size_breaks[length(big_bin_size_breaks)] <- max(big_bins$raw_size)
+big_bin_sizes <- big_bins$raw_size
+big_bin_size_breaks <- quantile(big_bin_sizes, c(0, 0.25, 0.5, 0.75, 1))
+big_bin_labs <- NULL
+for (i in 1:(length(big_bin_size_breaks)-1)){
+  big_bin_labs <- c(big_bin_labs, 
+    paste("(", round(big_bin_size_breaks[i],0), " to ", 
+          round(big_bin_size_breaks[i+1],0), "]", 
+          sep = ""))
+}
+small_bins$cat_parent_size <- cut(small_bins$parent_size, 
+  breaks = big_bin_size_breaks,
+  labels = big_bin_labs)
 
-
-small_bins$cat_parent_size <- cut(small_bins$parent_size, big_bin_size_breaks)
-big_bins$cat_raw_size <- cut(big_bins$raw_size, big_bin_size_breaks)
+big_bins$cat_raw_size <- cut(big_bins$raw_size, 
+  breaks = big_bin_size_breaks,
+  labels = big_bin_labs)
 
 small_bin_size_labs <- 
 data.frame(value = c('1', '2', '3', '>3'),
@@ -99,30 +99,8 @@ ggplot(small_bins_trans, aes(y = count, x=dist_to_big, fill = cat_parent_size)) 
   facet_wrap(~ raw_size_lab, scales = 'free_y') +
   ylab('Number of Small Bins') +
   xlab("Distance to Nearest Big Bin") +
-  scale_fill_discrete(guide = guide_legend('Parent\nBin Size'))
-
-big_bins <- subset(result$metrics$bin_metrics, big_enough)
-
-big_bin_size_breaks <-
-as.numeric(strsplit(
-gsub('\\([0-9\\.]*,',',', 
-gsub('^\\(', '', 
-gsub(']', '', 
-     paste(levels(small_bins$cat_parent_size), collapse='')
-))),
-            ',')[[1]])
-big_bin_size_breaks[1] <- min(big_bins$raw_size)
-big_bin_size_breaks[length(big_bin_size_breaks)] <- max(big_bins$raw_size)
-
-big_bins$cat_raw_size <- cut(big_bins$raw_size, big_bin_size_breaks)
-
-p1_1 <- 
-ggplot(subset(big_bins, !is.na(big_bins$cat_raw_size)), 
-       aes(x=cat_raw_size, fill = cat_raw_size)) +
-  geom_bar() +
-  xlab("Size of Big Bin") +
-  ylab("Number of Big Bins") +
-  scale_fill_discrete(guide = guide_legend("Big Bin Size"))
+  scale_fill_discrete(guide = guide_legend('Parent\nBin Size')) +
+  theme(legend.position = "bottom")
 
 p2 <- 
 ggplot(subset(small_bins, dist_to_big <= 2), 
@@ -146,11 +124,7 @@ print(p1)
 
 As the size of the small bins increases, the probability of the same sequencing error in the PID of a large bin yielding that exact same offspring pid decreases. That means that in the previous graph, the distance to the nearest big bin will decrease as the size of the offspring bin increases. Also, since the sampling space of potential PIDs is so large, it is unlikely to sample two PIDs that are within 1 or 2 distance from each other. This means that as the small bins get larger, the likelihood that they are the result of a truly sampled PID, which just amplified poorly increases. Hence it is expected that as the small bin size increases, then proportion of bins of that size that are more than 2 distance from the nearest big bin will increase. Obviously this interpretation is affected by the length of the PID, the number of PIDs sampled and overall sampling depth. Hence if the previous graph does not follow this interpretation, those things must be looked at first.
 
-Note also, that as the size of the small bins increases, then the size of the bins that are close to there bins should increase. This is logical because larger parent bins result in larger offspring bins. This interacts with the distibution of the size of potential parent (a.k.a big) bins shown in the next figure.
-
-```{r, dpi=300, fig.width=7, fig.height=3, fig.cap=fig.cap1_1, fig.path=figure_path}
-print(p1_1)
-```
+Note also, that as the size of the small bins increases, then the size of the bins that are close to there bins should increase. This is logical because larger parent bins result in larger offspring bins. This interacts with the distibution of the size of potential parent (a.k.a big) bins. The breaks used to divide the big bins into groups were chosen so that each interval contains 25% of the bins.
 
 ```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2, fig.path=figure_path}
 print(p2)
