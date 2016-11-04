@@ -104,14 +104,14 @@ ggplot(small_bins_trans, aes(y = count, x=dist_to_big, fill = cat_parent_size)) 
 
 p2 <- 
 ggplot(subset(small_bins, dist_to_big <= 2), 
-       aes(y = off_spring_prob, x = parent_size, col = as.factor(raw_size))) +
+       aes(y = off_spring_prob, x = parent_size, col = raw_size)) +
   geom_point() +
   scale_y_log10() +
   facet_wrap( ~ dist_to_big_lab) +
   geom_hline(yintercept = result$metrics$offspring_prob_cutoff) +
   ylab("Probability of being offspring") +
   xlab("Size of closest parent bin") +
-  scale_color_discrete("Size of\nSmall\nBin")
+  scale_color_gradient("Size of\nSmall\nBin", low = '#52A9ED', high = '#153048')
 ```
 
 ```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap0, fig.path=figure_path}
