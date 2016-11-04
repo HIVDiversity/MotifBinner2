@@ -29,7 +29,7 @@ The consensus cutoff computed for this dataset is `r result$metrics$consensus_cu
 *NOTE!! If your largest bin is very large, the scaling in the graphs below may not be appropriate - contact the package maintainer for further information.*
 
 ```{r, eval = FALSE}
-result <- all_results$n018_processBadPIDs
+result <- all_results[[4]]
 result$metrics$consensus_cutoff
 names(result)
 
@@ -40,14 +40,18 @@ names(result$metrics)
 ```{r, include=FALSE}
 logplot <- data.frame(bin_size = as.numeric(names(table(result$metrics$bin_metrics$raw_size))),
                       num_bins = as.numeric(table(result$metrics$bin_metrics$raw_size)))
+largest_bin <- max(logplot$num_bins)
 p0 <- ggplot(logplot, aes(x = bin_size, y = num_bins)) + 
   geom_point() + 
   scale_y_log10() + 
   labs(x = 'Bin Size',
        y = 'Number of Bins') +
-  geom_vline(xintercept = result$metrics$consensus_cutoff, col = 'red')
-
-
+  geom_vline(xintercept = result$metrics$consensus_cutoff, col = 'red') +
+  geom_text(data = data.frame(x=1), 
+            aes(x = result$metrics$consensus_cutoff, y = largest_bin,
+            hjust = 0, vjust = 1, 
+            label = round(result$metrics$consensus_cutoff,0)),
+            col = 'red')
 
 small_bins <- subset(result$metrics$bin_metrics, !big_enough)
 small_bins$off_spring_prob[small_bins$off_spring_prob == 0] <- 0.0000000001
