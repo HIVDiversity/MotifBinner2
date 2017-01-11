@@ -1,11 +1,14 @@
 ## vsearchCluster
 
-Merges overlapping reads using PEAR.
+Uses vsearch to cluster sequences. Only the centroids of clusters above a specified threshold are reported.
+
+
 
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(warning=FALSE)
 opts_chunk$set(fig.pos = 'H')
+options(scipen=99)
 
 library(MotifBinner2)
 
@@ -17,6 +20,36 @@ if (class(result) != 'vsearchCluster')
 {
   stop('class of result variable incorrect')
 }
+fig.cap1 <- "Figure: Number of clusters by cluster size. The y axis counts the number of clusters of the size given on the x-axis. Note the log scale on the y-axis."
+fig.cap2 <- "Figure: Number of clusters by cluster size. The y axis counts the number of clusters of the size given on the x-axis. Note the log scale on both axes."
+figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
+```
+
+Number of clusters: `r sum(result$metrics$per_read_metrics$is_centroid)`
+
+```{r, result = 'asis', dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
+cluster_sizes <- data.frame(
+  size = as.numeric(names(table(result$metrics$per_read_metrics$size))),
+  n_clus = as.numeric(table(result$metrics$per_read_metrics$size)))
+print(ggplot(cluster_sizes, aes(x = size, y = n_clus)) + 
+      geom_point() + 
+      scale_y_log10() + 
+      labs(x = 'Cluster Size',
+           y = 'Number of Clusters')
+      )
+```
+
+```{r, result = 'asis', dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
+cluster_sizes <- data.frame(
+  size = as.numeric(names(table(result$metrics$per_read_metrics$size))),
+  n_clus = as.numeric(table(result$metrics$per_read_metrics$size)))
+print(ggplot(cluster_sizes, aes(x = size, y = n_clus)) + 
+      geom_point() + 
+      scale_y_log10() + 
+      scale_x_log10() + 
+      labs(x = 'Cluster Size',
+           y = 'Number of Clusters')
+      )
 ```
 
 ```{r, results='asis'}

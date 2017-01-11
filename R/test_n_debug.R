@@ -314,7 +314,7 @@ dummy_test_debug <- function()
   all_results <- applyOperation(all_results, config, op_number = 'n100') # dataTracing
 
   genReport(all_results, config)
-  op_number <- 'n031'
+  op_number <- 'n016'
   config$current_op_number <- op_number
 
   result <- all_results

@@ -1,4 +1,10 @@
 #' Extracts required dataset by navigating down into a list
+#'
+#' Specify the names of the elements you want to extract using 
+#' the extract_levels parameter. If you have results stashed
+#' in a list like this list('X' = list('bla' = the_target_data)),
+#' then specify the extract levels as extract_levels = c('X', 'bla')
+#'
 #' @inheritParams applyOperation
 #' @export
 
@@ -16,7 +22,7 @@ extractData <- function(all_results, config)
 
   data_set <- all_results[[data_source_indx]][[op_args$extract_levels[1]]]
   for (i in 2:length(op_args$extract_levels)){
-    data_set <- data_set[[op_args$extract_levels[2]]]
+    data_set <- data_set[[op_args$extract_levels[2]]] # The 2 should be an i?
   }
   seq_dat <- data_set
 

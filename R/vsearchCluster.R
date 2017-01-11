@@ -18,6 +18,10 @@ vsearchCluster <- function(all_results, config)
   stopifnot(length(data_source_indx) == 1)
 
   id <- op_args$id
+  min_clus_size <- op_args$min_clus_size
+  if (is.null(min_clus_size)){
+    min_clus_size <- 1
+  }
   
   seq_dat <- all_results[[data_source_indx]]$seq_dat
 
@@ -49,6 +53,7 @@ vsearchCluster <- function(all_results, config)
   assignments <- merge(assignments, centroid_names, 
                        by.x = 'seq_name', by.y = 'centroid',
                        all.x = TRUE)
+  print(str(assignments))
   assignments$new_name <- ifelse(is.na(assignments$new_name), assignments$seq_name, assignments$new_name)
   per_read_metrics <- subset(assignments, type != 'C')
 
@@ -58,6 +63,7 @@ vsearchCluster <- function(all_results, config)
   seq_dat@id <- BStringSet(per_read_metrics$new_name)
   per_read_metrics$seq_name <- per_read_metrics$new_name
   per_read_metrics$new_name <- NULL
+  per_read_metrics$size <- as.numeric(gsub('^.*_', '', per_read_metrics$seq_name))
 
   per_read_metrics$assigned_to[per_read_metrics$type == 'S'] <- 'Centroid'
   per_read_metrics$is_centroid <- ifelse(per_read_metrics$type == 'S', 1, 0)
@@ -67,7 +73,11 @@ vsearchCluster <- function(all_results, config)
   trim_steps <- list(step1 = list(name = 'is_centroid',
                                   threshold = 1,
                                   comparator = `>=`,
-                                  breaks = c(Inf, 1, -Inf)))
+                                  breaks = c(Inf, 1, -Inf)),
+                     step2 = list(name = 'size',
+                                  threshold = min_clus_size,
+                                  comparator = `>=`,
+                                  breaks = rev(sort(unique(c(0, 1, 100, 1000, min_clus_size, min_clus_size-1, min_clus_size+1))))))
 
   result <- list(trim_steps = trim_steps,
                  metrics = list(per_read_metrics = per_read_metrics))

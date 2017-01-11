@@ -27,7 +27,8 @@ blastTrim <- function(all_results, config)
              compress=FALSE)
 
   blast_hits_file_name <- file.path(op_dir, 'blast_hits.tab')
-  system(paste('blastn', 
+  blast_command <- 
+         paste('blastn', 
                ' -db ', op_args$database, 
                ' -query ', seq_file_name,
                ' -out ', blast_hits_file_name,
@@ -35,7 +36,9 @@ blastTrim <- function(all_results, config)
                ' -outfmt 6',
                ' -max_hsps 1',
                ' -max_target_seqs 1', 
-               sep = ''))
+               sep = '')
+  print(blast_command)
+  system(blast_command)
   
   per_read_metrics <- read.delim(blast_hits_file_name, header = F,
                                  stringsAsFactors = F)[,c(1,2,3),]

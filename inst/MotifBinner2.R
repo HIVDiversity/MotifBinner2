@@ -121,7 +121,7 @@ buildConfig(overlapping = opt$overlapping,
             base_for_names = opt$base_for_names,
             ncpu = opt$ncpu)
 
-print(config)
+dput(config)
 
 unlink(file.path(config$output_dir, config$base_for_names), recursive=T)
 all_results <- list()
