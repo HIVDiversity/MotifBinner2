@@ -1,6 +1,6 @@
-## blastTrim
+# `r result$config$op_full_name`
 
-Merges overlapping reads using PEAR.
+Trims sequences that does not meet (or exceeds) a certain threshold.
 
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)

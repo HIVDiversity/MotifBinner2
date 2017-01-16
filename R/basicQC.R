@@ -19,6 +19,11 @@ basicQC <- function(all_results, config)
 
   if (is.null(op_args$max_seqs)){
     max_seqs <- 500000
+  } else {
+    max_seqs <- op_args$max_seqs
+  }
+  if (is.null(op_args$map_reads)){
+    op_args$map_reads <- FALSE
   }
   data_source_indx <- grep(op_args$data_source, names(all_results))
   stopifnot(length(data_source_indx) == 1)
@@ -28,6 +33,27 @@ basicQC <- function(all_results, config)
   } else {
     seq_dat <- all_results[[data_source_indx]]$seq_dat[sample(1:n_source_seqs, max_seqs)]
   }
+
+  if (toupper(as.character(op_args$map_reads)) == "TRUE"){
+    if (max_seqs > 10000){
+      warning('mapping more than 10000 reads - prepare to wait')
+    }
+    the_profile <- readDNAStringSet(op_args$profile_file)
+    #sourceCpp('/home/phillipl/projects/MotifBinner2/code/MotifBinner2/src/trimFront.cpp')
+    x <- map_reads_no_ins_cpp(as.character(the_profile), 
+      as.character(seq_dat@sread), 
+      as.character(seq_dat@quality@quality))
+    seq_dat <- ShortReadQ(DNAStringSet(x[[1]]),
+                          BStringSet(x[[2]]),
+                          BStringSet(seq_dat@id))
+
+    gap_follow <- x$gap_follow
+    aligned_to_gap <- x$aligned_to_gap
+    rm(x)
+  } else {
+    gap_follow <- NULL
+    aligned_to_gap <- NULL
+  }
   
   per_read_metrics <- data.frame('read_exists' = rep(1, length(seq_dat)))
   trim_steps <- list(step1 = list(name = 'read_exists',
@@ -35,7 +61,9 @@ basicQC <- function(all_results, config)
                                   breaks = c(1)))
 
   result <- list(trim_steps = trim_steps,
-                 metrics = list(per_read_metrics = per_read_metrics))
+                 metrics = list(per_read_metrics = per_read_metrics,
+                                gap_follow = gap_follow,
+                                aligned_to_gap = aligned_to_gap))
   class(result) <- 'basicQC'
   if (op_args$cache){
     stop('Do not cache data in steps that do not alter the datasets')
@@ -76,6 +104,9 @@ computeMetrics.basicQC <- function(result, config, seq_dat)
                           "index_seq")
   fastq_numeric <- c("run_num", "lane", "tile", "xpos", "ypos", "read",
                      "control_num", "index_seq")
+  fastq_name_headers <- c("instrument", "run_num", "flowcell", "lane", "tile",
+                          "xpos", "ypos")
+  fastq_numeric <- c("run_num", "lane", "tile", "xpos", "ypos")
 
   qual_mat <- as(FastqQuality(quality(quality(seq_dat))), 'matrix')
   per_read_quality <- apply(qual_mat, 1, sum, na.rm=T)
@@ -89,6 +120,8 @@ computeMetrics.basicQC <- function(result, config, seq_dat)
                        qual = per_read_quality / width(seq_dat),              
                        stringsAsFactors = F)
   rm(per_read_quality)
+  seq_df$seq_name <- gsub(' .*', '', seq_df$seq_name)
+  seq_df$seq_name <- gsub('_PID.*', '', seq_df$seq_name)
   
   seq_df <- seq_df %>%
     mutate(seq_name = gsub(' ', ':', seq_name)) %>%
@@ -115,11 +148,28 @@ computeMetrics.basicQC <- function(result, config, seq_dat)
     group_by(cycle_cat, qual) %>%
     summarize(count = n())
 
+  if (!is.null(result$metrics$gap_follow)){
+    gap_follow <- apply(result$metrics$gap_follow, 2, sum)
+    gap_follow <- data.frame(pos = 1:length(gap_follow),
+                             n_gaps = as.numeric(gap_follow))
+  } else {
+    gap_follow <- NULL
+  }
+
+  if (!is.null(result$metrics$aligned_to_gap)){
+    aligned_to_gap <- data.frame(pos = 1:length(result$metrics$aligned_to_gap),
+                                 n_gaps = as.numeric(result$metrics$aligned_to_gap))
+  } else {
+    aligned_to_gap <- NULL
+  }
+
   result$metrics <- list(
     seq_df = seq_df,
     zone_qual = zone_qual,
     tile_qual = tile_qual,
-    pos_qual = pos_qual
+    pos_qual = pos_qual,
+    gap_follow = gap_follow,
+    aligned_to_gap = aligned_to_gap
   )
   
   return(result)

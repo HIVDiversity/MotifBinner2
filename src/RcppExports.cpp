@@ -19,6 +19,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// map_reads_no_ins_cpp
+Rcpp::List map_reads_no_ins_cpp(CharacterVector r_profile, CharacterVector r_reads, CharacterVector r_quals);
+RcppExport SEXP MotifBinner2_map_reads_no_ins_cpp(SEXP r_profileSEXP, SEXP r_readsSEXP, SEXP r_qualsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type r_profile(r_profileSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type r_reads(r_readsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type r_quals(r_qualsSEXP);
+    rcpp_result_gen = Rcpp::wrap(map_reads_no_ins_cpp(r_profile, r_reads, r_quals));
+    return rcpp_result_gen;
+END_RCPP
+}
 // transfer_gaps_cpp
 Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qual, NumericVector gap_only_cols);
 RcppExport SEXP MotifBinner2_transfer_gaps_cpp(SEXP aligned_readSEXP, SEXP r_qualSEXP, SEXP gap_only_colsSEXP) {

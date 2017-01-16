@@ -40,11 +40,25 @@ blastTrim <- function(all_results, config)
   print(blast_command)
   system(blast_command)
   
-  per_read_metrics <- read.delim(blast_hits_file_name, header = F,
-                                 stringsAsFactors = F)[,c(1,2,3),]
+  per_read_metrics <- try(read.delim(blast_hits_file_name, header = F,
+                                     stringsAsFactors = F)[,c(1,2,3),],
+                          silent = TRUE)
+  if (class(per_read_metrics) == 'try-error'){
+    if (grepl("no lines av", attr(per_read_metrics, "condition"))){
+      per_read_metrics <- data.frame(query = character(0),
+                                     target = character(0),
+                                     pident = numeric(0))
+      
+      no_hits <- as.character(seq_dat@id)
+    } else {
+      print(per_read_metrics)
+      stop('something failed while blasting')
+    }
+  } else {
+    names(per_read_metrics) <- c('query', 'target', 'pident')
+    no_hits <- as.character(seq_dat@id)[!(as.character(seq_dat@id) %in% per_read_metrics$query)]
+  }
   file.remove(seq_file_name)
-  names(per_read_metrics) <- c('query', 'target', 'pident')
-  no_hits <- as.character(seq_dat@id)[!(as.character(seq_dat@id) %in% per_read_metrics$query)]
   if (length(no_hits) > 0){
     per_read_metrics <- rbind(as.data.frame(per_read_metrics),
       data.frame(query = no_hits,

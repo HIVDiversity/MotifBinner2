@@ -11,9 +11,10 @@ dataTracing <- function(all_results, config)
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
   
-  i <- 1
+  i <- 15
   chain_stats <- NULL
   for (i in 1:length(op_args$data_source)){
+    print(i)
     chain <- strsplit(names(op_args$data_source)[i], '\\.')[[1]][1]
     link_n <- as.numeric(strsplit(names(op_args$data_source)[i], '\\.')[[1]][2])
     link_indx <- grep(op_args$data_source[i], names(all_results))

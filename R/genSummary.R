@@ -281,15 +281,13 @@ kable_summary <- function(summary_tab)
 {
   summary_tab$seqs_in <- summary_tab$k_seqs + summary_tab$t_seqs
   cat('\n\nTable: The number of sequences kept and discarded.This table shows the effect of increasingly less strict trimming based one or more parameters. The first column shows the name of the parameter and the range of values to which the row corresponds. Each row is applying the same filter with an expanded parameter range to those reads that were still excluded by the criteria specified in the previous row. Hence you will note that the seqs_in (number of sequences evaluated) column value always corresponds with the t_seqs (number of trimmed sequences) of the previous row. This table is useful to see if a small tweak to the trimming parameters will include or exclude a large number of reads.\n\n')
-  print(
-  kable(summary_tab[,c('parameter', 'seqs_in', 'k_seqs', 't_seqs')])
-  )
+  print( kable(summary_tab[,c('parameter', 'seqs_in', 'k_seqs', 't_seqs')], format='markdown'))
   cat('\n\nTable: Statistics of the kept sequences. The rows correspond to those of the previous table.\n\n')
   kept_tab <- summary_tab[,grep('k_', names(summary_tab))]
   names(kept_tab) <- gsub('k_', '', names(kept_tab))
-  print(kable(kept_tab))
+  print(kable(kept_tab, format='markdown'))
   cat('\n\nTable: Statistics of the trimmed sequences. The rows correspond to those of the previous two tables.\n\n')
   trimmed_tab <- summary_tab[,grep('t_', names(summary_tab))]
   names(trimmed_tab) <- gsub('t_', '', names(trimmed_tab))
-  print(kable(trimmed_tab))
+  print(kable(trimmed_tab, format='markdown'))
 }

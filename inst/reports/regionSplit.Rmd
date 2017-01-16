@@ -1,6 +1,7 @@
-## regionSplit
 
-Removes sequences that are either too short or too long.
+# `r result$config$op_full_name`
+
+Splits the sequences into different regions based on a map.
 
 ```{r include=FALSE}
 opts_chunk$set(echo=FALSE)

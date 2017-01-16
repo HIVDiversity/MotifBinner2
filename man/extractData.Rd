@@ -12,6 +12,9 @@ extractData(all_results, config)
 \item{config}{A list of configuration options}
 }
 \description{
-Extracts required dataset by navigating down into a list
+Specify the names of the elements you want to extract using 
+the extract_levels parameter. If you have results stashed
+in a list like this list('X' = list('bla' = the_target_data)),
+then specify the extract levels as extract_levels = c('X', 'bla')
 }
 

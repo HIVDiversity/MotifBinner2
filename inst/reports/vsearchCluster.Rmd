@@ -1,7 +1,8 @@
-## vsearchCluster
+
+
+# `r result$config$op_full_name`
 
 Uses vsearch to cluster sequences. Only the centroids of clusters above a specified threshold are reported.
-
 
 
 ```{r include=FALSE}
@@ -24,6 +25,9 @@ fig.cap1 <- "Figure: Number of clusters by cluster size. The y axis counts the n
 fig.cap2 <- "Figure: Number of clusters by cluster size. The y axis counts the number of clusters of the size given on the x-axis. Note the log scale on both axes."
 figure_path <- paste('figure_', result$config$op_full_name, '/', sep = '')
 ```
+
+Identity threshold: `r result$config$op_args$id`
+
 
 Number of clusters: `r sum(result$metrics$per_read_metrics$is_centroid)`
 

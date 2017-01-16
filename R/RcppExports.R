@@ -5,6 +5,10 @@ trimFront_cpp <- function(r_sread, r_qual, r_primer, prefix_lens) {
     .Call('MotifBinner2_trimFront_cpp', PACKAGE = 'MotifBinner2', r_sread, r_qual, r_primer, prefix_lens)
 }
 
+map_reads_no_ins_cpp <- function(r_profile, r_reads, r_quals) {
+    .Call('MotifBinner2_map_reads_no_ins_cpp', PACKAGE = 'MotifBinner2', r_profile, r_reads, r_quals)
+}
+
 transfer_gaps_cpp <- function(aligned_read, r_qual, gap_only_cols) {
     .Call('MotifBinner2_transfer_gaps_cpp', PACKAGE = 'MotifBinner2', aligned_read, r_qual, gap_only_cols)
 }

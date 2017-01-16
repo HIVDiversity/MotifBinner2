@@ -29,16 +29,21 @@ seq_df <- result$metrics$seq_df
 zone_qual <- result$metrics$zone_qual
 tile_qual <- result$metrics$tile_qual
 pos_qual <- result$metrics$pos_qual
+gap_follow <- result$metrics$gap_follow
+aligned_to_gap <- result$metrics$aligned_to_gap
 
 fig.cap1 <- "Figure: Histograms of read lengths and average qualities."
 fig.cap2 <- "Figure: Read length and quality by position on slide."
 fig.cap3 <- "Figure: Average sequence quality by tile and cycle."
 fig.cap4 <- "Figure: Distribution of sequence qualities by cycle. For plotting reasons, cycles are grouped into bins of size two. This means that y-axis is double the range it would be if each cycle was plotted independently. Also, cycles 300 and 301 (250 and 251) are grouped together and since the max length is 300 (250), the final bar is expected to be half the height of the bar immediately preceeding it."
+fig.cap5 <- 'Figure: Distribution of insertions in the reads relative to the profile used for mapping.'
+fig.cap6 <- 'Figure: Distribution of deletions in the reads relative to the profile used for mapping.'
 ```
 
 ```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
 options(scipen=99)
-read_width_breaks <- c(-Inf,(0:22)*15, Inf)
+n_breaks <- ceiling(quantile(seq_df$read_widths, 0.95)/15)
+read_width_breaks <- c(-Inf,(0:n_breaks)*15, Inf)
 qual_breaks <- (0:21)*2
 p1 <- 
 ggplot(seq_df, aes(x=read_widths)) + 
@@ -84,11 +89,31 @@ print(
 
 ```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap4, fig.path=figure_path}
 print(
-  ggplot(na.omit(pos_qual), aes(x = cycle_cat, fill = as.factor(qual))) +
+  ggplot(na.omit(pos_qual), aes(x = cycle_cat, 
+    fill = reorder(qual, desc(qual), ordered=T))) +
          geom_bar(aes(y=count), width=2, stat = 'identity') +
          xlab("Sequencing Cycle - nucleotide position in the raw reads") +
          ylab("Number of Reads (x2)") +
-         scale_fill_discrete(guide = guide_legend(title = "Q Score"))
+         scale_fill_hue(guide = guide_legend(title = "Q Score"),
+                        h = c(360, 30)+15)
+)
+```
+
+```{r, eval=(!is.null(gap_follow)), dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap5, fig.path=figure_path}
+print(
+  ggplot(gap_follow, aes(x = pos)) +
+         geom_bar(aes(y=n_gaps), width=1, stat = 'identity') +
+         xlab("Sequencing Cycle - nucleotide position in the raw reads") +
+         ylab("Number of Reads with Insertions")
+)
+```
+
+```{r, eval=(!is.null(aligned_to_gap)), dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap6, fig.path=figure_path}
+print(
+  ggplot(aligned_to_gap, aes(x = pos)) +
+         geom_bar(aes(y=n_gaps), width=1, stat = 'identity') +
+         xlab("Sequencing Cycle - nucleotide position in the raw reads") +
+         ylab("Number of Reads with Deletions")
 )
 ```
 

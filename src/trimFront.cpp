@@ -584,6 +584,75 @@ Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
 }
 
 // [[Rcpp::export]]
+Rcpp::List map_reads_no_ins_cpp(CharacterVector r_profile, CharacterVector r_reads, CharacterVector r_quals)
+{
+  int p_base_pos;
+  std::string read;
+  std::string qual;
+  Rcpp::NumericMatrix gap_follow(r_reads.size(), r_profile[0].size()+1);
+  std::vector<std::string> no_gap_aligned_reads;
+  std::vector<std::string> no_gap_aligned_quals;
+  int qual_indx;
+  std::vector<int> aligned_to_gap;
+  for (int i = 0; i < r_profile[0].size()-1; ++i){
+    aligned_to_gap.push_back(0);
+  }
+
+  alignResult alignment;
+
+  for (int i=0; i < r_reads.size(); ++i){
+    read = Rcpp::as<std::string>(r_reads[i]);
+    qual = Rcpp::as<std::string>(r_quals[i]);
+
+    alignment = align(read,
+                      Rcpp::as<std::string>(r_profile),
+                      false, false, false, false);
+
+    if (alignment.vseq.length() != alignment.hseq.length())
+    {
+      throw std::range_error("Alignments must be of equal lengths");
+    }
+
+    std::string& a_read = alignment.vseq; // reference for easier name
+    std::string& a_profile = alignment.hseq; // reference for easier name
+
+    p_base_pos = 0;
+    qual_indx = 0;
+    no_gap_aligned_reads.push_back("");
+    no_gap_aligned_quals.push_back("");
+    for (int j=0; j < a_profile.size(); ++j){
+      if (a_profile[j] == '-'){
+        gap_follow(i, p_base_pos)++;
+      } else {
+        no_gap_aligned_reads[i] += a_read[j];
+        if (a_read[j] != '-'){
+          no_gap_aligned_quals[i] += qual[qual_indx];
+          qual_indx++;
+        } else {
+          aligned_to_gap[p_base_pos]++;
+          if (qual_indx > (qual.size()-1)){
+            no_gap_aligned_quals[i] += qual[qual.size()-1];
+          } else {
+            no_gap_aligned_quals[i] += qual[qual_indx];
+          }
+        }
+        p_base_pos++;
+      }
+    }
+  }
+
+  Rcpp::List result;
+
+  result = Rcpp::List::create(
+    Rcpp::Named("no_gap_aligned_reads") = no_gap_aligned_reads,
+    Rcpp::Named("no_gap_aligned_quals") = no_gap_aligned_quals,
+    Rcpp::Named("gap_follow") = gap_follow,
+    Rcpp::Named("aligned_to_gap") = aligned_to_gap
+      );
+  return result;
+}
+
+// [[Rcpp::export]]
 Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qual, NumericVector gap_only_cols)
 {
   int read_bases;
