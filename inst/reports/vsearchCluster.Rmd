@@ -32,9 +32,11 @@ Identity threshold: `r result$config$op_args$id`
 Number of clusters: `r sum(result$metrics$per_read_metrics$is_centroid)`
 
 ```{r, result = 'asis', dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
+centroid_details <- subset(result$metrics$per_read_metrics, is_centroid == 1)
 cluster_sizes <- data.frame(
-  size = as.numeric(names(table(result$metrics$per_read_metrics$size))),
-  n_clus = as.numeric(table(result$metrics$per_read_metrics$size)))
+  size = as.numeric(names(table(centroid_details$size))),
+  n_clus = as.numeric(table(centroid_details$size))
+  )
 print(ggplot(cluster_sizes, aes(x = size, y = n_clus)) + 
       geom_point() + 
       scale_y_log10() + 
@@ -44,9 +46,6 @@ print(ggplot(cluster_sizes, aes(x = size, y = n_clus)) +
 ```
 
 ```{r, result = 'asis', dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
-cluster_sizes <- data.frame(
-  size = as.numeric(names(table(result$metrics$per_read_metrics$size))),
-  n_clus = as.numeric(table(result$metrics$per_read_metrics$size)))
 print(ggplot(cluster_sizes, aes(x = size, y = n_clus)) + 
       geom_point() + 
       scale_y_log10() + 

@@ -252,6 +252,20 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
         char_to_remove = "-",
         cache_data = TRUE
            ),
+    'n027' =
+      list(name = 'vsearchCluster',
+        op = 'vsearchCluster98',
+        data_source = "n026",
+        id = 0.98,
+        min_clus_size = 1,
+        cache_data = TRUE),
+    'n028' =
+      list(name = 'vsearchCluster',
+        op = 'vsearchCluster95',
+        data_source = "n026",
+        id = 0.95,
+        min_clus_size = 1,
+        cache_data = TRUE),
     'n100' =
       list(name = 'dataTracing',
         op = 'dataTracing',
@@ -264,7 +278,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
 
           "mergeReads.1" = "n017", "mergeReads.2" = "n018", "mergeReads.3" = "n019",
           "mergeReads.4" = "n020", "mergeReads.5" = "n021", "mergeReads.6" = "n022",
-          "mergeReads.7" = "n023"),
+          "mergeReads.7" = "n023", "mergeReads.8" = "n027", "mergeReads.9" = "n028"),
       cache_data = FALSE)
   )
 

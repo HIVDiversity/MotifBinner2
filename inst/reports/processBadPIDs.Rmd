@@ -60,7 +60,7 @@ small_bins[small_bins$raw_size_trunc >= 4,'raw_size_trunc'] <- '>3'
 
 big_bins <- subset(result$metrics$bin_metrics, big_enough)
 big_bin_sizes <- big_bins$raw_size
-big_bin_size_breaks <- quantile(big_bin_sizes, c(0, 0.25, 0.5, 0.75, 1))
+big_bin_size_breaks <- sort(unique(quantile(big_bin_sizes, c(0, 0.25, 0.5, 0.75, 1))))
 big_bin_labs <- NULL
 for (i in 1:(length(big_bin_size_breaks)-1)){
   big_bin_labs <- c(big_bin_labs, 
