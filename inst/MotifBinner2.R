@@ -69,6 +69,10 @@ make_option("--base_for_names",
 make_option("--ncpu",
             help = paste("Number of cores to use. NOTE: Each additional core specified ",
                          "significantly increases memory consumption.",
+                         sep = "")),
+make_option("--merged_read_length",
+            default = 1000,
+            help = paste("Require reads to be longer than this in the seqLength trimming step AFTER building consensus sequences ",
                          sep = "")))
 
 opt <- parse_args(OptionParser(option_list = option_list,
@@ -119,9 +123,10 @@ buildConfig(overlapping = opt$overlapping,
             min_read_length = as.numeric(opt$min_read_length),
             output_dir = opt$output_dir,
             base_for_names = opt$base_for_names,
-            ncpu = opt$ncpu)
+            ncpu = opt$ncpu,
+            merged_read_length = opt$merged_read_length)
 
-dput(config)
+print(dput(config))
 
 unlink(file.path(config$output_dir, config$base_for_names), recursive=T)
 all_results <- list()

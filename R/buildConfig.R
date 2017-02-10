@@ -14,7 +14,8 @@ buildConfig <- function(overlapping,
                         verbosity = 3,
                         report_type = c('html'),
                         ncpu = 4,
-                        bins_to_process = Inf)
+                        bins_to_process = Inf,
+                        merged_read_length = 1000)
 {
   if (overlapping)
   {
@@ -37,7 +38,8 @@ buildConfig <- function(overlapping,
                         verbosity = verbosity,
                         report_type = report_type,
                         ncpu = ncpu,
-                        bins_to_process = bins_to_process)
+                        bins_to_process = bins_to_process,
+                        merged_read_length = merged_read_length)
   } else {
     buildConfig_nol_test(fwd_file = fwd_file, 
                          fwd_primer_seq = fwd_primer_seq, 
@@ -77,7 +79,8 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
                                 verbosity = 3,
                                 report_type = c('html'),
                                 ncpu = 4,
-                                bins_to_process = Inf
+                                bins_to_process = Inf,
+                                merged_read_length = 1000
                                 )
 {
   if (fwd_pid_in_which_fragment == "NULL"){fwd_pid_in_which_fragment <- NULL}
@@ -253,16 +256,28 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
         cache_data = TRUE
            ),
     'n027' =
-      list(name = 'vsearchCluster',
-        op = 'vsearchCluster98',
+      list(name = 'cons_ambigSeqs',
+        op = 'ambigSeqs',
         data_source = "n026",
+        threshold = 0,
+        cache_data = TRUE),
+    'n028' =
+      list(name = 'cons_seqLength',
+        op = 'seqLength',
+        data_source = "n027",
+        threshold = merged_read_length,
+        cache_data = TRUE),
+    'n029' =
+      list(name = 'vsearchCluster98',
+        op = 'vsearchCluster',
+        data_source = "n028",
         id = 0.98,
         min_clus_size = 1,
         cache_data = TRUE),
-    'n028' =
-      list(name = 'vsearchCluster',
-        op = 'vsearchCluster95',
-        data_source = "n026",
+    'n030' =
+      list(name = 'vsearchCluster95',
+        op = 'vsearchCluster',
+        data_source = "n029",
         id = 0.95,
         min_clus_size = 1,
         cache_data = TRUE),
@@ -276,9 +291,10 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
           "revReads.1" = "n008", "revReads.2" = "n010", "revReads.3" = "n011",
           "revReads.4" = "n012", "revReads.5" = "n013", "revReads.6" = "n014",
 
-          "mergeReads.1" = "n017", "mergeReads.2" = "n018", "mergeReads.3" = "n019",
-          "mergeReads.4" = "n020", "mergeReads.5" = "n021", "mergeReads.6" = "n022",
-          "mergeReads.7" = "n023", "mergeReads.8" = "n027", "mergeReads.9" = "n028"),
+          "mergeReads.01" = "n017", "mergeReads.02" = "n018", "mergeReads.03" = "n019",
+          "mergeReads.04" = "n020", "mergeReads.05" = "n021", "mergeReads.06" = "n022",
+          "mergeReads.07" = "n023", "mergeReads.08" = "n027", "mergeReads.09" = "n028",
+          "mergeReads.10" = "n029", "mergeReads.11" = "n030"),
       cache_data = FALSE)
   )
 
