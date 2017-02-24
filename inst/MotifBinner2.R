@@ -115,8 +115,8 @@ rev_spec_length <- sum(as.numeric(strsplit(opt$rev_primer_lens, ',')[[1]]))
 if (rev_primer_length != rev_spec_length){
   stop('Reverse primer does not match specified lengths')
 }
-stopifnot(file.exists(opt$fwd_file))
-stopifnot(file.exists(opt$rev_file))
+if (!file.exists(opt$fwd_file)){stop('Error: Forward file not found - are you sure the file name you specified is correct?')}
+if (!file.exists(opt$rev_file)){stop('Error: Reverse file not found - are you sure the file name you specified is correct?')}
 
 config <-
 buildConfig(overlapping = opt$overlapping,
