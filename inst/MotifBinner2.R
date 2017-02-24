@@ -104,18 +104,17 @@ if ((!opt$overlapping) & (!opt$non_overlapping)){
   opt$overlapping <- FALSE
 }
 
-print('Checking Primer Length Specifications')
 fwd_primer_length <- nchar(opt$fwd_primer_seq)
-fwd_spec_length <- sum(strsplit(opt$fwd_primer_seq, ',')[[1]])
-if (fwd_primer_length == fwd_spec_length){
+print(strsplit(opt$fwd_primer_lens, ',')[[1]])
+fwd_spec_length <- sum(as.numeric(strsplit(opt$fwd_primer_lens, ',')[[1]]))
+if (fwd_primer_length != fwd_spec_length){
   stop('Forward primer does not match specified lengths')
 }
 rev_primer_length <- nchar(opt$rev_primer_seq)
-rev_spec_length <- sum(strsplit(opt$rev_primer_seq, ',')[[1]])
-if (rev_primer_length == rev_spec_length){
+rev_spec_length <- sum(as.numeric(strsplit(opt$rev_primer_lens, ',')[[1]]))
+if (rev_primer_length != rev_spec_length){
   stop('Reverse primer does not match specified lengths')
 }
-print('Primers all good')
 stopifnot(file.exists(opt$fwd_file))
 stopifnot(file.exists(opt$rev_file))
 
