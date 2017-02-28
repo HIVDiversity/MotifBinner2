@@ -71,14 +71,14 @@ make_option("--ncpu",
                          "significantly increases memory consumption.",
                          sep = "")),
 make_option("--merged_read_length",
-            default = 1000,
+            default = 100,
             help = paste("Require reads to be longer than this in the seqLength trimming step AFTER building consensus sequences ",
                          sep = "")))
 
 opt <- parse_args(OptionParser(option_list = option_list,
   description = "Bin Illumina reads produced with Primer ID approach",
   epilogue = "Example Call:
-./MotifBinner2.R --non_overlapping --fwd_file=/fridge/data/walter_nol_2016_11/raw/CAP188_4220_004wpi_v1v3_R1.fastq --fwd_primer_seq=NNNNNNNNCAAAGYCTAAARCCATGTGTA --fwd_primer_lens=29 --fwd_primer_min_score=25 --rev_file=/fridge/data/walter_nol_2016_11/raw/CAP188_4220_004wpi_v1v3_R2.fastq --rev_primer_seq=TGACNNNNNNNNNNNNNNNTACTAATGTTACAATRTGC --rev_primer_lens=4,15,19 --rev_primer_min_score=34 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=2 --output_dir=/fridge/data/walter_nol_2016_11 --base_for_names=CAP188_4220_004wpi_v1v3 --ncpu=6 "))
+./MotifBinner2.R --non_overlapping --fwd_file=/fridge/data/walter_nol_2016_11/raw/CAP188_4220_004wpi_v1v3_R1.fastq --fwd_primer_seq=NNNNNNNNCAAAGYCTAAARCCATGTGTA --fwd_primer_lens=29 --fwd_primer_min_score=25 --rev_file=/fridge/data/walter_nol_2016_11/raw/CAP188_4220_004wpi_v1v3_R2.fastq --rev_primer_seq=TGACNNNNNNNNNNNNNNNTACTAATGTTACAATRTGC --rev_primer_lens=4,15,19 --rev_primer_min_score=34 --fwd_pid_in_which_fragment=NULL --rev_pid_in_which_fragment=2 --output_dir=/fridge/data/walter_nol_2016_11 --base_for_names=CAP188_4220_004wpi_v1v3 --ncpu=6 --merged_read_length=250"))
 
 #######################
 # old commands examples
