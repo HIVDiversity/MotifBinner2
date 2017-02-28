@@ -15,7 +15,7 @@ buildConfig <- function(overlapping,
                         report_type = c('html'),
                         ncpu = 4,
                         bins_to_process = Inf,
-                        merged_read_length = 1000)
+                        merged_read_length = 100)
 {
   if (overlapping)
   {
