@@ -113,6 +113,8 @@ MotifBinner2.R -h
 
 This will display help for all the options and an example call to MotifBinner.
 
+Good luck.
+
 ## Bibliography
 
 * Cassandra B Jabara, Corbin D Jones, Jeffrey Roach, Jeffrey A Anderson, and
