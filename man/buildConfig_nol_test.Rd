@@ -11,7 +11,8 @@ buildConfig_nol_test(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score,
   output_dir = "/fridge/data/MotifBinner2_test",
   base_for_names = "CAP129_2040_009wpi_C2C3", intermediate_reports = TRUE,
   erase_history = TRUE, verbosity = 3, report_type = c("html"),
-  ncpu = 4, bins_to_process = Inf)
+  ncpu = 4, bins_to_process = Inf, header_format = "MiSeq",
+  front_gaps_allowed = 0)
 }
 \description{
 Test config builder for non-overlapping reads

@@ -11,7 +11,8 @@ buildConfig(overlapping, fwd_file, fwd_primer_seq, fwd_primer_lens,
   output_dir = "/fridge/data/MotifBinner2_test",
   base_for_names = "CAP129_2040_009wpi_C2C3", intermediate_reports = TRUE,
   erase_history = FALSE, verbosity = 3, report_type = c("html"),
-  ncpu = 4, bins_to_process = Inf, merged_read_length = 1000)
+  ncpu = 4, bins_to_process = Inf, merged_read_length = 100,
+  header_format = "MiSeq", front_gaps_allowed = 0)
 }
 \description{
 Builds the overlapping or non-overlapping production configs

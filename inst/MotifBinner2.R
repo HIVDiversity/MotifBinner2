@@ -73,7 +73,16 @@ make_option("--ncpu",
 make_option("--merged_read_length",
             default = 100,
             help = paste("Require reads to be longer than this in the seqLength trimming step AFTER building consensus sequences ",
-                         sep = "")))
+                         sep = "")),
+make_option("--header_format",
+            default = "MiSeq",
+            help = paste("Format of the sequence names. Set to 'SRA' if downloaded from NCBI's SRA. ",
+                         sep = "")),
+make_option("--front_gaps_allowed",
+            default = 0,
+            help = paste("Number of non-primer letters allowed before the specified primer sequence in the read. Strongly recommend 0, unless you have a variable length primer. ",
+                         sep = ""))
+)
 
 opt <- parse_args(OptionParser(option_list = option_list,
   description = "Bin Illumina reads produced with Primer ID approach",
@@ -138,7 +147,9 @@ buildConfig(overlapping = opt$overlapping,
             output_dir = opt$output_dir,
             base_for_names = opt$base_for_names,
             ncpu = opt$ncpu,
-            merged_read_length = opt$merged_read_length)
+            merged_read_length = opt$merged_read_length,
+            header_format = opt$header_format,
+            front_gaps_allowed = opt$front_gaps_allowed)
 
 print(dput(config))
 

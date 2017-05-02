@@ -23,10 +23,19 @@ matchPairs <- function(all_results, config)
   seq_dat_fwd <- all_results[[data_source_indx_fwd]]$seq_dat
   seq_dat_rev <- all_results[[data_source_indx_rev]]$seq_dat
 
-  tmp <- data.frame(x=as.character(seq_dat_fwd@id),stringsAsFactors=F)
-  fwd_names <- separate(data = tmp, col = x, into = c('raw_name', 'pid_fwd'), sep = ".PID:")
-  tmp <- data.frame(x=as.character(seq_dat_rev@id),stringsAsFactors=F)
-  rev_names <- separate(data = tmp, col = x, into = c('raw_name', 'pid_rev'), sep = ".PID:")
+  fwd_raw_names <- data.frame(x=as.character(seq_dat_fwd@id),stringsAsFactors=F)
+  fwd_names <- separate(data = fwd_raw_names, col = x, into = c('raw_name', 'pid_fwd'), sep = ".PID:")
+  rev_raw_names <- data.frame(x=as.character(seq_dat_rev@id),stringsAsFactors=F)
+  rev_names <- separate(data = rev_raw_names, col = x, into = c('raw_name', 'pid_rev'), sep = ".PID:")
+
+  if (op_args$header_format == "SRA"){
+    fwd_names$raw_name <- gsub("\\.1 ", "_", fwd_names$raw_name)
+    rev_names$raw_name <- gsub("\\.2 ", "_", rev_names$raw_name)
+    fwd_raw_names <- gsub("\\.1 ", "_", fwd_raw_names$x)
+    rev_raw_names <- gsub("\\.2 ", "_", rev_raw_names$x)
+
+  } else {
+  }
 
   merged_names <- merge(fwd_names, rev_names, by = 'raw_name')
   merged_names$new_name <- paste(merged_names$raw_name,
@@ -35,13 +44,16 @@ matchPairs <- function(all_results, config)
                                  '_',
                                  merged_names$pid_rev,
                                  sep = '')
+  
+  
   fwd_kept <- seq_dat_fwd[match(paste(merged_names$raw_name, '_PID:', merged_names$pid_fwd, sep = ''), 
-                                as.character(seq_dat_fwd@id))]
-  fwd_trim <- seq_dat_fwd[!(as.character(seq_dat_fwd@id) %in% paste(merged_names$raw_name, '_PID:', merged_names$pid_fwd, sep = ''))]
+                                fwd_raw_names)]
+
+  fwd_trim <- seq_dat_fwd[!(fwd_raw_names %in% paste(merged_names$raw_name, '_PID:', merged_names$pid_fwd, sep = ''))]
 
   rev_kept <- seq_dat_rev[match(paste(merged_names$raw_name, '_PID:', merged_names$pid_rev, sep = ''), 
-                                as.character(seq_dat_rev@id))]
-  rev_trim <- seq_dat_rev[!(as.character(seq_dat_rev@id) %in% paste(merged_names$raw_name, '_PID:', merged_names$pid_rev, sep = ''))]
+                                rev_raw_names)]
+  rev_trim <- seq_dat_rev[!(rev_raw_names %in% paste(merged_names$raw_name, '_PID:', merged_names$pid_rev, sep = ''))]
   fwd_kept@id <- BStringSet(merged_names$new_name)
   rev_kept@id <- BStringSet(merged_names$new_name)
 
