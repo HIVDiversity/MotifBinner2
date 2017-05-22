@@ -29,12 +29,13 @@ matchPairs <- function(all_results, config)
   rev_names <- separate(data = rev_raw_names, col = x, into = c('raw_name', 'pid_rev'), sep = ".PID:")
 
   if (op_args$header_format == "SRA"){
-    fwd_names$raw_name <- gsub("\\.1 ", "_", fwd_names$raw_name)
-    rev_names$raw_name <- gsub("\\.2 ", "_", rev_names$raw_name)
-    fwd_raw_names <- gsub("\\.1 ", "_", fwd_raw_names$x)
-    rev_raw_names <- gsub("\\.2 ", "_", rev_raw_names$x)
-
+    fwd_names$raw_name <- gsub(" length=[0-9]*", "", gsub("\\.1 ", "_", fwd_names$raw_name))
+    rev_names$raw_name <- gsub(" length=[0-9]*", "", gsub("\\.2 ", "_", rev_names$raw_name))
+    fwd_raw_names <- gsub(" length=[0-9]*_", "_", gsub("\\.1 ", "_", fwd_raw_names$x))
+    rev_raw_names <- gsub(" length=[0-9]*_", "_", gsub("\\.2 ", "_", rev_raw_names$x))
   } else {
+    fwd_raw_names <- fwd_raw_names$x
+    rev_raw_names <- rev_raw_names$x
   }
 
   merged_names <- merge(fwd_names, rev_names, by = 'raw_name')
