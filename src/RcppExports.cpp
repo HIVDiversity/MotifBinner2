@@ -136,3 +136,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"MotifBinner2_trimFront_cpp", (DL_FUNC) &MotifBinner2_trimFront_cpp, 4},
+    {"MotifBinner2_map_reads_no_ins_cpp", (DL_FUNC) &MotifBinner2_map_reads_no_ins_cpp, 3},
+    {"MotifBinner2_transfer_gaps_cpp", (DL_FUNC) &MotifBinner2_transfer_gaps_cpp, 3},
+    {"MotifBinner2_gapQualityTweaker_ol_cpp", (DL_FUNC) &MotifBinner2_gapQualityTweaker_ol_cpp, 2},
+    {"MotifBinner2_gapQualityTweaker_non_ol_cpp", (DL_FUNC) &MotifBinner2_gapQualityTweaker_non_ol_cpp, 4},
+    {"MotifBinner2_scoreAlignmentPositions_cpp", (DL_FUNC) &MotifBinner2_scoreAlignmentPositions_cpp, 2},
+    {"MotifBinner2_buildConsensus_cpp", (DL_FUNC) &MotifBinner2_buildConsensus_cpp, 3},
+    {"MotifBinner2_tallyPrimerSeqErrors_cpp", (DL_FUNC) &MotifBinner2_tallyPrimerSeqErrors_cpp, 3},
+    {"MotifBinner2_regionSplit_cpp", (DL_FUNC) &MotifBinner2_regionSplit_cpp, 4},
+    {"MotifBinner2_removeChars_cpp", (DL_FUNC) &MotifBinner2_removeChars_cpp, 3},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_MotifBinner2(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

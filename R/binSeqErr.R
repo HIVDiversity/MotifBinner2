@@ -95,7 +95,8 @@ binSeqErr <- function(all_results, config)
 
 group_cons_bins_internal <- function(cons_dat, msa_dat)
 {
-  cons_pids <- gsub('_[^ACGTacgt]*$', '', as.character(cons_dat@id))
+  cons_pids <- gsub('_[^ACGTacgt]*$', '', as.character(cons_dat@id)) # strip off bin size counts
+  cons_pids <- gsub('^.*_', '', cons_pids) # strip off base for names prefix
   cons_dat <- cons_dat[order(cons_pids)]
   cons_pids <- sort(cons_pids)
   msa_pids <- gsub('_[^ACGTacgt]*$', '', gsub('^.*PID:_', '', as.character(msa_dat@id)))

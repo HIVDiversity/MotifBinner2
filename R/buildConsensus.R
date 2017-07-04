@@ -40,7 +40,7 @@ buildConsensus <- function(all_results, config)
     x <- scoreAlignmentPositions_cpp(as.character(bin_seqs@sread),
                                    qual_mat)
     z <- list()
-    z[[paste(pid, '_', length(bin_seq_indx), sep = '')]] <- buildConsensus_cpp(x$score_mat, required_dominance, minimum_score)
+    z[[paste(config$base_for_names, '_', pid, '_', length(bin_seq_indx), sep = '')]] <- buildConsensus_cpp(x$score_mat, required_dominance, minimum_score)
     z
   }
 

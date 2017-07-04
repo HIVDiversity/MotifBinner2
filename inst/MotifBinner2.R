@@ -151,7 +151,7 @@ buildConfig(overlapping = opt$overlapping,
             header_format = opt$header_format,
             front_gaps_allowed = opt$front_gaps_allowed)
 
-print(dput(config))
+dput(config)
 
 unlink(file.path(config$output_dir, config$base_for_names), recursive=T)
 all_results <- list()
@@ -160,6 +160,10 @@ class(all_results) <- 'allResults'
 for (op_num in names(config$operation_list)){
   all_results <-  applyOperation(all_results, config, op_number = op_num)
 }
+
+file.copy(from = file.path(all_results$n027_cons_ambigSeqs$config$op_dir, 
+                           paste(config$base_for_names, "kept", "cons_ambigSeqs.fastq", sep = "_")),
+          to = file.path(config$output_dir, config$base_for_names))
 
 x <- genReport(all_results, config)
 

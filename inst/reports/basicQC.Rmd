@@ -31,6 +31,8 @@ tile_qual <- result$metrics$tile_qual
 pos_qual <- result$metrics$pos_qual
 gap_follow <- result$metrics$gap_follow
 aligned_to_gap <- result$metrics$aligned_to_gap
+zone_qual$zone_quality_botcut <- zone_qual$zone_quality
+zone_qual$zone_quality_botcut[zone_qual$zone_quality < sort(zone_qual$zone_quality)[50]] <- sort(zone_qual$zone_quality)[50]
 
 fig.cap1 <- "Figure: Histograms of read lengths and average qualities."
 fig.cap2 <- "Figure: Read length and quality by position on slide."
@@ -66,9 +68,10 @@ ggplot(zone_qual,
        theme(legend.position = 'bottom') +
        xlab(NULL) + ylab(NULL) +
        labs(list(fill = 'Number of Sequences'))
+
 p4 <-
 ggplot(zone_qual,
-       aes(x=xcat, y=ycat, fill=zone_quality)) + 
+       aes(x=xcat, y=ycat, fill=zone_quality_botcut)) + 
        geom_tile() + 
        theme(legend.position = 'bottom') +
        xlab(NULL) + ylab(NULL) +
