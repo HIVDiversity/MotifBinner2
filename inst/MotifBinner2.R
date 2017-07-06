@@ -81,7 +81,11 @@ make_option("--header_format",
 make_option("--front_gaps_allowed",
             default = 0,
             help = paste("Number of non-primer letters allowed before the specified primer sequence in the read. Strongly recommend 0, unless you have a variable length primer. ",
-                         sep = ""))
+                         sep = "")),
+make_option("--erase_history", 
+            action = "store_true",
+            default = FALSE,
+            help = "Delete all data from memory that is not needed for subsequent steps.")
 )
 
 opt <- parse_args(OptionParser(option_list = option_list,
@@ -149,7 +153,8 @@ buildConfig(overlapping = opt$overlapping,
             ncpu = opt$ncpu,
             merged_read_length = opt$merged_read_length,
             header_format = opt$header_format,
-            front_gaps_allowed = opt$front_gaps_allowed)
+            front_gaps_allowed = opt$front_gaps_allowed,
+            erase_history = opt$erase_history)
 
 dput(config)
 

@@ -56,7 +56,10 @@ applyOperation <- function(all_results, config, op_number = NULL, operation = NU
     for (i in 1:length(config$operation_list)){
       dependencies[[names(config$operation_list)[i]]] <- NULL
       for (j in config$operation_list[[i]]$data_source){
-        if (grepl("^n[0-9]*$", j)){
+        if (grepl("dataTracing", config$operation_list[[i]]$name) | grepl("dataTracing", config$operation_list[[i]]$op)){
+          do_absolutely_nothing <- 0
+          rm(do_absolutely_nothing)
+        } else if (grepl("^n[0-9]*$", j)){
           dependencies[[j]] <- c(dependencies[[j]], names(config$operation_list)[i])
         }
       }
@@ -64,6 +67,7 @@ applyOperation <- function(all_results, config, op_number = NULL, operation = NU
     ops_performed <- gsub("_.*$", "", names(all_results))
     for (purge_step in names(dependencies)){
       if (all(dependencies[[purge_step]] %in% ops_performed)){
+        print(paste("Deleting: ", purge_step))
         indx <- grep(purge_step, names(all_results))
         stopifnot(length(indx) == 1)
         all_results[[indx]]$seq_dat <- NULL
