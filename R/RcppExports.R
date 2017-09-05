@@ -2,42 +2,42 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 trimFront_cpp <- function(r_sread, r_qual, r_primer, prefix_lens) {
-    .Call('MotifBinner2_trimFront_cpp', PACKAGE = 'MotifBinner2', r_sread, r_qual, r_primer, prefix_lens)
+    .Call('_MotifBinner2_trimFront_cpp', PACKAGE = 'MotifBinner2', r_sread, r_qual, r_primer, prefix_lens)
 }
 
 map_reads_no_ins_cpp <- function(r_profile, r_reads, r_quals) {
-    .Call('MotifBinner2_map_reads_no_ins_cpp', PACKAGE = 'MotifBinner2', r_profile, r_reads, r_quals)
+    .Call('_MotifBinner2_map_reads_no_ins_cpp', PACKAGE = 'MotifBinner2', r_profile, r_reads, r_quals)
 }
 
 transfer_gaps_cpp <- function(aligned_read, r_qual, gap_only_cols) {
-    .Call('MotifBinner2_transfer_gaps_cpp', PACKAGE = 'MotifBinner2', aligned_read, r_qual, gap_only_cols)
+    .Call('_MotifBinner2_transfer_gaps_cpp', PACKAGE = 'MotifBinner2', aligned_read, r_qual, gap_only_cols)
 }
 
 gapQualityTweaker_ol_cpp <- function(reads, q_mat) {
-    .Call('MotifBinner2_gapQualityTweaker_ol_cpp', PACKAGE = 'MotifBinner2', reads, q_mat)
+    .Call('_MotifBinner2_gapQualityTweaker_ol_cpp', PACKAGE = 'MotifBinner2', reads, q_mat)
 }
 
 gapQualityTweaker_non_ol_cpp <- function(reads, q_mat, which_pair, avg_quals) {
-    .Call('MotifBinner2_gapQualityTweaker_non_ol_cpp', PACKAGE = 'MotifBinner2', reads, q_mat, which_pair, avg_quals)
+    .Call('_MotifBinner2_gapQualityTweaker_non_ol_cpp', PACKAGE = 'MotifBinner2', reads, q_mat, which_pair, avg_quals)
 }
 
 scoreAlignmentPositions_cpp <- function(reads, q_mat) {
-    .Call('MotifBinner2_scoreAlignmentPositions_cpp', PACKAGE = 'MotifBinner2', reads, q_mat)
+    .Call('_MotifBinner2_scoreAlignmentPositions_cpp', PACKAGE = 'MotifBinner2', reads, q_mat)
 }
 
 buildConsensus_cpp <- function(score_mat, required_dominance, minimum_score) {
-    .Call('MotifBinner2_buildConsensus_cpp', PACKAGE = 'MotifBinner2', score_mat, required_dominance, minimum_score)
+    .Call('_MotifBinner2_buildConsensus_cpp', PACKAGE = 'MotifBinner2', score_mat, required_dominance, minimum_score)
 }
 
 tallyPrimerSeqErrors_cpp <- function(r_sread, r_primer, r_qual) {
-    .Call('MotifBinner2_tallyPrimerSeqErrors_cpp', PACKAGE = 'MotifBinner2', r_sread, r_primer, r_qual)
+    .Call('_MotifBinner2_tallyPrimerSeqErrors_cpp', PACKAGE = 'MotifBinner2', r_sread, r_primer, r_qual)
 }
 
 regionSplit_cpp <- function(mapped_read, profile, region_map, mapped_qual) {
-    .Call('MotifBinner2_regionSplit_cpp', PACKAGE = 'MotifBinner2', mapped_read, profile, region_map, mapped_qual)
+    .Call('_MotifBinner2_regionSplit_cpp', PACKAGE = 'MotifBinner2', mapped_read, profile, region_map, mapped_qual)
 }
 
 removeChars_cpp <- function(r_sread, r_qual, char_to_strip) {
-    .Call('MotifBinner2_removeChars_cpp', PACKAGE = 'MotifBinner2', r_sread, r_qual, char_to_strip)
+    .Call('_MotifBinner2_removeChars_cpp', PACKAGE = 'MotifBinner2', r_sread, r_qual, char_to_strip)
 }
 

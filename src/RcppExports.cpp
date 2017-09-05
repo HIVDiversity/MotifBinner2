@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // trimFront_cpp
 Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual, CharacterVector r_primer, std::vector<int> prefix_lens);
-RcppExport SEXP MotifBinner2_trimFront_cpp(SEXP r_sreadSEXP, SEXP r_qualSEXP, SEXP r_primerSEXP, SEXP prefix_lensSEXP) {
+RcppExport SEXP _MotifBinner2_trimFront_cpp(SEXP r_sreadSEXP, SEXP r_qualSEXP, SEXP r_primerSEXP, SEXP prefix_lensSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +21,7 @@ END_RCPP
 }
 // map_reads_no_ins_cpp
 Rcpp::List map_reads_no_ins_cpp(CharacterVector r_profile, CharacterVector r_reads, CharacterVector r_quals);
-RcppExport SEXP MotifBinner2_map_reads_no_ins_cpp(SEXP r_profileSEXP, SEXP r_readsSEXP, SEXP r_qualsSEXP) {
+RcppExport SEXP _MotifBinner2_map_reads_no_ins_cpp(SEXP r_profileSEXP, SEXP r_readsSEXP, SEXP r_qualsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -34,7 +34,7 @@ END_RCPP
 }
 // transfer_gaps_cpp
 Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qual, NumericVector gap_only_cols);
-RcppExport SEXP MotifBinner2_transfer_gaps_cpp(SEXP aligned_readSEXP, SEXP r_qualSEXP, SEXP gap_only_colsSEXP) {
+RcppExport SEXP _MotifBinner2_transfer_gaps_cpp(SEXP aligned_readSEXP, SEXP r_qualSEXP, SEXP gap_only_colsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -47,7 +47,7 @@ END_RCPP
 }
 // gapQualityTweaker_ol_cpp
 Rcpp::List gapQualityTweaker_ol_cpp(CharacterVector reads, NumericMatrix q_mat);
-RcppExport SEXP MotifBinner2_gapQualityTweaker_ol_cpp(SEXP readsSEXP, SEXP q_matSEXP) {
+RcppExport SEXP _MotifBinner2_gapQualityTweaker_ol_cpp(SEXP readsSEXP, SEXP q_matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -59,7 +59,7 @@ END_RCPP
 }
 // gapQualityTweaker_non_ol_cpp
 Rcpp::List gapQualityTweaker_non_ol_cpp(CharacterVector reads, NumericMatrix q_mat, std::string which_pair, NumericVector avg_quals);
-RcppExport SEXP MotifBinner2_gapQualityTweaker_non_ol_cpp(SEXP readsSEXP, SEXP q_matSEXP, SEXP which_pairSEXP, SEXP avg_qualsSEXP) {
+RcppExport SEXP _MotifBinner2_gapQualityTweaker_non_ol_cpp(SEXP readsSEXP, SEXP q_matSEXP, SEXP which_pairSEXP, SEXP avg_qualsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -73,7 +73,7 @@ END_RCPP
 }
 // scoreAlignmentPositions_cpp
 Rcpp::List scoreAlignmentPositions_cpp(CharacterVector reads, NumericMatrix q_mat);
-RcppExport SEXP MotifBinner2_scoreAlignmentPositions_cpp(SEXP readsSEXP, SEXP q_matSEXP) {
+RcppExport SEXP _MotifBinner2_scoreAlignmentPositions_cpp(SEXP readsSEXP, SEXP q_matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -85,7 +85,7 @@ END_RCPP
 }
 // buildConsensus_cpp
 Rcpp::List buildConsensus_cpp(NumericMatrix score_mat, double required_dominance, double minimum_score);
-RcppExport SEXP MotifBinner2_buildConsensus_cpp(SEXP score_matSEXP, SEXP required_dominanceSEXP, SEXP minimum_scoreSEXP) {
+RcppExport SEXP _MotifBinner2_buildConsensus_cpp(SEXP score_matSEXP, SEXP required_dominanceSEXP, SEXP minimum_scoreSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -98,7 +98,7 @@ END_RCPP
 }
 // tallyPrimerSeqErrors_cpp
 std::map<char, std::map<char, std::map<char, int> > > tallyPrimerSeqErrors_cpp(CharacterVector r_sread, CharacterVector r_primer, CharacterVector r_qual);
-RcppExport SEXP MotifBinner2_tallyPrimerSeqErrors_cpp(SEXP r_sreadSEXP, SEXP r_primerSEXP, SEXP r_qualSEXP) {
+RcppExport SEXP _MotifBinner2_tallyPrimerSeqErrors_cpp(SEXP r_sreadSEXP, SEXP r_primerSEXP, SEXP r_qualSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -111,7 +111,7 @@ END_RCPP
 }
 // regionSplit_cpp
 Rcpp::List regionSplit_cpp(CharacterVector mapped_read, CharacterVector profile, CharacterVector region_map, CharacterVector mapped_qual);
-RcppExport SEXP MotifBinner2_regionSplit_cpp(SEXP mapped_readSEXP, SEXP profileSEXP, SEXP region_mapSEXP, SEXP mapped_qualSEXP) {
+RcppExport SEXP _MotifBinner2_regionSplit_cpp(SEXP mapped_readSEXP, SEXP profileSEXP, SEXP region_mapSEXP, SEXP mapped_qualSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -125,7 +125,7 @@ END_RCPP
 }
 // removeChars_cpp
 Rcpp::List removeChars_cpp(CharacterVector r_sread, CharacterVector r_qual, std::string char_to_strip);
-RcppExport SEXP MotifBinner2_removeChars_cpp(SEXP r_sreadSEXP, SEXP r_qualSEXP, SEXP char_to_stripSEXP) {
+RcppExport SEXP _MotifBinner2_removeChars_cpp(SEXP r_sreadSEXP, SEXP r_qualSEXP, SEXP char_to_stripSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -138,16 +138,16 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"MotifBinner2_trimFront_cpp", (DL_FUNC) &MotifBinner2_trimFront_cpp, 4},
-    {"MotifBinner2_map_reads_no_ins_cpp", (DL_FUNC) &MotifBinner2_map_reads_no_ins_cpp, 3},
-    {"MotifBinner2_transfer_gaps_cpp", (DL_FUNC) &MotifBinner2_transfer_gaps_cpp, 3},
-    {"MotifBinner2_gapQualityTweaker_ol_cpp", (DL_FUNC) &MotifBinner2_gapQualityTweaker_ol_cpp, 2},
-    {"MotifBinner2_gapQualityTweaker_non_ol_cpp", (DL_FUNC) &MotifBinner2_gapQualityTweaker_non_ol_cpp, 4},
-    {"MotifBinner2_scoreAlignmentPositions_cpp", (DL_FUNC) &MotifBinner2_scoreAlignmentPositions_cpp, 2},
-    {"MotifBinner2_buildConsensus_cpp", (DL_FUNC) &MotifBinner2_buildConsensus_cpp, 3},
-    {"MotifBinner2_tallyPrimerSeqErrors_cpp", (DL_FUNC) &MotifBinner2_tallyPrimerSeqErrors_cpp, 3},
-    {"MotifBinner2_regionSplit_cpp", (DL_FUNC) &MotifBinner2_regionSplit_cpp, 4},
-    {"MotifBinner2_removeChars_cpp", (DL_FUNC) &MotifBinner2_removeChars_cpp, 3},
+    {"_MotifBinner2_trimFront_cpp", (DL_FUNC) &_MotifBinner2_trimFront_cpp, 4},
+    {"_MotifBinner2_map_reads_no_ins_cpp", (DL_FUNC) &_MotifBinner2_map_reads_no_ins_cpp, 3},
+    {"_MotifBinner2_transfer_gaps_cpp", (DL_FUNC) &_MotifBinner2_transfer_gaps_cpp, 3},
+    {"_MotifBinner2_gapQualityTweaker_ol_cpp", (DL_FUNC) &_MotifBinner2_gapQualityTweaker_ol_cpp, 2},
+    {"_MotifBinner2_gapQualityTweaker_non_ol_cpp", (DL_FUNC) &_MotifBinner2_gapQualityTweaker_non_ol_cpp, 4},
+    {"_MotifBinner2_scoreAlignmentPositions_cpp", (DL_FUNC) &_MotifBinner2_scoreAlignmentPositions_cpp, 2},
+    {"_MotifBinner2_buildConsensus_cpp", (DL_FUNC) &_MotifBinner2_buildConsensus_cpp, 3},
+    {"_MotifBinner2_tallyPrimerSeqErrors_cpp", (DL_FUNC) &_MotifBinner2_tallyPrimerSeqErrors_cpp, 3},
+    {"_MotifBinner2_regionSplit_cpp", (DL_FUNC) &_MotifBinner2_regionSplit_cpp, 4},
+    {"_MotifBinner2_removeChars_cpp", (DL_FUNC) &_MotifBinner2_removeChars_cpp, 3},
     {NULL, NULL, 0}
 };
 
