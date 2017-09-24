@@ -1,7 +1,7 @@
 Package: MotifBinner2
 Title: Process NGS Primer ID Datasets
 Description: Process NGS Primer ID Datasets
-Version: 0.0.3
+Version: 0.0.4
 Author: Phillip Labuschagne <philliplab@gmail.com>
 Maintainer: Phillip Labuschagne <philliplab@gmail.com>
 LinkingTo:
