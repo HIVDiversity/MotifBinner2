@@ -5,6 +5,19 @@
 
 using namespace Rcpp;
 
+// pairWiseMSA_cpp
+Rcpp::List pairWiseMSA_cpp(CharacterVector r_sread, CharacterVector r_ref_seq, CharacterVector r_seq_names);
+RcppExport SEXP _MotifBinner2_pairWiseMSA_cpp(SEXP r_sreadSEXP, SEXP r_ref_seqSEXP, SEXP r_seq_namesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type r_sread(r_sreadSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type r_ref_seq(r_ref_seqSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type r_seq_names(r_seq_namesSEXP);
+    rcpp_result_gen = Rcpp::wrap(pairWiseMSA_cpp(r_sread, r_ref_seq, r_seq_names));
+    return rcpp_result_gen;
+END_RCPP
+}
 // trimFront_cpp
 Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual, CharacterVector r_primer, std::vector<int> prefix_lens);
 RcppExport SEXP _MotifBinner2_trimFront_cpp(SEXP r_sreadSEXP, SEXP r_qualSEXP, SEXP r_primerSEXP, SEXP prefix_lensSEXP) {
@@ -138,6 +151,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_MotifBinner2_pairWiseMSA_cpp", (DL_FUNC) &_MotifBinner2_pairWiseMSA_cpp, 3},
     {"_MotifBinner2_trimFront_cpp", (DL_FUNC) &_MotifBinner2_trimFront_cpp, 4},
     {"_MotifBinner2_map_reads_no_ins_cpp", (DL_FUNC) &_MotifBinner2_map_reads_no_ins_cpp, 3},
     {"_MotifBinner2_transfer_gaps_cpp", (DL_FUNC) &_MotifBinner2_transfer_gaps_cpp, 3},

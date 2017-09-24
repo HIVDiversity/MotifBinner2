@@ -394,6 +394,64 @@ alignResult align(std::string vseq, std::string hseq,
   return result;
 }
 
+
+// [[Rcpp::export]]
+
+Rcpp::List pairWiseMSA_cpp(CharacterVector r_sread, CharacterVector r_ref_seq, 
+    CharacterVector r_seq_names)
+{
+  alignResult alignment;
+  std::string full_read;
+  std::string ref_seq;
+  std::string mapped_read;
+  std::unordered_map<int, std::string> insert_tracker;
+  std::unordered_map<std::string, std::unordered_map<int, std::string> > result_ins;
+  std::unordered_map<std::string, std::string> result_mapped;
+  int N_inserts;
+  ref_seq = Rcpp::as<std::string>(r_ref_seq);
+
+  for (int i=0; i!= r_sread.size(); i++)
+  {
+    if (i % 100 == 0) {
+      std::cout << i << " " << std::flush;
+    }
+
+    full_read = Rcpp::as<std::string>(r_sread[i]);
+
+    alignment = align(full_read,
+                      ref_seq,
+                      false, false, false, false);
+//    std::cout << alignment.hseq << "\n";
+//    std::cout << alignment.vseq << "\n";
+    
+    N_inserts = 0;
+    mapped_read = "";
+    insert_tracker.clear();
+    for (int j=0; j!= alignment.hseq.size(); j++)
+    {
+      if (alignment.hseq[j] == '-'){
+        N_inserts++;
+//        std::cout << "gap number " << N_inserts << " at " << j << "\n";
+        insert_tracker[j-N_inserts] += alignment.vseq[j];
+//        std::cout << "the inserted base " << insert_tracker[j-N_inserts] << "\n";
+      } else {
+        mapped_read += alignment.vseq[j];
+      }
+    }
+//    std::cout << "Mapped Read\n" << mapped_read << "\n";
+    result_mapped[Rcpp::as<std::string>(r_seq_names[i])] = mapped_read;
+    result_ins[Rcpp::as<std::string>(r_seq_names[i])] = insert_tracker;
+  }
+  Rcpp::List result;
+  result = Rcpp::List::create(
+    Rcpp::Named("inserts") = result_ins,
+    Rcpp::Named("mapped") = result_mapped
+  );
+  std::cout << "\n";
+
+  return result;
+}
+
 // [[Rcpp::export]]
 Rcpp::List trimFront_cpp(CharacterVector r_sread, CharacterVector r_qual,
     CharacterVector r_primer, std::vector<int> prefix_lens) // int pref_len, int pid_len, int suf_len, int verbosity)
@@ -651,6 +709,8 @@ Rcpp::List map_reads_no_ins_cpp(CharacterVector r_profile, CharacterVector r_rea
       );
   return result;
 }
+
+
 
 // [[Rcpp::export]]
 Rcpp::List transfer_gaps_cpp(CharacterVector aligned_read, CharacterVector r_qual, NumericVector gap_only_cols)
