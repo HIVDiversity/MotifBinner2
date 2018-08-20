@@ -77,6 +77,7 @@ buildConfig <- function(overlapping,
 buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score,
                                 rev_file, rev_primer_seq, rev_primer_lens, rev_min_score,
                                 fwd_pid_in_which_fragment, rev_pid_in_which_fragment,
+                                max_seq = NULL,
                                 min_read_length = 295,
                                 pattern_to_chop_from_names = ' [0-9]:N:[0-9]*:[0-9]*$',
                                 output_dir = "/fridge/data/MotifBinner2_test",
@@ -99,6 +100,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
       list(name = 'fwd_loadData',
         op = 'loadData',
         data_source = fwd_file,
+        max_seq = max_seq,
         cache_data = TRUE),
     'n002' =
       list(name = 'fwd_basicQC',
@@ -147,6 +149,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
       list(name = 'rev_loadData',
         op = 'loadData',
         data_source = rev_file,
+        max_seq = max_seq,
         cache_data = TRUE),
     'n009' =
       list(name = 'rev_basicQC',
@@ -324,6 +327,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
 buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score,
                         rev_file, rev_primer_seq, rev_primer_lens, rev_min_score,
                         fwd_pid_in_which_fragment, rev_pid_in_which_fragment,
+                        max_seq = NULL,
                         min_read_length = 295,
                         pattern_to_chop_from_names = ' [0-9]:N:[0-9]*:[0-9]*$',
                         output_dir = "/fridge/data/MotifBinner2_test",
@@ -349,6 +353,7 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
       list(name = 'fwd_loadData',
         op = 'loadData',
         data_source = fwd_file,
+        max_seq = max_seq,
         cache_data = TRUE),
     'n002' =
       list(name = 'fwd_basicQC',
@@ -397,6 +402,7 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
       list(name = 'rev_loadData',
         op = 'loadData',
         data_source = rev_file,
+        max_seq = max_seq,
         cache_data = TRUE),
     'n009' =
       list(name = 'rev_basicQC',
