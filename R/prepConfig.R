@@ -26,21 +26,44 @@ prepConfig <- function(all_results, config)
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
 
+  flat_op_list <- data.frame(op_num = character(0),
+                             setting_1 = character(0),
+                             setting_2 = character(0),
+                             value = character(0),
+                             stringsAsFactors = FALSE)
 
-#  input_file <- config$operation_list[[op_number]]$data_source
-#  if (is.null(input_file)){
-#    stop('Input file must be specified')
-#  }
-#  if (!file.exists(input_file)){
-#    stop(paste('input file does not exists: ', input_file, sep = ''))
-#  }
+  for (op_num in names(config$operation_list)){
+    for (i in names(config$operation_list[[op_num]])){
+      if (length(config$operation_list[[op_num]][[i]]) > 1){
+        print('multi')
+        for (j in names(config$operation_list[[op_num]][[i]])){
+          the_value <- config$operation_list[[op_num]][[i]][[j]]
+          flat_op_list <- rbind(flat_op_list,
+            data.frame(op_num = op_num,
+                       setting_1 = i,
+                       setting_2 = j,
+                       value = ifelse(is.null(the_value), "NULL", the_value),
+                       stringsAsFactors = FALSE))
+        }
+      } else {
+        the_value <- config$operation_list[[op_num]][[i]]
+        flat_op_list <- rbind(flat_op_list,
+          data.frame(op_num = op_num,
+                     setting_1 = i,
+                     setting_2 = "",
+                     value = ifelse(is.null(the_value), "NULL", the_value),
+                     stringsAsFactors = FALSE))
+      }
+      
+    }
+  }
 
   trim_steps <- list(step1 = list(name = 'read_exists',
                                   threshold = 1,
                                   breaks = c(1)))
 
   result <- list(trim_steps = trim_steps,
-                 metrics = as.data.frame(config))
+                 metrics = flat_op_list)
   class(result) <- 'prepConfig'
   result$config <- list(op_number = op_number,
                         op_args = op_args,

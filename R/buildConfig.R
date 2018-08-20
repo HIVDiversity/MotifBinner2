@@ -311,7 +311,11 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
           "mergeReads.04" = "n020", "mergeReads.05" = "n021", "mergeReads.06" = "n022",
           "mergeReads.07" = "n023", "mergeReads.08" = "n027", "mergeReads.09" = "n028",
           "mergeReads.10" = "n029", "mergeReads.11" = "n030"),
-      cache_data = FALSE)
+      cache_data = FALSE),
+    'n101' =
+      list(name = 'prepConfig',
+        op = 'prepConfig',
+        cache_data = FALSE)
   )
 
   return(list(operation_list = operation_list,
@@ -554,7 +558,11 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
           "revReads.04" = "n012", "revReads.05" = "n013", "revReads.06" = "n014",
           "revReads.07" = "n017", "revReads.08" = "n018", "revReads.09" = "n024",
           "revReads.10" = "n025"),
-      cache_data = FALSE)
+      cache_data = FALSE),
+    'n101' =
+      list(name = 'prepConfig',
+        op = 'prepConfig',
+        cache_data = FALSE)
     )
 
   config <- list(operation_list = operation_list,
