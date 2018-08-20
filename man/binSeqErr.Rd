@@ -14,4 +14,3 @@ binSeqErr(all_results, config)
 \description{
 Computes the sequencing parameters for each bin
 }
-

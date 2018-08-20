@@ -8,8 +8,9 @@ genSummary(result, config, seq_dat)
 }
 \arguments{
 \item{result}{The result produced from a specific operation}
+
+\item{config}{A list of configuration options}
 }
 \description{
 Generates a summary for a operation or the full process
 }
-

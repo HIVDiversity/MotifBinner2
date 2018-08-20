@@ -14,4 +14,3 @@ trimAffixes(all_results, config)
 \description{
 Trims the ends of the sequences so that they all start at the same place
 }
-

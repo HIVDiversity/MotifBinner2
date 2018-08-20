@@ -23,4 +23,3 @@ sim_all_parents_main_off(ns = seq(100, 10000, 100), pl = 9, phi = (1/50),
 \description{
 Simulate range of parents and their main offspring sizes
 }
-

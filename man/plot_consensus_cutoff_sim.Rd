@@ -12,4 +12,3 @@ plot_consensus_cutoff_sim(dat)
 \description{
 Plots the results of a consensus_cutoff simulation
 }
-

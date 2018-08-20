@@ -12,4 +12,3 @@ shortReadQ_forced_append(x)
 \description{
 Forces ShortReadQ objects to append into a single ShortReadQ object
 }
-

@@ -9,4 +9,3 @@ moving_statistic(y, x, statistic, bw = 5, n_steps = 30, ...)
 \description{
 Computes a moving statistic over a sliding window.
 }
-

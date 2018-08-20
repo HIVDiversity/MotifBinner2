@@ -16,4 +16,3 @@ sim_one_parent_main_off(n = 1000, pl = 9, phi = (1/50))
 \description{
 Simulate a parent and its main offspring size
 }
-

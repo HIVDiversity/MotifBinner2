@@ -14,4 +14,3 @@ saveToDisk(result, config, seq_dat)
 \description{
 Save the relevant results of an operation to disk
 }
-

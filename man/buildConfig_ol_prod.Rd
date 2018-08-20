@@ -17,4 +17,3 @@ buildConfig_ol_prod(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score,
 \description{
 Builds the config for overlapping reads - stable version
 }
-

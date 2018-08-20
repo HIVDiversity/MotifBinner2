@@ -17,4 +17,3 @@ buildConfig_nol_test(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score,
 \description{
 Test config builder for non-overlapping reads
 }
-

@@ -10,4 +10,3 @@ alignBins_internal(cur_fwd_seqs, cur_rev_seqs, profile_file, working_dir, pid)
 a custom guide tree is constructed to ensure that the alignment of the fwd
 reads does not interfere with the alignment of the rev reads and vice versa.
 }
-

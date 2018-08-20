@@ -14,4 +14,3 @@ basicQC(all_results, config)
 \description{
 Performs basic quality assessment
 }
-

@@ -18,4 +18,3 @@ Constructs a list with a single element for each bin. This element is a list
 that contains the consensus sequence as well as the aligned reads of the
 bins.
 }
-

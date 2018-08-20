@@ -8,8 +8,9 @@ genSummary_case4(result, config, seq_dat)
 }
 \arguments{
 \item{result}{The result produced from a specific operation}
+
+\item{config}{A list of configuration options}
 }
 \description{
 Generates summary table when there is many trim steps each with many values
 }
-

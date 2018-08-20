@@ -9,4 +9,3 @@ makeIUPACScoreMat()
 \description{
 This function creates a scoring matrix for aligning IUPAC sequences
 }
-

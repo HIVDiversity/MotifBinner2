@@ -14,4 +14,3 @@ loadData(all_results, config)
 \description{
 Loads the fwd and rev fastq reads
 }
-

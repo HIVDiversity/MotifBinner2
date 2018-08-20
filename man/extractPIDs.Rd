@@ -14,4 +14,3 @@ extractPIDs(all_results, config)
 \description{
 Extracts the PIDs after affixes were trimmed and add then to the sequence names
 }
-

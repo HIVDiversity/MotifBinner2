@@ -17,4 +17,3 @@ to both gaps and N's. These are the two primary types of characters to
 remove and hence it does not make sense to report on the quality of the
 letters that were removed.
 }
-

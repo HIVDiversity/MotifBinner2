@@ -12,4 +12,3 @@ timingTable(result)
 \description{
 Produces the timing tables in the reports
 }
-

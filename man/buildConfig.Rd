@@ -17,4 +17,3 @@ buildConfig(overlapping, fwd_file, fwd_primer_seq, fwd_primer_lens,
 \description{
 Builds the overlapping or non-overlapping production configs
 }
-

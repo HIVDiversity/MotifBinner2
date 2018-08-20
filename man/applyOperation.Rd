@@ -24,4 +24,3 @@ retrieved from the operations_list in the config argument.}
 \description{
 Applies a single operation
 }
-

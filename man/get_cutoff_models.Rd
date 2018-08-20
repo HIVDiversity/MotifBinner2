@@ -11,4 +11,3 @@ A number of consensus cutoff models have been pre-built. This function
 returns a data.frame with there parameters and the parameters that describes
 the datasets that they are applicable to
 }
-

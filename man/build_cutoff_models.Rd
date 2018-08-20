@@ -18,4 +18,3 @@ to this file.}
 \description{
 Builds the consensus cutoff models given a dataset index file
 }
-
