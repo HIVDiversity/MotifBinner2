@@ -6,13 +6,15 @@
 \usage{
 buildConfig(overlapping, fwd_file, fwd_primer_seq, fwd_primer_lens,
   fwd_min_score, rev_file, rev_primer_seq, rev_primer_lens, rev_min_score,
-  fwd_pid_in_which_fragment, rev_pid_in_which_fragment, min_read_length = 295,
+  fwd_pid_in_which_fragment, rev_pid_in_which_fragment, max_seq = NULL,
+  min_read_length = 295,
   pattern_to_chop_from_names = " [0-9]:N:[0-9]*:[0-9]*$",
   output_dir = "/fridge/data/MotifBinner2_test",
-  base_for_names = "CAP129_2040_009wpi_C2C3", intermediate_reports = TRUE,
-  erase_history = FALSE, verbosity = 3, report_type = c("html"),
-  ncpu = 4, bins_to_process = Inf, merged_read_length = 100,
-  header_format = "MiSeq", front_gaps_allowed = 0)
+  base_for_names = "CAP129_2040_009wpi_C2C3",
+  intermediate_reports = TRUE, erase_history = FALSE, verbosity = 3,
+  report_type = c("html"), ncpu = 4, bins_to_process = Inf,
+  merged_read_length = 100, header_format = "MiSeq",
+  front_gaps_allowed = 0)
 }
 \description{
 Builds the overlapping or non-overlapping production configs

@@ -4,7 +4,8 @@
 \alias{alignBins_internal}
 \title{aligns fwd and rev sequences to a profile}
 \usage{
-alignBins_internal(cur_fwd_seqs, cur_rev_seqs, profile_file, working_dir, pid)
+alignBins_internal(cur_fwd_seqs, cur_rev_seqs, profile_file, working_dir,
+  pid)
 }
 \description{
 a custom guide tree is constructed to ensure that the alignment of the fwd

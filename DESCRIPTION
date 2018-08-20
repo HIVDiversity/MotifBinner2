@@ -30,4 +30,4 @@ Suggests:
 VignetteBuilder: knitr
 License: GPL-3
 https: //bitbucket.org/hivdiversity/motifbinner2
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

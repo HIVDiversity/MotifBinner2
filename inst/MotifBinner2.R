@@ -137,6 +137,8 @@ if (rev_primer_length != rev_spec_length){
 if (!file.exists(opt$fwd_file)){stop('Error: Forward file not found - are you sure the file name you specified is correct?')}
 if (!file.exists(opt$rev_file)){stop('Error: Reverse file not found - are you sure the file name you specified is correct?')}
 
+print(as.numeric(opt$max_seq))
+
 config <-
 buildConfig(overlapping = opt$overlapping,
             fwd_file = opt$fwd_file,
