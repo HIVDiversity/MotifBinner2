@@ -32,6 +32,11 @@ prepConfig <- function(all_results, config)
                              value = character(0),
                              stringsAsFactors = FALSE)
 
+  input_files <- data.frame(op_num = character(0),
+                            value = character(0),
+                            stringsAsFactors = FALSE)
+
+  in_loadData <- FALSE
   for (op_num in names(config$operation_list)){
     for (i in names(config$operation_list[[op_num]])){
       if (length(config$operation_list[[op_num]][[i]]) > 1){
@@ -47,15 +52,35 @@ prepConfig <- function(all_results, config)
         }
       } else {
         the_value <- config$operation_list[[op_num]][[i]]
-        flat_op_list <- rbind(flat_op_list,
-          data.frame(op_num = op_num,
-                     setting_1 = i,
-                     setting_2 = "",
-                     value = ifelse(is.null(the_value), "NULL", the_value),
-                     stringsAsFactors = FALSE))
+        if (!is.null(the_value)){
+          if (the_value == "loadData"){
+            in_loadData <- TRUE
+          }
+        }
+        if (in_loadData & i == "data_source"){
+          flat_op_list <- rbind(flat_op_list,
+            data.frame(op_num = op_num,
+                       setting_1 = i,
+                       setting_2 = "",
+                       value = "See note below",
+                       stringsAsFactors = FALSE))
+          input_files <- rbind(input_files,
+            data.frame(op_num = op_num,
+                       value = ifelse(is.null(the_value), "NULL", the_value),
+                       stringsAsFactors = FALSE))
+
+        } else {
+          flat_op_list <- rbind(flat_op_list,
+            data.frame(op_num = op_num,
+                       setting_1 = i,
+                       setting_2 = "",
+                       value = ifelse(is.null(the_value), "NULL", the_value),
+                       stringsAsFactors = FALSE))
+        }
       }
       
     }
+    in_loadData <- FALSE
   }
 
   trim_steps <- list(step1 = list(name = 'read_exists',
@@ -63,7 +88,8 @@ prepConfig <- function(all_results, config)
                                   breaks = c(1)))
 
   result <- list(trim_steps = trim_steps,
-                 metrics = flat_op_list)
+                 metrics = list(flat_op_list = flat_op_list,
+                                input_files = input_files))
   class(result) <- 'prepConfig'
   result$config <- list(op_number = op_number,
                         op_args = op_args,

@@ -14,14 +14,24 @@ if (class(result) != 'prepConfig')
   result <- all_results[[grep('prepConfig', names(all_results))[1]]]
 }
 ```
-# `r result$config$op_full_name`
+# Configuration and Settings
 
 Prints out the configuration that was used to run MotifBinner for this run.
 
 ```{r, results='asis'}
-print(kable(result$metrics, format='markdown'))
+print(kable(result$metrics$flat_op_list, format='markdown'))
 ```
 
+NOTES:
+
+```{r, result='markup'}
+for (i in 1:nrow(result$metrics$input_files)){
+  cat(paste("Operation number ", result$metrics$input_files[i,'op_num'], 
+            " was a loadData operation from input file ", 
+            result$metrics$input_files[i,'value'], 
+            '\n\n\n', sep = ''))
+}
+```
 
 ```{r, results='asis'}
 cat('\n\n---\n\n')
