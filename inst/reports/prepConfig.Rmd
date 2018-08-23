@@ -19,7 +19,7 @@ if (class(result) != 'prepConfig')
 Prints out the configuration that was used to run MotifBinner for this run.
 
 ```{r, results='asis'}
-print(result$metrics)
+print(kable(result$metrics, format='markdown'))
 ```
 
 
