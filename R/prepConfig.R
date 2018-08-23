@@ -36,6 +36,10 @@ prepConfig <- function(all_results, config)
                             value = character(0),
                             stringsAsFactors = FALSE)
 
+  other_settings <- data.frame(opt_name = character(0),
+                               value = character(0),
+                               stringsAsFactors = FALSE)
+
   in_loadData <- FALSE
   for (op_num in names(config$operation_list)){
     for (i in names(config$operation_list[[op_num]])){
@@ -83,13 +87,27 @@ prepConfig <- function(all_results, config)
     in_loadData <- FALSE
   }
 
+  for (opt_name in names(config)){
+    if (opt_name != "operation_list")
+    {
+      other_settings <- rbind(other_settings,
+        data.frame(opt_name = opt_name,
+                   value = config[[opt_name]],
+                   stringsAsFactors = FALSE))
+    }
+  }
+
+  names(flat_op_list) <- c("Op. Number  ", "Setting  ", "Sub-Setting  ", "Value  ")
+
   trim_steps <- list(step1 = list(name = 'read_exists',
                                   threshold = 1,
                                   breaks = c(1)))
 
   result <- list(trim_steps = trim_steps,
                  metrics = list(flat_op_list = flat_op_list,
-                                input_files = input_files))
+                                input_files = input_files,
+                                other_settings = other_settings
+                                ))
   class(result) <- 'prepConfig'
   result$config <- list(op_number = op_number,
                         op_args = op_args,

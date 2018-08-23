@@ -16,20 +16,26 @@ if (class(result) != 'prepConfig')
 ```
 # Configuration and Settings
 
-Prints out the configuration that was used to run MotifBinner for this run.
+The configuration that was used in this run.
 
 ```{r, results='asis'}
+cat("\n\nTable: General Settings\n\n")
+print(kable(result$metrics$other_settings, format='markdown'))
+```
+
+```{r, results='asis'}
+cat("\n\nTable: The operation specific settings\n\n")
 print(kable(result$metrics$flat_op_list, format='markdown'))
 ```
 
 NOTES:
 
-```{r, result='markup'}
+```{r, result='asis'}
 for (i in 1:nrow(result$metrics$input_files)){
   cat(paste("Operation number ", result$metrics$input_files[i,'op_num'], 
             " was a loadData operation from input file ", 
             result$metrics$input_files[i,'value'], 
-            '\n\n\n', sep = ''))
+            '\n\n', sep = ''))
 }
 ```
 
