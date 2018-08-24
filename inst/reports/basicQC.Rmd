@@ -25,6 +25,7 @@ Inspired by FastQC:
 Andrews S. (2010). FastQC: a quality control tool for high throughput sequence data. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc
 
 ```{r}
+is_miseq <- tolower(config$header_format) == "miseq"
 seq_df <- result$metrics$seq_df
 zone_qual <- result$metrics$zone_qual
 tile_qual <- result$metrics$tile_qual
@@ -60,7 +61,7 @@ ggplot(seq_df, aes(x=qual)) +
 grid.arrange(p1, p2, ncol=2)
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2, fig.path=figure_path}
+```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2, fig.path=figure_path, eval=is_miseq}
 p3 <-
 ggplot(zone_qual,
        aes(x=xcat, y=ycat, fill=n_seq)) + 
@@ -79,7 +80,7 @@ ggplot(zone_qual,
 grid.arrange(p3, p4, ncol=2)
 ```
 
-```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap3, fig.path=figure_path}
+```{r, dpi=300, fig.width=7, fig.height=5, fig.cap=fig.cap3, fig.path=figure_path, eval=is_miseq}
 
 print(
   ggplot(data.frame(tile_qual), aes(cycle, as.factor(tile_indx))) +
