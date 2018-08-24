@@ -217,7 +217,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
       list(name = 'matchPairs',
         op = 'matchPairs',
         data_source = c("fwd" = "n015", "rev" = "n016"),
-        header_format = header_format,
+        #header_format = header_format,
         cache_data = TRUE),
     'n018' =
       list(name = 'processBadPIDs',
@@ -321,6 +321,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
   return(list(operation_list = operation_list,
               output_dir = output_dir,
               base_for_names = base_for_names,
+              header_format = header_format,
               intermediate_reports = intermediate_reports,
               verbosity = verbosity,
               erase_history = erase_history,
@@ -474,7 +475,7 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
       list(name = 'matchPairs',
         op = 'matchPairs',
         data_source = c("fwd" = "n015", "rev" = "n016"),
-        header_format = header_format,
+        #header_format = header_format,
         cache_data = TRUE),
     'n018' =
       list(name = 'processBadPIDs',
@@ -568,6 +569,7 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
   config <- list(operation_list = operation_list,
                  output_dir = output_dir,
                  base_for_names = base_for_names,
+                 header_format = header_format,
                  intermediate_reports = intermediate_reports,
                  verbosity = verbosity,
                  erase_history = erase_history,

@@ -28,7 +28,7 @@ matchPairs <- function(all_results, config)
   rev_raw_names <- data.frame(x=as.character(seq_dat_rev@id),stringsAsFactors=F)
   rev_names <- separate(data = rev_raw_names, col = x, into = c('raw_name', 'pid_rev'), sep = ".PID:")
 
-  if (op_args$header_format == "SRA"){
+  if (config$header_format == "SRA"){
     fwd_names$raw_name <- gsub(" length=[0-9]*", "", gsub("\\.1 ", "_", fwd_names$raw_name))
     rev_names$raw_name <- gsub(" length=[0-9]*", "", gsub("\\.2 ", "_", rev_names$raw_name))
     fwd_raw_names <- gsub(" length=[0-9]*_", "_", gsub("\\.1 ", "_", fwd_raw_names$x))
