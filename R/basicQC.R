@@ -126,7 +126,7 @@ computeMetrics.basicQC <- function(result, config, seq_dat)
   seq_df <- seq_df %>%
     mutate(seq_name = gsub(' ', ':', seq_name)) %>%
     separate(seq_name, fastq_name_headers, ":") %>%
-    mutate_each_(funs(as.numeric), fastq_numeric) %>%
+    mutate_at(fastq_numeric, as.numeric) %>%
     mutate(xcat = round(xpos/max(xpos), 2)) %>%
     mutate(ycat = round(ypos/max(ypos), 2))
   
