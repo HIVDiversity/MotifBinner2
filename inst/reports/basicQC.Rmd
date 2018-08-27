@@ -61,6 +61,10 @@ ggplot(seq_df, aes(x=qual)) +
 grid.arrange(p1, p2, ncol=2)
 ```
 
+```{r, eval=!is_miseq}
+cat('Since the sequence headers are not MiSeq formatted, no reports based on the location of the reads on the slide can be generated.')
+```
+
 ```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap2, fig.path=figure_path, eval=is_miseq}
 p3 <-
 ggplot(zone_qual,
