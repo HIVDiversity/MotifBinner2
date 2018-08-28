@@ -19,7 +19,8 @@ Depends:
     tidyr,
     gridExtra,
     reshape2,
-    stringi
+    stringi,
+    formattable
 Imports:
     data.table,
     BiocGenerics,

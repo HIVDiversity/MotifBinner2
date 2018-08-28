@@ -20,12 +20,12 @@ The configuration that was used in this run.
 
 ```{r, results='asis'}
 cat("\n\nTable: General Settings\n\n")
-print(kable(result$metrics$other_settings, format='markdown'))
+print(format_table(result$metrics$other_settings))
 ```
 
 ```{r, results='asis'}
 cat("\n\nTable: The operation specific settings\n\n")
-print(kable(result$metrics$flat_op_list, format='markdown'))
+print(format_table(result$metrics$flat_op_list))
 ```
 
 NOTES:

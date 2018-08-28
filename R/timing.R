@@ -43,15 +43,23 @@ timingTable <- function(result)
 timingTable_allResults <- function(result)
 {
   cat(paste('\nTable: Timing for all the operations', '.\n', sep = ''))
-  print(kable(sliceTime_allResults(result)))
+  #print(kable(sliceTime_allResults(result)))
+  print(format_table(sliceTime_allResults(result), 
+                     align = 'l'))
 }
 
 timingTable_other <- function(result)
 {
   cat(paste('\nTable: Timing for the steps in ', class(result), '.\n', sep = ''))
+#  print(
+#    kable(data.frame(step = names(sapply(result$timing, sliceTime)),
+#               time = sapply(result$timing, sliceTime),
+#               row.names = NULL))
+#  )
   print(
-    kable(data.frame(step = names(sapply(result$timing, sliceTime)),
-               time = sapply(result$timing, sliceTime),
-               row.names = NULL))
+    format_table(data.frame(step = names(sapply(result$timing, sliceTime)),
+                   time = sapply(result$timing, sliceTime),
+                   row.names = NULL),
+                 align = 'l')
   )
 }
