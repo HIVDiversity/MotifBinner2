@@ -23,7 +23,7 @@ sliceTime_allResults <- function(x)
     row.names(z) <- NULL
     all_times <- rbind(all_times, z)
   }
-  all_times
+  as.data.frame(all_times)
 }
 
 #' Produces the timing tables in the reports

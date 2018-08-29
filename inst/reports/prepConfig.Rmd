@@ -14,7 +14,7 @@ if (class(result) != 'prepConfig')
   result <- all_results[[grep('prepConfig', names(all_results))[1]]]
 }
 ```
-# Configuration and Settings
+# Configuration and Timing
 
 The configuration that was used in this run.
 
@@ -30,7 +30,7 @@ print(format_table(result$metrics$flat_op_list))
 
 NOTES:
 
-```{r, result='asis'}
+```{r, results='asis'}
 for (i in 1:nrow(result$metrics$input_files)){
   cat(paste("Operation number ", result$metrics$input_files[i,'op_num'], 
             " was a loadData operation from input file ", 
@@ -38,6 +38,13 @@ for (i in 1:nrow(result$metrics$input_files)){
             '\n\n', sep = ''))
 }
 ```
+
+The time it took to run the various steps
+
+```{r, results='asis'}
+print(timingTable(all_results))
+```
+
 
 ```{r, results='asis'}
 cat('\n\n---\n\n')
