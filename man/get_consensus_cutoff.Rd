@@ -22,4 +22,3 @@ produced by build_cutoff_models.}
 This function will find the model that matches your input parameters and use
 it to predict the appropriate consensus cutoff for your dataset
 }
-

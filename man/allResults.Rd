@@ -14,4 +14,3 @@ allResults(all_results, config)
 \description{
 Performs any final processing operations
 }
-

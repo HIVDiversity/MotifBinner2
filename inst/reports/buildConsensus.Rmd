@@ -46,7 +46,7 @@ data.frame(metric = c('', 'Highest number in single sequence', '2nd Highest numb
            Gaps   = c('', n_gaps[1],                           n_gaps[2],                               n_gaps[3]))
 )
 cat('\n\nTable: Stats about the number of sequences with gaps and Ns as well as the sequences with highest numbers of gaps and Ns.\n\n')
-kable(stats_tab)
+print(format_table(stats_tab))
 ```
 
 ```{r, results='asis'}

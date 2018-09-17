@@ -4,8 +4,8 @@
 \alias{sim_all_parents_main_off}
 \title{Simulate range of parents and their main offspring sizes}
 \usage{
-sim_all_parents_main_off(ns = seq(100, 10000, 100), pl = 9, phi = (1/50),
-  repeats = 1000, verbose = FALSE, ncpu = 8)
+sim_all_parents_main_off(ns = seq(100, 10000, 100), pl = 9,
+  phi = (1/50), repeats = 1000, verbose = FALSE, ncpu = 8)
 }
 \arguments{
 \item{pl}{PID length (9)}
@@ -23,4 +23,3 @@ sim_all_parents_main_off(ns = seq(100, 10000, 100), pl = 9, phi = (1/50),
 \description{
 Simulate range of parents and their main offspring sizes
 }
-

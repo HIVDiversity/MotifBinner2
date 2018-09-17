@@ -1,4 +1,9 @@
-#' Loads the fwd and rev fastq reads
+#' Loads a fastq file
+#'
+#' Given a file name, it calls ShortRead::readFastq and populates the result list
+#'
+#' The action function for the class loadData
+#'
 #' @inheritParams applyOperation
 #' @export
 
@@ -10,7 +15,10 @@ loadData <- function(all_results, config)
 
   op_dir <- file.path(config$output_dir, config$base_for_names, op_full_name)
   dir.create(op_dir, showWarnings = FALSE, recursive = TRUE)
-  input_file <- config$operation_list[[op_number]]$data_source
+
+
+#  input_file <- config$operation_list[[op_number]]$data_source
+  input_file <- op_args$data_source
   if (is.null(input_file)){
     stop('Input file must be specified')
   }
@@ -18,14 +26,21 @@ loadData <- function(all_results, config)
     stop(paste('input file does not exists: ', input_file, sep = ''))
   }
 
+  max_seq <- op_args$max_seq
   seq_dat <- readFastq(input_file)
+  total_seq <- length(seq_dat)
+  if (!is.null(max_seq)){
+    if (max_seq > 0 & length(seq_dat) > max_seq){
+      seq_dat <- seq_dat[1:max_seq]
+    }
+  }
   per_read_metrics <- data.frame('read_exists' = rep(1, length(seq_dat)))
   trim_steps <- list(step1 = list(name = 'read_exists',
                                   threshold = 1,
                                   breaks = c(1)))
 
   result <- list(trim_steps = trim_steps,
-                 metrics = list(per_read_metrics = per_read_metrics))
+                 metrics = list(per_read_metrics = per_read_metrics, total_seq = total_seq))
   class(result) <- 'loadData'
   if (op_args$cache){
     result$seq_dat <- seq_dat

@@ -18,4 +18,3 @@ plot_consensus_cutoff_model(a, b, d, e)
 \description{
 The following model is assumed: y = a + bx + dx^e.
 }
-

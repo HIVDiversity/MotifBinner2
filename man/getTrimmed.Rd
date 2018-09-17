@@ -9,4 +9,3 @@ getTrimmed(seq_dat, kept_dat)
 \description{
 Get the data trimmed at a trimming step
 }
-

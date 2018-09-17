@@ -8,8 +8,9 @@ genReport(result, config)
 }
 \arguments{
 \item{result}{The result produced from a specific operation}
+
+\item{config}{A list of configuration options}
 }
 \description{
 Generates a report for a operation or the full process
 }
-

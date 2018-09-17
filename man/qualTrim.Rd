@@ -14,4 +14,3 @@ qualTrim(all_results, config)
 \description{
 Removes sequences that does not match specified quality
 }
-

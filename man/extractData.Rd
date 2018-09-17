@@ -17,4 +17,3 @@ the extract_levels parameter. If you have results stashed
 in a list like this list('X' = list('bla' = the_target_data)),
 then specify the extract levels as extract_levels = c('X', 'bla')
 }
-

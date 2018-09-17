@@ -23,7 +23,7 @@ sliceTime_allResults <- function(x)
     row.names(z) <- NULL
     all_times <- rbind(all_times, z)
   }
-  all_times
+  as.data.frame(all_times)
 }
 
 #' Produces the timing tables in the reports
@@ -43,15 +43,23 @@ timingTable <- function(result)
 timingTable_allResults <- function(result)
 {
   cat(paste('\nTable: Timing for all the operations', '.\n', sep = ''))
-  print(kable(sliceTime_allResults(result)))
+  #print(kable(sliceTime_allResults(result)))
+  print(format_table(sliceTime_allResults(result), 
+                     align = 'l'))
 }
 
 timingTable_other <- function(result)
 {
   cat(paste('\nTable: Timing for the steps in ', class(result), '.\n', sep = ''))
+#  print(
+#    kable(data.frame(step = names(sapply(result$timing, sliceTime)),
+#               time = sapply(result$timing, sliceTime),
+#               row.names = NULL))
+#  )
   print(
-    kable(data.frame(step = names(sapply(result$timing, sliceTime)),
-               time = sapply(result$timing, sliceTime),
-               row.names = NULL))
+    format_table(data.frame(step = names(sapply(result$timing, sliceTime)),
+                   time = sapply(result$timing, sliceTime),
+                   row.names = NULL),
+                 align = 'l')
   )
 }

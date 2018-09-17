@@ -15,4 +15,3 @@ make_monotonic(x, direction = "increasing")
 Monotonicity is achieved by substituting a number with the number preceeding
 it if it violates the monotonicity criteria.
 }
-

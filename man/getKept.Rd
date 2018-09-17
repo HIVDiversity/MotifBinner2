@@ -9,4 +9,3 @@ getKept(result, seq_dat = NULL)
 \description{
 Get the data kept after a trimming step
 }
-

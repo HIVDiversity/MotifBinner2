@@ -14,4 +14,3 @@ alignBins(all_results, config)
 \description{
 Removes sequences shorter than a given cutoff
 }
-

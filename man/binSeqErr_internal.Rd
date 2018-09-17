@@ -23,4 +23,3 @@ sequence can be taken as an indication of the sequencing error rates.
 A full characterization of the errors is returned that tallies each match
 and mismatch and the quality at which they happened.
 }
-

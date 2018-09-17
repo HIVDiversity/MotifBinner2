@@ -9,4 +9,3 @@ genKeptVector(result)
 \description{
 Generates a vector of T/F indicating which sequences were kept or trimmed.
 }
-

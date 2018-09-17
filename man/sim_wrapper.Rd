@@ -36,4 +36,3 @@ The function calls the sim_all_parents_main_off function and saves the
 result to a folder together with a file that contains a description of the
 simulation parameters.
 }
-

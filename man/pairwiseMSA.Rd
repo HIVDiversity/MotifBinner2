@@ -14,4 +14,3 @@ pairwiseMSA(reads, ref_seq)
 \description{
 Sequence quality information will be ignored.
 }
-

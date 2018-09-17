@@ -15,4 +15,3 @@ A data.frame with the tallies of the sequencing parameters
 \description{
 Reformats the tallies produced by tallyPrimerSeqError_cpp
 }
-

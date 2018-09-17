@@ -36,4 +36,3 @@ that are based on small bins are removed from the file. The consensuses are
 then written out to a file with the same name as the input file, but the
 suffix cc added to it.
 }
-

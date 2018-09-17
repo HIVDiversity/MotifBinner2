@@ -2,7 +2,7 @@
 % Please edit documentation in R/loadData.R
 \name{loadData}
 \alias{loadData}
-\title{Loads the fwd and rev fastq reads}
+\title{Loads a fastq file}
 \usage{
 loadData(all_results, config)
 }
@@ -12,6 +12,8 @@ loadData(all_results, config)
 \item{config}{A list of configuration options}
 }
 \description{
-Loads the fwd and rev fastq reads
+Given a file name, it calls ShortRead::readFastq and populates the result list
 }
-
+\details{
+The action function for the class loadData
+}

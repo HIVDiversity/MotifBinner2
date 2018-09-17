@@ -5,6 +5,7 @@ buildConfig <- function(overlapping,
                         fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score,
                         rev_file, rev_primer_seq, rev_primer_lens, rev_min_score,
                         fwd_pid_in_which_fragment, rev_pid_in_which_fragment,
+                        max_seq = NULL,
                         min_read_length = 295,
                         pattern_to_chop_from_names = ' [0-9]:N:[0-9]*:[0-9]*$',
                         output_dir = "/fridge/data/MotifBinner2_test",
@@ -32,6 +33,7 @@ buildConfig <- function(overlapping,
                         rev_min_score = rev_min_score,
                         fwd_pid_in_which_fragment = fwd_pid_in_which_fragment, 
                         rev_pid_in_which_fragment = rev_pid_in_which_fragment,
+                        max_seq = max_seq,
                         min_read_length = min_read_length,
                         pattern_to_chop_from_names = pattern_to_chop_from_names,
                         output_dir = output_dir,
@@ -56,6 +58,7 @@ buildConfig <- function(overlapping,
                          rev_min_score = rev_min_score,
                          fwd_pid_in_which_fragment = fwd_pid_in_which_fragment, 
                          rev_pid_in_which_fragment = rev_pid_in_which_fragment,
+                         max_seq = max_seq,
                          min_read_length = min_read_length,
                          pattern_to_chop_from_names = pattern_to_chop_from_names,
                          output_dir = output_dir,
@@ -77,6 +80,7 @@ buildConfig <- function(overlapping,
 buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score,
                                 rev_file, rev_primer_seq, rev_primer_lens, rev_min_score,
                                 fwd_pid_in_which_fragment, rev_pid_in_which_fragment,
+                                max_seq = NULL,
                                 min_read_length = 295,
                                 pattern_to_chop_from_names = ' [0-9]:N:[0-9]*:[0-9]*$',
                                 output_dir = "/fridge/data/MotifBinner2_test",
@@ -99,6 +103,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
       list(name = 'fwd_loadData',
         op = 'loadData',
         data_source = fwd_file,
+        max_seq = max_seq,
         cache_data = TRUE),
     'n002' =
       list(name = 'fwd_basicQC',
@@ -147,6 +152,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
       list(name = 'rev_loadData',
         op = 'loadData',
         data_source = rev_file,
+        max_seq = max_seq,
         cache_data = TRUE),
     'n009' =
       list(name = 'rev_basicQC',
@@ -211,7 +217,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
       list(name = 'matchPairs',
         op = 'matchPairs',
         data_source = c("fwd" = "n015", "rev" = "n016"),
-        header_format = header_format,
+        #header_format = header_format,
         cache_data = TRUE),
     'n018' =
       list(name = 'processBadPIDs',
@@ -305,12 +311,17 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
           "mergeReads.04" = "n020", "mergeReads.05" = "n021", "mergeReads.06" = "n022",
           "mergeReads.07" = "n023", "mergeReads.08" = "n027", "mergeReads.09" = "n028",
           "mergeReads.10" = "n029", "mergeReads.11" = "n030"),
-      cache_data = FALSE)
+      cache_data = FALSE),
+    'n101' =
+      list(name = 'prepConfig',
+        op = 'prepConfig',
+        cache_data = FALSE)
   )
 
   return(list(operation_list = operation_list,
               output_dir = output_dir,
               base_for_names = base_for_names,
+              header_format = header_format,
               intermediate_reports = intermediate_reports,
               verbosity = verbosity,
               erase_history = erase_history,
@@ -324,6 +335,7 @@ buildConfig_ol_prod <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_m
 buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_min_score,
                         rev_file, rev_primer_seq, rev_primer_lens, rev_min_score,
                         fwd_pid_in_which_fragment, rev_pid_in_which_fragment,
+                        max_seq = NULL,
                         min_read_length = 295,
                         pattern_to_chop_from_names = ' [0-9]:N:[0-9]*:[0-9]*$',
                         output_dir = "/fridge/data/MotifBinner2_test",
@@ -349,6 +361,7 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
       list(name = 'fwd_loadData',
         op = 'loadData',
         data_source = fwd_file,
+        max_seq = max_seq,
         cache_data = TRUE),
     'n002' =
       list(name = 'fwd_basicQC',
@@ -397,6 +410,7 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
       list(name = 'rev_loadData',
         op = 'loadData',
         data_source = rev_file,
+        max_seq = max_seq,
         cache_data = TRUE),
     'n009' =
       list(name = 'rev_basicQC',
@@ -461,7 +475,7 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
       list(name = 'matchPairs',
         op = 'matchPairs',
         data_source = c("fwd" = "n015", "rev" = "n016"),
-        header_format = header_format,
+        #header_format = header_format,
         cache_data = TRUE),
     'n018' =
       list(name = 'processBadPIDs',
@@ -545,12 +559,17 @@ buildConfig_nol_test <- function(fwd_file, fwd_primer_seq, fwd_primer_lens, fwd_
           "revReads.04" = "n012", "revReads.05" = "n013", "revReads.06" = "n014",
           "revReads.07" = "n017", "revReads.08" = "n018", "revReads.09" = "n024",
           "revReads.10" = "n025"),
-      cache_data = FALSE)
+      cache_data = FALSE),
+    'n101' =
+      list(name = 'prepConfig',
+        op = 'prepConfig',
+        cache_data = FALSE)
     )
 
   config <- list(operation_list = operation_list,
                  output_dir = output_dir,
                  base_for_names = base_for_names,
+                 header_format = header_format,
                  intermediate_reports = intermediate_reports,
                  verbosity = verbosity,
                  erase_history = erase_history,

@@ -52,7 +52,13 @@ make_option("--rev_pid_in_which_fragment",
                          "NULL if this primer does not contain a PID. The first index is ",
                          "1 - not 0. ",
                          sep = "")),
-
+make_option("--max_seq",
+            default = 0,
+            help = paste("Maximum number of sequences to read from the input files. By default the ",
+                         "forward and reverse read files produced by a MiSeq are in the same order, ",
+                         "so just reading out the first 'max_seq' sequences from each file should ",
+                         "yield 'max_seq' pair-end reads in the dataset.",
+                         sep = "")),
 make_option("--min_read_length",
             default = 295,
             help = paste("Require reads to be longer than this in the seqLength trimming step. ",
@@ -131,6 +137,8 @@ if (rev_primer_length != rev_spec_length){
 if (!file.exists(opt$fwd_file)){stop('Error: Forward file not found - are you sure the file name you specified is correct?')}
 if (!file.exists(opt$rev_file)){stop('Error: Reverse file not found - are you sure the file name you specified is correct?')}
 
+print(as.numeric(opt$max_seq))
+
 config <-
 buildConfig(overlapping = opt$overlapping,
             fwd_file = opt$fwd_file,
@@ -141,6 +149,7 @@ buildConfig(overlapping = opt$overlapping,
             rev_primer_seq = opt$rev_primer_seq,
             rev_primer_lens = as.numeric(strsplit(opt$rev_primer_lens, ',')[[1]]),
             rev_min_score = as.numeric(opt$rev_primer_min_score),
+            max_seq = as.numeric(opt$max_seq),
             fwd_pid_in_which_fragment = ifelse(opt$fwd_pid_in_which_fragment == "NULL", 
                                                "NULL", 
                                                as.numeric(opt$fwd_pid_in_which_fragment)),

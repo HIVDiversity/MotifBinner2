@@ -14,4 +14,3 @@ doubleClusterTally(all_results, config)
 \description{
 Tallies to true sizes of clusters of clusters
 }
-

@@ -17,7 +17,9 @@ if (class(result) != 'loadData')
 
 # `r result$config$op_full_name`
 
-`r length(result$seq_dat)` reads were sucessfully loaded from file `r basename(result$config$op_args$data_source)` in the folder `r dirname(result$config$op_args$data_source)`.
+`r length(result$seq_dat)` out of `r result$metrics$total_seq` reads were sucessfully loaded from file `r basename(result$config$op_args$data_source)` in the folder `r dirname(result$config$op_args$data_source)`.
+
+If fewer than all the reads were read this is because the `max_seq` option was specified.
 
 ```{r, results='asis'}
 #kable_summary(result$summary)
@@ -26,7 +28,7 @@ summary_tab <- result$summary
 cat('\n\nTable: Basic statistics of the loaded sequences.\n\n')
 kept_tab <- summary_tab[,grep('k_', names(summary_tab))]
 names(kept_tab) <- gsub('k_', '', names(kept_tab))
-print(kable(kept_tab))
+print(format_table(kept_tab))
 
 timingTable(result)
 ```

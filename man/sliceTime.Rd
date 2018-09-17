@@ -12,4 +12,3 @@ sliceTime(x)
 \description{
 Internal function that reforms a list storing exe times
 }
-

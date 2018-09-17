@@ -14,4 +14,3 @@ ambigSeqs(all_results, config)
 \description{
 Removes sequences with too many ambig bases
 }
-

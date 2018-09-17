@@ -113,8 +113,6 @@ MotifBinner2.R -h
 
 This will display help for all the options and an example call to MotifBinner.
 
-Good luck.
-
 ## Bibliography
 
 * Cassandra B Jabara, Corbin D Jones, Jeffrey Roach, Jeffrey A Anderson, and
@@ -126,3 +124,29 @@ United States of America, 108(50):20166–71, December 2011.
 validates template sampling depth and greatly reduced the error rate of
 next-generation sequencing of HIV1 genomic RNA populations. J Virol. 2015 Aug
 15;89(16):8540-55. doi: 10.1128/JVI.00522-15. Epub 2015 Jun 3.
+
+## Design
+
+This package is designed to apply a series of steps:
+* specified by a config
+* to two input fastq files resulting from pair-end MiSeq sequencing
+* producing a list of results called all results
+* and a set of comprehensive reports.
+
+
+Given two input fastq files resulting from pair-end MiSeq sequencing and a
+number of options, MotifBinner2 will apply a series of operations to the input
+data. The operations are highly structured. Each operation has an action
+function that performs the operation on the data given to it. This function
+packages the result and a large set of metrics describing the operation into a
+list and assigns a class to the list using R's S3 system. S3 is an extremely
+basic class system that allows methods to be overloaded for specific datatypes.
+In addition to the its action function which serves as a constructor, each
+operation also has a computeMetrics, saveToDisk and print method. Lastly, for
+each operation, an Rmarkdown template must be provided. Then the genReport
+function is calles on a result list, then it will extract the class of the
+result and use it to match the result list to a suitable template. The
+genReport function will then call knitr::knit to generate an html report for
+the result list.
+
+The series of operations that must be performed is controlled by a config list.

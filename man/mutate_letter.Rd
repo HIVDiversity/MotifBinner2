@@ -12,4 +12,3 @@ mutate_letter(x)
 \description{
 Mutates a nucleotide to another
 }
-

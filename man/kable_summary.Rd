@@ -12,4 +12,3 @@ kable_summary(summary_tab)
 \description{
 formats a summary table for markdown
 }
-

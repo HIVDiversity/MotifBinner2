@@ -35,7 +35,7 @@ More more detail on the benchmarks refer to an article named: "Insight into bias
 Note: The insertion and deletion rates are consistently 10 times higher than the benchmark - this is probably an issue with the alignment step rather than an accurate signal for increased indels. Fixing this is on the todo list.
 
 ```{r, dpi=300, fig.width=7, fig.height=4, fig.cap=fig.cap1, fig.path=figure_path}
-kable(rate_mat)
+print(format_table(rate_mat))
 print(p1)
 ```
 

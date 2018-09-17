@@ -14,4 +14,3 @@ primerDimer(all_results, config)
 \description{
 Removes perimer-dimer sequences (based on sequence length)
 }
-

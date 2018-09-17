@@ -122,25 +122,37 @@ computeMetrics.basicQC <- function(result, config, seq_dat)
   rm(per_read_quality)
   seq_df$seq_name <- gsub(' .*', '', seq_df$seq_name)
   seq_df$seq_name <- gsub('_PID.*', '', seq_df$seq_name)
-  
-  seq_df <- seq_df %>%
-    mutate(seq_name = gsub(' ', ':', seq_name)) %>%
-    separate(seq_name, fastq_name_headers, ":") %>%
-    mutate_each_(funs(as.numeric), fastq_numeric) %>%
-    mutate(xcat = round(xpos/max(xpos), 2)) %>%
-    mutate(ycat = round(ypos/max(ypos), 2))
-  
-  zone_qual <- seq_df %>%
-    group_by(xcat, ycat) %>%
-    summarize(zone_quality = mean(qual, na.rm=T),
-              n_seq = sum(!is.na(qual)))
 
-  tile_qual <- pos_qual %>%
-    inner_join(seq_df %>% select(read_num, tile), by = 'read_num') %>%
-    mutate(tile_indx = dense_rank(tile)) %>%
-    select(tile_indx, cycle, qual) %>%
-    group_by(tile_indx, cycle) %>%
-    summarize(avg_qual = mean(qual, na.rm = T))
+  #########
+  # HERE split function for seperate behaviour for MiSeq headers
+  #########
+
+  if (config$header_format == "MiSeq") {
+    seq_df <- seq_df %>%
+      mutate(seq_name = gsub(' ', ':', seq_name)) %>%
+      separate(seq_name, fastq_name_headers, ":") %>%
+      mutate_at(fastq_numeric, as.numeric) %>%
+      mutate(xcat = round(xpos/max(xpos), 2)) %>%
+      mutate(ycat = round(ypos/max(ypos), 2))
+    
+    zone_qual <- seq_df %>%
+      group_by(xcat, ycat) %>%
+      summarize(zone_quality = mean(qual, na.rm=T),
+                n_seq = sum(!is.na(qual)))
+
+    tile_qual <- pos_qual %>%
+      inner_join(seq_df %>% select(read_num, tile), by = 'read_num') %>%
+      mutate(tile_indx = dense_rank(tile)) %>%
+      select(tile_indx, cycle, qual) %>%
+      group_by(tile_indx, cycle) %>%
+      summarize(avg_qual = mean(qual, na.rm = T))
+
+  } else {
+
+    zone_qual <- NULL
+    tile_qual <- NULL
+
+  }
 
   pos_qual <- pos_qual %>%
     mutate(cycle_cat = trunc((cycle+1)/2)*2) %>%

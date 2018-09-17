@@ -1,7 +1,7 @@
 Package: MotifBinner2
-Title: Process NGS Primer ID Datasets
-Description: Process NGS Primer ID Datasets
-Version: 0.0.4
+Title: Processes NGS Primer ID Datasets
+Description: Processes NGS Primer ID Datasets
+Version: 0.0.5
 Author: Phillip Labuschagne <philliplab@gmail.com>
 Maintainer: Phillip Labuschagne <philliplab@gmail.com>
 LinkingTo:
@@ -19,7 +19,8 @@ Depends:
     tidyr,
     gridExtra,
     reshape2,
-    stringi
+    stringi,
+    formattable
 Imports:
     data.table,
     BiocGenerics,
@@ -30,4 +31,4 @@ Suggests:
 VignetteBuilder: knitr
 License: GPL-3
 https: //bitbucket.org/hivdiversity/motifbinner2
-RoxygenNote: 5.0.1
+RoxygenNote: 6.1.0

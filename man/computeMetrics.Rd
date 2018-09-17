@@ -14,4 +14,3 @@ computeMetrics(result, config, seq_dat)
 \description{
 Computes metrics useful for reporting
 }
-
