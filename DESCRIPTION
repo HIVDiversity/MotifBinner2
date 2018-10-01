@@ -27,7 +27,9 @@ Imports:
     Biostrings,
     Rcpp
 Suggests:
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 VignetteBuilder: knitr
 License: GPL-3
 https: //bitbucket.org/hivdiversity/motifbinner2
