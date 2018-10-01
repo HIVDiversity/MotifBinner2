@@ -1,0 +1,124 @@
+---
+title: "MotifBinner2 Design"
+author: "Phillip Labuschagne"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+While MotifBinner is designed to process Primer ID sequences, it is build on a
+more general architecture. It is a general computational pipeline that applies
+operations to input data. The main features are:
+
+1. Support for automated generation of HTML reports.
+2. Ability to specify complex patterns of inputs and outputs between the steps.
+3. Automated tracking of the number of data entries that enters and exits each operation.
+
+A cost of the detailed reporting and tracking is that large amounts of memory
+is consumed to keep all various inputs and outputs available for all steps.
+While some functionality has been added to remove unnecessary data from memory,
+many further optimazations are possible. During our development and usage of
+MotifBinner we did not run into the limitations of our hardware, but our
+datasets were not particularly large (less than 1GB).
+
+## Design
+
+The package is designed to be a computational pipeline. If applies operations
+to a large list called 'all_results' that accumulates all the results and
+metrics required to render the reports. Each operation adds another element
+into all_results. Each element in all_results should have the following
+sub-elements: (this is not enforced programmatically):
+
+* element 1...
+
+## Old stuff
+
+This package is designed to apply a series of steps:
+* specified by a config
+* to two input fastq files resulting from pair-end MiSeq sequencing
+* producing a list of results called all results
+* and a set of comprehensive reports.
+
+
+Given two input fastq files resulting from pair-end MiSeq sequencing and a
+number of options, MotifBinner2 will apply a series of operations to the input
+data. The operations are highly structured. Each operation has an action
+function that performs the operation on the data given to it. This function
+packages the result and a large set of metrics describing the operation into a
+list and assigns a class to the list using R's S3 system. S3 is an extremely
+basic class system that allows methods to be overloaded for specific datatypes.
+In addition to the its action function which serves as a constructor, each
+operation also has a computeMetrics, saveToDisk and print method. Lastly, for
+each operation, an Rmarkdown template must be provided. Then the genReport
+function is calles on a result list, then it will extract the class of the
+result and use it to match the result list to a suitable template. The
+genReport function will then call knitr::knit to generate an html report for
+the result list.
+
+The series of operations that must be performed is controlled by a config list.
+
+
+
+## The vignette template
+
+Keep it for easy reference for now.
+
+Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+
+- Never uses retina figures
+- Has a smaller default figure size
+- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+
+## Vignette Info
+
+Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
