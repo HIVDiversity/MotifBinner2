@@ -1,6 +1,6 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "MotifBinner2 Design"
+author: "Phillip Labuschagne"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -16,7 +16,34 @@ knitr::opts_chunk$set(
 )
 ```
 
+## Overview
+
+While MotifBinner is designed to process Primer ID sequences, it is build on a
+more general architecture. It is a general computational pipeline that applies
+operations to input data. The main features are:
+
+1. Support for automated generation of HTML reports.
+2. Ability to specify complex patterns of inputs and outputs between the steps.
+3. Automated tracking of the number of data entries that enters and exits each operation.
+
+A cost of the detailed reporting and tracking is that large amounts of memory
+is consumed to keep all various inputs and outputs available for all steps.
+While some functionality has been added to remove unnecessary data from memory,
+many further optimazations are possible. During our development and usage of
+MotifBinner we did not run into the limitations of our hardware, but our
+datasets were not particularly large (less than 1GB).
+
 ## Design
+
+The package is designed to be a computational pipeline. If applies operations
+to a large list called 'all_results' that accumulates all the results and
+metrics required to render the reports. Each operation adds another element
+into all_results. Each element in all_results should have the following
+sub-elements: (this is not enforced programmatically):
+
+* element 1...
+
+## Old stuff
 
 This package is designed to apply a series of steps:
 * specified by a config
